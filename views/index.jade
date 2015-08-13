@@ -1,0 +1,34 @@
+doctype html
+html
+  head
+    title= title
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    link(rel='stylesheet', href='/bower_components/angular-chart.js/dist/angular-chart.css')
+    script(src='https://ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js')
+    script(src='/core.js')
+    script(src='/bower_components/Chart.js/Chart.js')
+    script(src='/bower_components/Chart.StackedBar.js/src/Chart.StackedBar.js')
+    script(src='/bower_components/angular-chart.js/dist/angular-chart.js')
+
+  body(ng-app='coreApp', ng-controller='mainCtrl')
+    #mainCtrlDiv
+      canvas(id='line',
+             class='chart chart-stacked-bar',
+             data='data',
+             labels='labels',
+             legend='true',
+             series='series',
+             click='onClick')
+
+    //-
+      ** File drop handling **
+      div(class='dropzone',
+          file-dropzone='[image/png, image/jpeg, image/gif]',
+          file='image',
+          file-name='imageFileName',
+          data-max-file-size='3')
+        span
+
+      div(class='image-container')
+        img(ng-src="{{image}}")
+        span(class='file-name') {{imageFileName}}
