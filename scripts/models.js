@@ -25,7 +25,6 @@ var matchQueueItemSchema = new Schema({
     lane: String,
     role: String,
     timestamp: Number,
-    date_added: Date,
     processed: Boolean,
     cached: Boolean
 });

@@ -28,8 +28,7 @@ function addMatchQueueItem(json_data) {
                                     role: match.role,
                                     season: match.season,
                                     queue: match.queue,
-                                    timestamp: match.timestamp,
-                                    date_added: new Date() },
+                                    timestamp: match.timestamp },
                                   { upsert: true },
                                   function(error){ if (error) console.log(error); });
         });
@@ -50,9 +49,7 @@ function addMatchQueueItem(json_data) {
 }
 
 function selectSummoner() {
-    // Step through tiers
-    //SeedSummoner.find({tier: current_tier},
-    SeedSummoner.find({},
+    SeedSummoner.find({tier: current_tier},
                         function(error, summoner){
                             if (error) console.log(error);
                             else if (summoner) {
