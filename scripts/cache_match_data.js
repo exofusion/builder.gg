@@ -28,8 +28,10 @@ function addMatchToCache(json_data) {
                 if (error) {
                     console.log(error);
                 } else {
-                    console.log('[CACHED] ['+util.rankString(current_mqi.tier, current_mqi.division)+
-                                ']\t'+current_mqi._id+"]");
+                    var match_date = new Date(current_mqi.timestamp);
+                    console.log('[CACHED] ['+util.rankString(current_mqi.tier, current_mqi.division)+']'+
+                                '\t('+match_date.toLocaleString('en-US')+')'+
+                                '\t'+current_mqi._id);
                     stepTier();
                     selectMatchQueueItem();
                 }
@@ -39,7 +41,7 @@ function addMatchToCache(json_data) {
 }
 
 function selectMatchQueueItem(){
-    MatchQueueItem.find({ tier: current_tier, cached: {$in: [null,false]}},
+    MatchQueueItem.find({ tier: current_tier, cached: {$ne: true}},
                           function(error, mqi){
                             if (error) {
                                 console.log(error);

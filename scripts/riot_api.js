@@ -1,7 +1,8 @@
 var request = require('request');
+var fs = require('fs');
 
 var TIMEOUT = 0;
-var RATE_LIMIT_TIMOUT = 10000;
+var RATE_LIMIT_TIMOUT = 15000;
 var RETRY = 3;
 
 var api_key = require('./api_key');
@@ -19,6 +20,8 @@ var url_matchlist_by_summoner = 'v2.2/matchlist/by-summoner/';
 var url_matchlist_parameters = 'rankedQueues=RANKED_SOLO_5x5&seasons=SEASON2015';
 var url_match = 'v2.2/match/';
 var url_match_timeline = '?includeTimeline=true';
+
+var local_item_list = '/static_json/itemlist.json';
 
 function handleResponse(error, response, body, url, callback, retries_left) {
     if (retries_left >= 0)
@@ -78,4 +81,13 @@ exports.getMatch = function(match_id, callback) {
     var url = url_base+url_match+match_id+url_match_timeline+'&'+api_key;
     request(url, function(error, response, body){
                           handleResponse(error, response, body, url, callback, RETRY)});
+}
+
+exports.getItemList = function(callback) {
+    fs.readFile( __dirname + local_item_list, function (error, data) {
+        if (error) {
+            console.log(error); 
+        }
+        callback(JSON.parse(data));
+    });
 }

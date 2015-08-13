@@ -46,29 +46,35 @@ function selectMatchCacheItem() {
                 if (mqi.length)
                 {
                     mqi = mqi[0];
-                    MatchCacheItem.findOne({ _id: mqi._id, data: {$ne: null}}, function(error, mci){
+                    MatchCacheItem.findOne({ _id: mqi._id }, function(error, mci){
                         if (mci)
                         {
-                            var identities = mci.data.participantIdentities;
-                            async.eachSeries(identities, function(participant, next_participant)
+                            if (mci.data)
                             {
-                                SeedSummoner.findOne({_id: participant.player.summonerId}, function(error, summoner)
+                                var identities = mci.data.participantIdentities;
+                                async.eachSeries(identities, function(participant, next_participant)
                                 {
-                                    if (error) {
-                                        console.log(error);
-                                    } else if (summoner) {
-                                        next_participant();
-                                    } else {
-                                        riot_api.getLeagueBySummonerId( participant.player.summonerId,
-                                                                        function(json_data){
-                                                                            db_functions.insertLeagueSummoners(json_data);
-                                                                            next_participant();
-                                                                        });
-                                    }
+                                    SeedSummoner.findOne({_id: participant.player.summonerId}, function(error, summoner)
+                                    {
+                                        if (error) {
+                                            console.log(error);
+                                        } else if (summoner) {
+                                            next_participant();
+                                        } else {
+                                            riot_api.getLeagueBySummonerId( participant.player.summonerId,
+                                                                            function(json_data){
+                                                                                db_functions.insertLeagueSummoners(json_data);
+                                                                                next_participant();
+                                                                            });
+                                        }
+                                    });
+                                }, function(){
+                                    stepTier();
                                 });
-                            }, function(){
+                            } else {
+                                console.log("[ERROR] MatchCacheItem's data is null: "+mqi._id);
                                 stepTier();
-                            });
+                            }
                         } else {
                             console.log("[ERROR] Couldn't match MatchQueueItem to MatchCacheItem: "+mqi._id);
                             stepTier();
