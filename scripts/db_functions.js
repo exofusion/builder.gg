@@ -1,6 +1,6 @@
 var riot_api = require('./riot_api');
 var models = require('./models');
-var util = require('./utility_functions.js')
+var util_functions = require('./utility_functions.js')
 
 var SeedSummoner = models.SeedSummoner;
 
@@ -10,8 +10,8 @@ function processLeague(league) {
             SeedSummoner.update({ _id: entry.playerOrTeamId },
                                 { _id: entry.playerOrTeamId,
                                   name: entry.playerOrTeamName,
-                                  tier: util.tierInts[league.tier],
-                                  division: util.divisionInts[entry.division],
+                                  tier: util_functions.tierInts[league.tier],
+                                  division: util_functions.divisionInts[entry.division],
                                   isInactive: entry.isInactive,
                                   wins: entry.wins,
                                   losses: entry.losses,

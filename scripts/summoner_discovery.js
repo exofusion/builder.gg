@@ -3,20 +3,20 @@ var async = require('async');
 var riot_api = require('./riot_api');
 var models = require('./models');
 var db_functions = require('./db_functions');
-var util = require('./utility_functions');
+var util_functions = require('./utility_functions');
 
 var SeedSummoner = models.SeedSummoner;
 var MatchQueueItem = models.MatchQueueItem;
 var MatchCacheItem = models.MatchCacheItem;
 
-var current_tier = util.MAX_TIER;
+var current_tier = util_functions.MAX_TIER;
 var skip_num = 0;
 
 function stepTier() {
     /*
     current_tier--;
     if (current_tier <= 0) {
-        current_tier = util.MAX_TIER;
+        current_tier = util_functions.MAX_TIER;
         skip_num++;
     }
     */
@@ -25,12 +25,12 @@ function stepTier() {
 }
 
 function selectMatchCacheItem() {
-    if (skip_num == 0 /*&& current_tier == util.tierInts['CHALLENGER']*/) {
+    if (skip_num == 0 /*&& current_tier == util_functions.tierInts['CHALLENGER']*/) {
         riot_api.getChallengerLeague(function(json_data){
             db_functions.insertLeagueSummoners(json_data);
             stepTier();
         });
-    } else if (skip_num == 1 /*&& current_tier == util.tierInts['MASTER']*/) {
+    } else if (skip_num == 1 /*&& current_tier == util_functions.tierInts['MASTER']*/) {
         riot_api.getMasterLeague(function(json_data){
             db_functions.insertLeagueSummoners(json_data);
             stepTier();

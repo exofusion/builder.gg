@@ -4,10 +4,9 @@ var riot_api = require('./riot_api');
 
 var MatchQueueItem = models.MatchQueueItem;
 var MatchCacheItem = models.MatchCacheItem;
-var Item = models.Item;
-
-var MINUTE = 60000;
-var TRACK_INTERVAL = 10 * MINUTE;
+var MatchProcessed = models.MatchProcessed;
+var StatCollection = models.StatCollection;
+var MatchFrameData = models.MatchFrameData;
 
 var ITEM_HEALTH_POTION = 2003;
 var ITEM_MANA_POTION = 2004;
@@ -15,16 +14,53 @@ var ITEM_MANA_POTION = 2004;
 var ItemList;
 riot_api.getItemList(function(json_data){ItemList = json_data;});
 
-/*
-function Item(item_id, quantity){
-    this.item_id = item_id;
+function AggregateStats(gT, s, tG, cG, hPU, mPU, tWP, vWP, sWP, i){
+    this.gameTime =             (gT == undefined)   ? 0 : gT;
+    this.samples =              (s == undefined)    ? 0 : s;
+    this.totalGold =            (tG == undefined)   ? 0 : tG;
+    this.currentGold =          (cG == undefined)   ? 0 : cG;
+    this.healthPotsUsed =       (hPU == undefined)  ? 0 : hPU;
+    this.manaPotsUsed =         (mPU == undefined)  ? 0 : mPU;
+    this.trinketWardsPlaced =   (tWP == undefined)  ? 0 : tWP;
+    this.visionWardsPlaced =    (vWP == undefined)  ? 0 : vWP;
+    this.sightWardsPlaced =     (sWP == undefined)  ? 0 : sWP;
+    this.items =                (i == undefined)    ? {} : i;
+}
 
-    if (quantity == undefined) {
-        this.quantity = 1;
-    } else {
-        this.quantity = quantity;
+function mergeStat(thisStat, thisSamples, otherStat, otherSamples) {
+    return (otherStat * otherSamples + thisStat * thisSamples) / (otherSamples + thisSamples);
+}
+
+AggregateStats.prototype.mergeSamples = function(otherStats){
+    this.totalGold = mergeStat(this.totalGold, this.samples, otherStats.totalGold, otherStats.samples);
+    this.currentGold = mergeStat(this.currentGold, this.samples, otherStats.currentGold, otherStats.samples);
+    this.healthPotsUsed = mergeStat(this.healthPotsUsed, this.samples, otherStats.healthPotsUsed, otherStats.samples);
+    this.manaPotsUsed = mergeStat(this.manaPotsUsed, this.samples, otherStats.manaPotsUsed, otherStats.samples);
+    this.trinketWardsPlaced = mergeStat(this.trinketWardsPlaced, this.samples, otherStats.trinketWardsPlaced, otherStats.samples);
+    this.visionWardsPlaced = mergeStat(this.visionWardsPlaced, this.samples, otherStats.visionWardsPlaced, otherStats.samples);
+    this.sightWardsPlaced = mergeStat(this.sightWardsPlaced, this.samples, otherStats.sightWardsPlaced, otherStats.samples);
+
+    for (i in otherStats.items) {
+        if (this.items[i] == undefined) {
+            this.items[i] = otherStats.items[i];
+        } else {
+            this.items[i].quantity += otherStats.items[i].quantity;
+            this.items[i].frequency += otherStats.items[i].frequency;
+        }
     }
-}*/
+
+    this.samples = this.samples + otherStats.samples;
+}
+
+// {{item_id}}: quantity => {{item_id}}: {quantity, frequency}
+
+function PrepareItems(items){
+    var newItems = {};
+    for (var i in items) {
+        newItems[i] = { quantity: items[i], frequency: 1 };
+    }
+    return newItems;
+}
 
 function ParticipantState(){
     this.items = {};
@@ -39,21 +75,6 @@ function ParticipantRecord(){
     this.state = null;
     this.timestamp = null;
     this.pframe = null;
-}
-
-ParticipantState.prototype.printState = function() {
-    console.log('=== Items ===');
-    for (item_id in this.items) {
-        console.log('(x'+this.items[item_id]+') '+ItemList.data[item_id].name);
-    }
-
-/*
-    console.log('\n=== Consumables ===');
-    console.log('Health Potions Used: '+this.health_pots_used);
-    console.log('Mana Potions Used: '+this.mana_pots_used);
-    console.log('Trinket Wards Placed: '+this.trinket_wards_placed);
-    console.log('Vision Wards Placed: '+this.vision_wards_placed);
-    console.log('Sight Wards Placed: '+this.sight_wards_placed);*/
 }
 
 ParticipantState.prototype.addItem = function(item_id) {
@@ -128,52 +149,139 @@ ParticipantState.prototype.handleEvent = function(event) {
 }
 
 function recordSnapshot(timestamp, state_history, p_frames, participant_states) {
-    for (p in participant_states) {
+    for (var p in participant_states) {
         var pRecord = new ParticipantRecord();
         pRecord.timestamp = timestamp;
         pRecord.state = participant_states[p];
         pRecord.pframe = p_frames[p];
 
         // Convert to/from JSON so we can actually save our ParticipantRecord
+        // *** Replace ParticipantRecord altogether with {} object here?
         state_history[p].push(JSON.parse(JSON.stringify(pRecord)));
     }
 }
 
 function processStateHistory(json_data, state_history, tier, callback) {
-    for (p in state_history) {
+    for (var p in state_history) {
         var participant_history = state_history[p];
         var matched_json = false;
+        var winning_team = 0;
 
-        for (var i=0; !matched_json && i<json_data.participants.length; i++) {
-            if (json_data.participants[i].participantId == p)
-            {
+        if (json_data.teams[0].winner) {
+            winning_team = json_data.teams[0].teamId;
+        } else {
+            winning_team = json_data.teams[1].teamId;
+        }
+
+        json_data.participants.forEach( function(json_p){
+            if (matched_json) {
+                return;
+            } else if (json_p.participantId == p) {
                 matched_json = true;
+                var victory = (json_p.teamId == winning_team) ? true : false;
 
-                // FUN STUFF GOES HERE
+                StatCollection.findOne({ championId: json_p.championId,
+                                         tier: tier,
+                                         victory: victory,
+                                         patch: json_data.matchVersion,
+                                         lane: json_p.timeline.lane,
+                                         role: json_p.timeline.role },
+                    function(error, stat_collection){
+                        if (error) {
+                            console.log(error);
+                        } else {
+                            if (!stat_collection) {
+                                stat_collection = new StatCollection();
+                                stat_collection.championId = json_p.championId;
+                                stat_collection.tier = tier;
+                                stat_collection.victory = victory;
+                                stat_collection.patch = json_data.matchVersion;
+                                stat_collection.lane = json_p.timeline.lane;
+                                stat_collection.role = json_p.timeline.role;
+                                stat_collection.samples = 0;
+                                stat_collection.aggregateStats = [];
+                            } else {
+                                for (var j=0; j<stat_collection.matchFrameData.length; j++) {
+                                    if (stat_collection.matchFrameData[j]._id == json_data.matchId) {
+                                        console.log('[ERROR] This match has already been added');
+                                        return;
+                                    }
+                                }
+                            }
 
-                /*
-                for (var j=0; i<participant_history.length; j++) {
-                    //console.log(participant_history[j]);
-                }
-                */
+                            var match_frame_data = new MatchFrameData();
+                            match_frame_data._id = json_data.matchId;
 
+                            for (var j=0; j<participant_history.length; j++) {
+                                if (participant_history[j].pframe.position) {
+                                    var this_coord = {};
+                                    this_coord.x = participant_history[j].pframe.position.x;
+                                    this_coord.y = participant_history[j].pframe.position.y;
+                                    match_frame_data.coords.push({ x: this_coord.x, y: this_coord.y });
+                                }
+
+                                var p_history = participant_history[j];
+
+                                //console.log(p_history.state.items);
+
+                                var aggregate_frame = new AggregateStats( p_history.timestamp,
+                                                                          1,
+                                                                          p_history.pframe.totalGold,
+                                                                          p_history.pframe.currentGold,
+                                                                          p_history.state.health_pots_used,
+                                                                          p_history.state.mana_pots_used,
+                                                                          p_history.state.trinket_wards_placed,
+                                                                          p_history.state.vision_wards_placed,
+                                                                          p_history.state.sight_wards_placed,
+                                                                          PrepareItems(p_history.state.items));
+
+                                if (stat_collection.aggregateStats[j] != undefined) {
+                                    aggregate_frame.mergeSamples(stat_collection.aggregateStats[j]);
+                                    //console.log(aggregate_frame);
+                                }
+                                stat_collection.aggregateStats[j] = aggregate_frame;
+                            }
+
+                            stat_collection.matchFrameData.push(match_frame_data);
+
+                            stat_collection.markModified('aggregateStats');
+                            stat_collection.samples++;
+                            stat_collection.save(function(error)
+                                                {
+                                                    if (error) {
+                                                        console.log(error);
+                                                        // Continue processing if we encounter an error in saving the stat_collection,
+                                                        // but callback() here so that we don't mark this match as processed
+                                                        callback();
+                                                    }
+                                                });
+                        }
+                    });
                 // TEST BUILD MATCHES FINAL BUILD
             }
-        }
+        });
 
         if (!matched_json) {
             console.log('[ERROR] Could not match the participantId in JSON.data.participants[]');
         }
     }
 
-    console.log('[PROCESSED] Match '+json_data.matchId);
-    callback();
+    // Update the MatchQueueItem so we don't process this match again
+    var match_processed = new MatchProcessed();
+    match_processed._id = json_data.matchId;
+    match_processed.save(function(error)
+            {
+                if (error) {
+                    console.log(error);
+                } else {
+                    console.log('[PROCESSED] Match '+json_data.matchId);
+                    callback();
+                }
+            });
 }
 
 function processFrames(json_data, tier, callback) {
     if (json_data.timeline) {
-        var time_threshold = 1 * MINUTE; // Start at the first minute
-
         var state_history = {};
         var participant_states = {};
         json_data.participants.forEach( function(participant) {
@@ -184,12 +292,6 @@ function processFrames(json_data, tier, callback) {
         for (var i=0; i<json_data.timeline.frames.length; i++) {
             frame = json_data.timeline.frames[i];
             var p_frames = frame.participantFrames;
-            var track = false;
-
-            if (frame.timestamp > time_threshold) {
-                time_threshold += TRACK_INTERVAL;
-                track = true;
-            }
 
             if (frame.events) {
                 for (var j=0; j<frame.events.length; j++) {
@@ -210,30 +312,26 @@ function processFrames(json_data, tier, callback) {
                 }
             }
 
-            if (track) {
-                recordSnapshot(frame.timestamp, state_history, p_frames, participant_states);
-            }
+            recordSnapshot(frame.timestamp, state_history, p_frames, participant_states);
         }
-        
-        // Record final snapshot so we can compare to the participant frame item build
-        var final_frame = json_data.timeline.frames[json_data.timeline.frames.length-1];
-        recordSnapshot(final_frame.timestamp, state_history, final_frame.participantFrames, participant_states);
 
         // Verify and record results
         processStateHistory(json_data, state_history, tier, callback);
     } else {
         console.log('[ERROR] No timeline data for this match: '+json_data.matchId);
+        callback();
     }
 }
 
 function selectMatch() {
     // EGF: 1918011420
     // 1918055064
-    MatchQueueItem.find({ /* REMOVE THIS */ /*_id: 1918011420,*/ cached: true, processed: {$ne: true}},
+    MatchQueueItem.find({cached: true, processed: {$ne: true}},
         function(error, mqi) {
         if (error) {
             console.log(error);
         } else if (mqi.length) {
+            // Do this synchronously so that we don't end up modifying the same record
             async.eachSeries(mqi, function(mqi_entry, callback){
                 MatchCacheItem.findOne({ _id: mqi_entry._id },
                     function(error, mci) {
@@ -241,8 +339,7 @@ function selectMatch() {
                             console.log(error);
                         } else if (mci) {
                             if (mci.data) {
-                                //processFrames(mci.data, mqi.tier, callback);
-                                callback();
+                                processFrames(mci.data, mqi_entry.tier, callback);
                             } else {
                                 console.log("[ERROR] MatchCacheItem's data is null: "+mqi_entry._id);
                                 callback();

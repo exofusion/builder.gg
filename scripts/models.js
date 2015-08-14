@@ -25,46 +25,75 @@ var matchQueueItemSchema = new Schema({
     lane: String,
     role: String,
     timestamp: Number,
-    processed: Boolean,
-    cached: Boolean
+    cached: Boolean,
+    added_by_summoner: Number
 });
 
 var matchCacheItemSchema = new Schema({
     _id: Number,
-    data: Object
+    data: {}
 });
 
+var matchProcessedSchema = new Schema({
+    _id: Number
+}, {collection: 'matchprocessed'});
+
+/*
 var itemSchema = new Schema({
     itemId: Number,
-    popularity: Number,
+    frequency: Number,
     quantity: Number
 });
+*/
 
-var itemBuildSchema = new Schema({
+/*
+var coordSchema = new Schema({
+    x: Number,
+    y: Number
+});
+*/
+
+/*
+var aggregateFrameDataSchema = new Schema({
     gameTime: Number,
-    averageGold: Number,
-    items: [itemSchema],
-    //consumables: [consumable]
+    samples: Number,
+    totalGold: Number,
+    currentGold: Number,
+    healthPotsUsed: Number,
+    manaPotsUsed: Number,
+    trinketWardsPlaced: Number,
+    visionWardsPlaced: Number,
+    sightWardsPlaced: Number,
+    items: Object
+});
+*/
+
+var matchFrameDataSchema = new Schema({
+    _id: Number, // MatchID
+    coords: []
 });
 
-var itemBuildStatsSchema = new Schema({
-    samples: Number,
+var statCollectionSchema = new Schema({
     championId: Number,
     tier: Number,
     patch: String,
     victory: Boolean,
     lane: String,
     role: String,
-    itemBuildTimeline: [itemBuildSchema],
-    matchIds: [Number]
+    samples: Number,
+    aggregateStats: [ {} ],
+    matchFrameData: [matchFrameDataSchema]
 });
 
 exports.SeedSummoner = mongoose.model('SeedSummoner', seedSummonerSchema);
 exports.MatchQueueItem = mongoose.model('MatchQueueItem', matchQueueItemSchema);
 exports.MatchCacheItem = mongoose.model('MatchCacheItem', matchCacheItemSchema);
-exports.Item = mongoose.model('Item', itemSchema);
-exports.ItemBuild = mongoose.model('ItemBuild', itemBuildSchema);
-exports.ItemBuildStats = mongoose.model('ItemBuildStats', itemBuildStatsSchema);
+exports.MatchProcessed = mongoose.model('MatchProcessed', matchProcessedSchema);
+//exports.Item = mongoose.model('Item', itemSchema);
+//exports.Coord = mongoose.model('Coord', coordSchema);
+//exports.AggregateFrameData = mongoose.model('AggregateFrameData', aggregateFrameDataSchema);
+exports.MatchFrameData = mongoose.model('MatchFrameData', matchFrameDataSchema);
+exports.StatCollection = mongoose.model('StatCollection', statCollectionSchema);
 
 exports.mongoose = mongoose;
 exports.disconnect = function(){ mongoose.disconnect(); }

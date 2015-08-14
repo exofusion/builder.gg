@@ -1,17 +1,17 @@
 var models = require('./models');
 var riot_api = require('./riot_api');
-var util = require('./utility_functions');
+var util_functions = require('./utility_functions');
 
 var SeedSummoner = models.SeedSummoner;
 var MatchQueueItem = models.MatchQueueItem;
 
-var current_tier = util.MAX_TIER;
+var current_tier = util_functions.MAX_TIER;
 var current_summoner;
 
 function stepTier() {
     current_tier--;
     if (current_tier <= 0) {
-        current_tier = util.MAX_TIER;
+        current_tier = util_functions.MAX_TIER;
     }
 }
 
@@ -28,7 +28,8 @@ function addMatchQueueItem(json_data) {
                                     role: match.role,
                                     season: match.season,
                                     queue: match.queue,
-                                    timestamp: match.timestamp },
+                                    timestamp: match.timestamp,
+                                    added_by_summoner: current_summoner._id },
                                   { upsert: true },
                                   function(error){ if (error) console.log(error); });
         });
@@ -37,7 +38,7 @@ function addMatchQueueItem(json_data) {
                             { last_match_queued: new Date() },
                             function(error){ if (error) console.log(error);});
 
-        console.log('[QUEUED] ['+util.rankString(current_summoner.tier, current_summoner.division)+
+        console.log('[QUEUED] ['+util_functions.rankString(current_summoner.tier, current_summoner.division)+
                     ']\t '+current_summoner.name+': \t'+
                     json_data.matches.length+' matches');
     } else {
