@@ -161,8 +161,24 @@ function recordSnapshot(timestamp, state_history, p_frames, participant_states) 
     }
 }
 
+function recordProcessed(matchId, callback){
+    // Update the MatchQueueItem so we don't process this match again
+    MatchProcessed.update({ _id: matchId },
+                          { _id: matchId },
+                          { upsert: true },
+                          function(error)
+                          {
+                            if (error) {
+                                console.log(error);
+                            } else {
+                                console.log('[PROCESSED] Match '+matchId);
+                                callback();
+                            }
+                          });
+}
+
 function processStateHistory(json_data, state_history, tier, callback) {
-    for (var p in state_history) {
+    async.eachSeries(Object.keys(state_history), function(p, next_p) {
         var participant_history = state_history[p];
         var matched_json = false;
         var winning_team = 0;
@@ -173,11 +189,9 @@ function processStateHistory(json_data, state_history, tier, callback) {
             winning_team = json_data.teams[1].teamId;
         }
 
-        json_data.participants.forEach( function(json_p){
-            if (matched_json) {
-                return;
-            } else if (json_p.participantId == p) {
-                matched_json = true;
+        for (var j in json_data.participants) {
+            var json_p = json_data.participants[j];
+            if (json_p.participantId == p) {
                 var victory = (json_p.teamId == winning_team) ? true : false;
 
                 StatCollection.findOne({ championId: json_p.championId,
@@ -222,8 +236,6 @@ function processStateHistory(json_data, state_history, tier, callback) {
 
                                 var p_history = participant_history[j];
 
-                                //console.log(p_history.state.items);
-
                                 var aggregate_frame = new AggregateStats( p_history.timestamp,
                                                                           1,
                                                                           p_history.pframe.totalGold,
@@ -237,7 +249,6 @@ function processStateHistory(json_data, state_history, tier, callback) {
 
                                 if (stat_collection.aggregateStats[j] != undefined) {
                                     aggregate_frame.mergeSamples(stat_collection.aggregateStats[j]);
-                                    //console.log(aggregate_frame);
                                 }
                                 stat_collection.aggregateStats[j] = aggregate_frame;
                             }
@@ -252,32 +263,17 @@ function processStateHistory(json_data, state_history, tier, callback) {
                                                         console.log(error);
                                                         // Continue processing if we encounter an error in saving the stat_collection,
                                                         // but callback() here so that we don't mark this match as processed
+                                                        // TODO: Add __v (version) to document?
                                                         callback();
                                                     }
                                                 });
-                        }
-                    });
+                        } // close "if (error) else"
+                    }); // close "findOne(function)"
                 // TEST BUILD MATCHES FINAL BUILD
-            }
-        });
-
-        if (!matched_json) {
-            console.log('[ERROR] Could not match the participantId in JSON.data.participants[]');
+                next_p();
+            } // close "if (json_data.participantId == p)""
         }
-    }
-
-    // Update the MatchQueueItem so we don't process this match again
-    var match_processed = new MatchProcessed();
-    match_processed._id = json_data.matchId;
-    match_processed.save(function(error)
-            {
-                if (error) {
-                    console.log(error);
-                } else {
-                    console.log('[PROCESSED] Match '+json_data.matchId);
-                    callback();
-                }
-            });
+    }, function(){ recordProcessed(json_data.matchId, callback); });
 }
 
 function processFrames(json_data, tier, callback) {
@@ -326,28 +322,38 @@ function processFrames(json_data, tier, callback) {
 function selectMatch() {
     // EGF: 1918011420
     // 1918055064
-    MatchQueueItem.find({cached: true, processed: {$ne: true}},
+    MatchQueueItem.find({cached: true},
         function(error, mqi) {
         if (error) {
             console.log(error);
         } else if (mqi.length) {
             // Do this synchronously so that we don't end up modifying the same record
-            async.eachSeries(mqi, function(mqi_entry, callback){
-                MatchCacheItem.findOne({ _id: mqi_entry._id },
-                    function(error, mci) {
-                        if (error) {
-                            console.log(error);
-                        } else if (mci) {
-                            if (mci.data) {
-                                processFrames(mci.data, mqi_entry.tier, callback);
-                            } else {
-                                console.log("[ERROR] MatchCacheItem's data is null: "+mqi_entry._id);
-                                callback();
-                            }
+            async.eachSeries(mqi, function(mqi_entry, next_mqi){
+                MatchProcessed.findOne({_id: mqi_entry._id}, function(error, mp){
+                    if (error) {
+                        console.log(error);
+                    } else {
+                        if (!mp) {
+                            MatchCacheItem.findOne({ _id: mqi_entry._id }, function(error, mci) {
+                                if (error) {
+                                    console.log(error);
+                                } else if (mci) {
+                                    if (mci.data) {
+                                        processFrames(mci.data, mqi_entry.tier, next_mqi);
+                                    } else {
+                                        console.log("[ERROR] MatchCacheItem's data is null: "+mqi_entry._id);
+                                        next_mqi();
+                                    }
+                                } else {
+                                    console.log("[ERROR] MatchCacheItem doesn't exist: "+mqi_entry._id);
+                                }
+                            });
                         } else {
-                            console.log("[ERROR] MatchCacheItem doesn't exist: "+mqi_entry._id);
+                            // Already processed this match
+                            next_mqi();
                         }
-                    });
+                    }
+                });
             }, function(){ console.log('[FINISHED]'); });
         } else {
             console.log('[ERROR] No MatchQueueItems ready to be processed');
