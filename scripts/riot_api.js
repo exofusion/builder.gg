@@ -21,7 +21,7 @@ var url_matchlist_parameters = 'rankedQueues=RANKED_SOLO_5x5&seasons=SEASON2015'
 var url_match = 'v2.2/match/';
 var url_match_timeline = '?includeTimeline=true';
 
-var local_item_list = '/static_json/itemlist.json';
+//var local_item_list = '../public/static-json/itemlist.json';
 
 function handleResponse(error, response, body, url, callback, retries_left) {
     if (retries_left >= 0)
@@ -83,6 +83,7 @@ exports.getMatch = function(match_id, callback) {
                           handleResponse(error, response, body, url, callback, RETRY)});
 }
 
+/*
 exports.getItemList = function(callback) {
     fs.readFile( __dirname + local_item_list, function (error, data) {
         if (error) {
@@ -91,3 +92,4 @@ exports.getItemList = function(callback) {
         callback(JSON.parse(data));
     });
 }
+*/

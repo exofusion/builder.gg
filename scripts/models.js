@@ -74,6 +74,7 @@ var matchFrameDataSchema = new Schema({
 });
 
 var statCollectionSchema = new Schema({
+    //_id: String,
     championId: Number,
     tier: Number,
     patch: String,
@@ -85,13 +86,12 @@ var statCollectionSchema = new Schema({
     matchFrameData: [matchFrameDataSchema]
 });
 
+//statCollectionSchema.index({ championId: 1, tier: 1, patch: 1, victory: 1, lane: 1, role: 1 });
+
 exports.SeedSummoner = mongoose.model('SeedSummoner', seedSummonerSchema);
 exports.MatchQueueItem = mongoose.model('MatchQueueItem', matchQueueItemSchema);
 exports.MatchCacheItem = mongoose.model('MatchCacheItem', matchCacheItemSchema);
 exports.MatchProcessed = mongoose.model('MatchProcessed', matchProcessedSchema);
-//exports.Item = mongoose.model('Item', itemSchema);
-//exports.Coord = mongoose.model('Coord', coordSchema);
-//exports.AggregateFrameData = mongoose.model('AggregateFrameData', aggregateFrameDataSchema);
 exports.MatchFrameData = mongoose.model('MatchFrameData', matchFrameDataSchema);
 exports.StatCollection = mongoose.model('StatCollection', statCollectionSchema);
 

@@ -11,9 +11,31 @@ html
     script(src='/bower_components/angular-chart.js/dist/angular-chart.js')
 
   body(ng-app='coreApp', ng-controller='mainCtrl')
+    form(ng-submit='submit()')
+        select(ng-model='search.tier', ng-init='search.tier = tiers[0].id', ng-options='tier.id as tier.name for tier in tiers')
+
+        select(ng-model='search.championId', ng-options='champion.id as champion.name for champion in championJson.data')
+
+        select(ng-model='search.patch', ng-init="search.patch=patches[0]", ng-options='patch for patch in patches')
+
+        select(ng-model='search.victory', ng-init="search.victory='true'")
+            option(value='true') Victory
+            option(value='false') Defeat
+
+        input(type='submit')
+
+    {{stat_collection}}
+
     #mainCtrlDiv
+      canvas(class='chart chart-stacked-bar',
+             data='data',
+             labels='labels',
+             legend='true',
+             series='series',
+             click='onClick')
+
       canvas(id='line',
-             class='chart chart-stacked-bar',
+             class='chart chart-line',
              data='data',
              labels='labels',
              legend='true',

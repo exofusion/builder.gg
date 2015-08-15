@@ -11,9 +11,6 @@ var MatchFrameData = models.MatchFrameData;
 var ITEM_HEALTH_POTION = 2003;
 var ITEM_MANA_POTION = 2004;
 
-var ItemList;
-riot_api.getItemList(function(json_data){ItemList = json_data;});
-
 function AggregateStats(gT, s, tG, cG, hPU, mPU, tWP, vWP, sWP, i){
     this.gameTime =             (gT == undefined)   ? 0 : gT;
     this.samples =              (s == undefined)    ? 0 : s;
@@ -178,101 +175,100 @@ function recordProcessed(matchId, callback){
 }
 
 function processStateHistory(json_data, state_history, tier, callback) {
-    async.eachSeries(Object.keys(state_history), function(p, next_p) {
-        var participant_history = state_history[p];
-        var matched_json = false;
-        var winning_team = 0;
+    var matched_json = false;
+    var winning_team = 0;
 
-        if (json_data.teams[0].winner) {
-            winning_team = json_data.teams[0].teamId;
-        } else {
-            winning_team = json_data.teams[1].teamId;
-        }
+    if (json_data.teams[0].winner) {
+        winning_team = json_data.teams[0].teamId;
+    } else {
+        winning_team = json_data.teams[1].teamId;
+    }
 
-        for (var j in json_data.participants) {
-            var json_p = json_data.participants[j];
-            if (json_p.participantId == p) {
-                var victory = (json_p.teamId == winning_team) ? true : false;
+    async.each(json_data.participants, function(json_p, next_p) {
+        var victory = (json_p.teamId == winning_team) ? true : false;
+        var participant_history = state_history[json_p.participantId];
 
-                StatCollection.findOne({ championId: json_p.championId,
-                                         tier: tier,
-                                         victory: victory,
-                                         patch: json_data.matchVersion,
-                                         lane: json_p.timeline.lane,
-                                         role: json_p.timeline.role },
-                    function(error, stat_collection){
-                        if (error) {
-                            console.log(error);
-                        } else {
-                            if (!stat_collection) {
-                                stat_collection = new StatCollection();
-                                stat_collection.championId = json_p.championId;
-                                stat_collection.tier = tier;
-                                stat_collection.victory = victory;
-                                stat_collection.patch = json_data.matchVersion;
-                                stat_collection.lane = json_p.timeline.lane;
-                                stat_collection.role = json_p.timeline.role;
-                                stat_collection.samples = 0;
-                                stat_collection.aggregateStats = [];
-                            } else {
-                                for (var j=0; j<stat_collection.matchFrameData.length; j++) {
-                                    if (stat_collection.matchFrameData[j]._id == json_data.matchId) {
-                                        console.log('[ERROR] This match has already been added');
-                                        return;
-                                    }
-                                }
+        StatCollection.findOne({ championId: json_p.championId,
+                                 tier: tier,
+                                 victory: victory,
+                                 patch: json_data.matchVersion,
+                                 lane: json_p.timeline.lane,
+                                 role: json_p.timeline.role },
+            function(error, stat_collection){
+                if (error) {
+                    console.log(error);
+                } else {
+                    if (!stat_collection) {
+                        stat_collection = new StatCollection();
+                        stat_collection.championId = json_p.championId;
+                        stat_collection.tier = tier;
+                        stat_collection.victory = victory;
+                        stat_collection.patch = json_data.matchVersion;
+                        stat_collection.lane = json_p.timeline.lane;
+                        stat_collection.role = json_p.timeline.role;
+                        stat_collection.samples = 0;
+                        stat_collection.aggregateStats = [];
+                    } else { 
+                        for (var j=0; j<stat_collection.matchFrameData.length; j++) {
+                            if (stat_collection.matchFrameData[j]._id == json_data.matchId) {
+                                console.log('[ERROR] This match has already been added: ');
+                                next_p();
                             }
+                        }
+                    }
 
-                            var match_frame_data = new MatchFrameData();
-                            match_frame_data._id = json_data.matchId;
+                    // Add rest of frame data
+                    var match_frame_data = new MatchFrameData();
+                    match_frame_data._id = json_data.matchId;
 
-                            for (var j=0; j<participant_history.length; j++) {
-                                if (participant_history[j].pframe.position) {
-                                    var this_coord = {};
-                                    this_coord.x = participant_history[j].pframe.position.x;
-                                    this_coord.y = participant_history[j].pframe.position.y;
-                                    match_frame_data.coords.push({ x: this_coord.x, y: this_coord.y });
-                                }
+                    for (var j=0; j<participant_history.length; j++) {
+                        if (participant_history[j].pframe.position) {
+                            var this_coord = {};
+                            this_coord.x = participant_history[j].pframe.position.x;
+                            this_coord.y = participant_history[j].pframe.position.y;
+                            match_frame_data.coords.push({ x: this_coord.x, y: this_coord.y });
+                        }
 
-                                var p_history = participant_history[j];
+                        var p_history = participant_history[j];
 
-                                var aggregate_frame = new AggregateStats( p_history.timestamp,
-                                                                          1,
-                                                                          p_history.pframe.totalGold,
-                                                                          p_history.pframe.currentGold,
-                                                                          p_history.state.health_pots_used,
-                                                                          p_history.state.mana_pots_used,
-                                                                          p_history.state.trinket_wards_placed,
-                                                                          p_history.state.vision_wards_placed,
-                                                                          p_history.state.sight_wards_placed,
-                                                                          PrepareItems(p_history.state.items));
+                        var aggregate_frame = new AggregateStats( p_history.timestamp,
+                                                                  1,
+                                                                  p_history.pframe.totalGold,
+                                                                  p_history.pframe.currentGold,
+                                                                  p_history.state.health_pots_used,
+                                                                  p_history.state.mana_pots_used,
+                                                                  p_history.state.trinket_wards_placed,
+                                                                  p_history.state.vision_wards_placed,
+                                                                  p_history.state.sight_wards_placed,
+                                                                  PrepareItems(p_history.state.items));
 
-                                if (stat_collection.aggregateStats[j] != undefined) {
-                                    aggregate_frame.mergeSamples(stat_collection.aggregateStats[j]);
-                                }
-                                stat_collection.aggregateStats[j] = aggregate_frame;
+                        if (stat_collection.aggregateStats[j] != undefined) {
+                            aggregate_frame.mergeSamples(stat_collection.aggregateStats[j]);
+                        }
+                        stat_collection.aggregateStats[j] = aggregate_frame;
+                    }
+
+                    stat_collection.matchFrameData.push(match_frame_data);
+
+                    stat_collection.markModified('aggregateStats');
+                    stat_collection.samples++;
+                    stat_collection.save(
+                        function(error)
+                        {
+                            if (error) {
+                                // TODO: Add __v (version) to document?
+                                // { [VersionError: No matching document found.]
+                                //      stack: [Getter/Setter],
+                                //      message: 'No matching document found.',
+                                //      name: 'VersionError' }
+                                console.log(error);
                             }
-
-                            stat_collection.matchFrameData.push(match_frame_data);
-
-                            stat_collection.markModified('aggregateStats');
-                            stat_collection.samples++;
-                            stat_collection.save(function(error)
-                                                {
-                                                    if (error) {
-                                                        console.log(error);
-                                                        // Continue processing if we encounter an error in saving the stat_collection,
-                                                        // but callback() here so that we don't mark this match as processed
-                                                        // TODO: Add __v (version) to document?
-                                                        callback();
-                                                    }
-                                                });
-                        } // close "if (error) else"
-                    }); // close "findOne(function)"
-                // TEST BUILD MATCHES FINAL BUILD
-                next_p();
-            } // close "if (json_data.participantId == p)""
-        }
+                            
+                            next_p();
+                        });
+            } // close "fineOne(function)"
+        }); // close "findOne"
+        // TEST BUILD MATCHES FINAL BUILD
     }, function(){ recordProcessed(json_data.matchId, callback); });
 }
 
