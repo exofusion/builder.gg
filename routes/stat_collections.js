@@ -7,7 +7,7 @@ var StatCollection = models.StatCollection;
 router.get('/', function(req, res, next) {
     var search_options = {};
 
-    if (req.query.champion) {
+    if (req.query.championId) {
         search_options.championId = parseInt(req.query.championId);
     }
 
@@ -27,7 +27,7 @@ router.get('/', function(req, res, next) {
         if (error) {
             console.log(error);
         } else if (stat_collection) {
-            res.send(stat_collection);
+           res.send(stat_collection);
         } else {
             res.status(404).end();
         }

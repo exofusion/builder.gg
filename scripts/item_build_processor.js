@@ -11,17 +11,26 @@ var MatchFrameData = models.MatchFrameData;
 var ITEM_HEALTH_POTION = 2003;
 var ITEM_MANA_POTION = 2004;
 
-function AggregateStats(gT, s, tG, cG, hPU, mPU, tWP, vWP, sWP, i){
-    this.gameTime =             (gT == undefined)   ? 0 : gT;
-    this.samples =              (s == undefined)    ? 0 : s;
-    this.totalGold =            (tG == undefined)   ? 0 : tG;
-    this.currentGold =          (cG == undefined)   ? 0 : cG;
-    this.healthPotsUsed =       (hPU == undefined)  ? 0 : hPU;
-    this.manaPotsUsed =         (mPU == undefined)  ? 0 : mPU;
-    this.trinketWardsPlaced =   (tWP == undefined)  ? 0 : tWP;
-    this.visionWardsPlaced =    (vWP == undefined)  ? 0 : vWP;
-    this.sightWardsPlaced =     (sWP == undefined)  ? 0 : sWP;
-    this.items =                (i == undefined)    ? {} : i;
+function AggregateStats() {
+    this.gameTime = 0;
+    this.samples = 0;
+    this.mergedTotalGold = 0;
+    this.mergedCurrentGold = 0;
+    this.healthPotsUsed = 0;
+    this.manaPotsUsed = 0;
+    this.trinketWardsPlaced = 0;
+    this.visionWardsPlaced = 0;
+    this.sightWardsPlaced = 0;
+    this.kills = 0;
+    this.assists = 0;
+    this.deaths = 0;
+    this.dragon = 0;
+    this.baron = 0;
+    this.items = {};
+
+    this.frameGold = 0;
+    this.frameMinionsKilled = 0;
+    this.frameJungleMinionsKilled = 0;
 }
 
 function mergeStat(thisStat, thisSamples, otherStat, otherSamples) {
@@ -29,13 +38,21 @@ function mergeStat(thisStat, thisSamples, otherStat, otherSamples) {
 }
 
 AggregateStats.prototype.mergeSamples = function(otherStats){
-    this.totalGold = mergeStat(this.totalGold, this.samples, otherStats.totalGold, otherStats.samples);
-    this.currentGold = mergeStat(this.currentGold, this.samples, otherStats.currentGold, otherStats.samples);
-    this.healthPotsUsed = mergeStat(this.healthPotsUsed, this.samples, otherStats.healthPotsUsed, otherStats.samples);
-    this.manaPotsUsed = mergeStat(this.manaPotsUsed, this.samples, otherStats.manaPotsUsed, otherStats.samples);
-    this.trinketWardsPlaced = mergeStat(this.trinketWardsPlaced, this.samples, otherStats.trinketWardsPlaced, otherStats.samples);
-    this.visionWardsPlaced = mergeStat(this.visionWardsPlaced, this.samples, otherStats.visionWardsPlaced, otherStats.samples);
-    this.sightWardsPlaced = mergeStat(this.sightWardsPlaced, this.samples, otherStats.sightWardsPlaced, otherStats.samples);
+    this.mergedTotalGold = mergeStat(this.mergedTotalGold, this.samples, otherStats.mergedTotalGold, otherStats.samples);
+    this.mergedCurrentGold = mergeStat(this.mergedCurrentGold, this.samples, otherStats.mergedCurrentGold, otherStats.samples);
+    this.healthPotsUsed += otherStats.healthPotsUsed;
+    this.manaPotsUsed += otherStats.manaPotsUsed;
+    this.trinketWardsPlaced += otherStats.trinketWardsPlaced;
+    this.visionWardsPlaced += otherStats.visionWardsPlaced;
+    this.sightWardsPlaced += otherStats.sightWardsPlaced;
+    this.kills += otherStats.kills;
+    this.assists += otherStats.assists;
+    this.deaths += otherStats.deaths;
+    this.dragon += otherStats.dragon;
+    this.baron += otherStats.baron;
+    this.frameGold = mergeStat(this.frameGold, this.samples, otherStats.frameGold, otherStats.samples);
+    this.frameMinionsKilled = mergeStat(this.frameMinionsKilled, this.samples, otherStats.frameMinionsKilled, otherStats.samples);
+    this.frameJungleMinionsKilled = mergeStat(this.frameJungleMinionsKilled, this.samples, otherStats.frameJungleMinionsKilled, otherStats.samples);
 
     for (i in otherStats.items) {
         if (this.items[i] == undefined) {
@@ -66,6 +83,28 @@ function ParticipantState(){
     this.trinket_wards_placed = 0;
     this.vision_wards_placed = 0;
     this.sight_wards_placed = 0;
+
+    this.kills = 0;
+    this.assists = 0;
+    this.deaths = 0;
+
+    this.dragon = 0;
+    this.baron = 0;
+}
+
+ParticipantState.prototype.frameReset = function() {
+    this.health_pots_used = 0;
+    this.mana_pots_used = 0;
+    this.trinket_wards_placed = 0;
+    this.vision_wards_placed = 0;
+    this.sight_wards_placed = 0;
+
+    this.kills = 0;
+    this.assists = 0;
+    this.deaths = 0;
+
+    this.dragon = 0;
+    this.baron = 0;
 }
 
 function ParticipantRecord(){
@@ -90,7 +129,7 @@ ParticipantState.prototype.removeItem = function(item_id) {
     }
 }
 
-ParticipantState.prototype.handleEvent = function(event) {
+ParticipantState.prototype.handleItemEvent = function(event) {
     var thisInventoryItemId = this.items[event.itemId];
     switch(event.eventType) {
         case 'ITEM_PURCHASED':
@@ -141,7 +180,48 @@ ParticipantState.prototype.handleEvent = function(event) {
             // Don't do anything with this for now
             break;
         default:
-            console.log('[ERROR] Unknown event: '+event.eventType);
+            // If we don't know what event this is, just ignore it
+    }
+}
+
+ParticipantState.prototype.handleKillEvent = function(event) {
+    switch (event.eventType) {
+        case 'CHAMPION_KILL':
+            this.kills++;
+            break;
+        case 'ELITE_MONSTER_KILL':
+            if (event.monsterType == 'DRAGON') {
+                this.dragon++;
+            } else if (event.monsterType == 'BARON') {
+                this.baron++;
+            }
+            break;
+        default:
+    }
+}
+
+ParticipantState.prototype.handleVictimEvent = function(event) {
+    switch (event.eventType) {
+        case 'CHAMPION_KILL':
+            this.deaths++;
+            break;
+        default:
+    }
+}
+
+ParticipantState.prototype.handleAssistEvent = function(event) {
+    switch (event.eventType) {
+        case 'CHAMPION_KILL':
+            this.assists++;
+            break;
+        case 'ELITE_MONSTER_KILL':
+            if (event.monsterType == 'DRAGON') {
+                this.dragon++;
+            } else if (event.monsterType == 'BARON') {
+                this.baron++;
+            }
+            break;
+        default:
     }
 }
 
@@ -155,6 +235,8 @@ function recordSnapshot(timestamp, state_history, p_frames, participant_states) 
         // Convert to/from JSON so we can actually save our ParticipantRecord
         // *** Replace ParticipantRecord altogether with {} object here?
         state_history[p].push(JSON.parse(JSON.stringify(pRecord)));
+
+        pRecord.state.frameReset();
     }
 }
 
@@ -231,16 +313,30 @@ function processStateHistory(json_data, state_history, tier, callback) {
 
                         var p_history = participant_history[j];
 
-                        var aggregate_frame = new AggregateStats( p_history.timestamp,
-                                                                  1,
-                                                                  p_history.pframe.totalGold,
-                                                                  p_history.pframe.currentGold,
-                                                                  p_history.state.health_pots_used,
-                                                                  p_history.state.mana_pots_used,
-                                                                  p_history.state.trinket_wards_placed,
-                                                                  p_history.state.vision_wards_placed,
-                                                                  p_history.state.sight_wards_placed,
-                                                                  PrepareItems(p_history.state.items));
+                        var aggregate_frame = new AggregateStats();
+
+                        aggregate_frame.gameTime = p_history.timestamp;
+                        aggregate_frame.samples = 1;
+                        aggregate_frame.totalGold = p_history.pframe.totalGold;
+                        aggregate_frame.currentGold = p_history.pframe.currentGold;
+                        aggregate_frame.healthPotsUsed = p_history.state.health_pots_used;
+                        aggregate_frame.manaPotsUsed = p_history.state.mana_pots_used;
+                        aggregate_frame.trinketWardsPlaced = p_history.state.trinket_wards_placed;
+                        aggregate_frame.visionWardsPlaced = p_history.state.vision_wards_placed;
+                        aggregate_frame.sightWardsPlaced = p_history.state.sight_wards_placed;
+                        aggregate_frame.items = PrepareItems(p_history.state.items);
+                        aggregate_frame.kills = p_history.state.kills;
+                        aggregate_frame.assists = p_history.state.assists;
+                        aggregate_frame.deaths = p_history.state.deaths;
+                        aggregate_frame.dragon = p_history.state.dragon;
+                        aggregate_frame.baron = p_history.state.baron;
+
+                        if (j > 0) {
+                            var last_frame = participant_history[j-1];
+                            aggregate_frame.frameGold = p_history.pframe.totalGold - last_frame.pframe.totalGold;
+                            aggregate_frame.frameMinionsKilled = p_history.pframe.minionsKilled - last_frame.pframe.minionsKilled;
+                            aggregate_frame.frameJungleMinionsKilled = p_history.pframe.jungleMinionsKilled - last_frame.pframe.jungleMinionsKilled;
+                        }
 
                         if (stat_collection.aggregateStats[j] != undefined) {
                             aggregate_frame.mergeSamples(stat_collection.aggregateStats[j]);
@@ -298,7 +394,21 @@ function processFrames(json_data, tier, callback) {
                         }
 
                         if (p_id != 0) {
-                            participant_states[p_id].handleEvent(event);
+                            participant_states[p_id].handleItemEvent(event);
+                        }
+                    } else if (event.killerId != undefined) {
+                        if (event.killerId != 0) {
+                            participant_states[event.killerId].handleKillEvent(event);
+                        }
+
+                        if (event.victimId != undefined) {
+                            participant_states[event.victimId].handleVictimEvent(event);
+                        }
+
+                        if (event.assistingParticipantIds) {
+                            for (var k=0; k<event.assistingParticipantIds.length; k++) {
+                                participant_states[event.assistingParticipantIds[k]].handleAssistEvent(event);
+                            }
                         }
                     }
                 }
