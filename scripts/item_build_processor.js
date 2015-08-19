@@ -11,6 +11,23 @@ var MatchFrameData = models.MatchFrameData;
 var ITEM_HEALTH_POTION = 2003;
 var ITEM_MANA_POTION = 2004;
 
+var ConsumableItemIds = [ 2003,   // Health Potion
+                          2004,   // Mana Potion
+                          2009,   // Total Biscuit of Regeneration
+                          2010,   // (Also Biscuit?)
+                          2043,   // Vision Ward
+                          2044    // Stealth Ward
+                        ]  
+
+var TrinketItemIds = [ 3340,   // Warding Totem
+                       3341,   // Sweeping Lens
+                       3342,   // Scrying Orb
+                       3361,   // Greater Stealth Totem
+                       3362,   // Greater Vision Totem
+                       3363,   // Farsight Orb
+                       3364,   // Oracle's Lens
+                     ] 
+
 function AggregateStats() {
     this.gameTime = 0;
     this.samples = 0;
@@ -27,6 +44,7 @@ function AggregateStats() {
     this.dragon = 0;
     this.baron = 0;
     this.items = {};
+    this.startingBuild = {};
 
     this.frameGold = 0;
     this.frameMinionsKilled = 0;
@@ -54,26 +72,65 @@ AggregateStats.prototype.mergeSamples = function(otherStats){
     this.frameMinionsKilled = mergeStat(this.frameMinionsKilled, this.samples, otherStats.frameMinionsKilled, otherStats.samples);
     this.frameJungleMinionsKilled = mergeStat(this.frameJungleMinionsKilled, this.samples, otherStats.frameJungleMinionsKilled, otherStats.samples);
 
+/*
     for (i in otherStats.items) {
         if (this.items[i] == undefined) {
             this.items[i] = otherStats.items[i];
         } else {
-            this.items[i].quantity += otherStats.items[i].quantity;
+            //this.items[i].quantity += otherStats.items[i].quantity;
             this.items[i].frequency += otherStats.items[i].frequency;
         }
     }
+*/
 
     this.samples = this.samples + otherStats.samples;
 }
 
 // {{item_id}}: quantity => {{item_id}}: {quantity, frequency}
 
+/*
 function PrepareItems(items){
+    // Add prefix of quantity to item_id
     var newItems = {};
     for (var i in items) {
-        newItems[i] = { quantity: items[i], frequency: 1 };
+        var qty_item_id = parseInt(i) + (items[i] * 10000); // QIIII: Q = quantity, IIII = item_id
+        newItems[qty_item_id] = { quantity: items[i], frequency: 1 };
     }
     return newItems;
+}*/
+
+function GetTrinketIdAndRemove(items) {
+    for (var i in items) {
+        if (TrinketItemIds.indexOf(parseInt(i)) > -1) {
+            delete items[i];
+            return i;
+        }
+    }
+}
+
+function RemoveConsumables(items) {
+    for (var i in items) {
+        if (ConsumableItemIds.indexOf(parseInt(i)) > -1) {
+            delete items[i];
+        }
+    }
+}
+
+function GetQuantityItemIdString(items){
+    // Add prefix of quantity to item_id
+    var qty_item_array = [];
+    for (var i in items) {
+        var qty_item_id = parseInt(i) + (items[i] * 10000); // QIIII: Q = quantity, IIII = item_id
+        qty_item_array.push(qty_item_id);
+    }
+
+    var item_build_string = '';
+    qty_item_array.sort()
+                  .forEach(function(v) {
+                     item_build_string += v+':';
+                  });
+
+    return item_build_string;
 }
 
 function ParticipantState(){
@@ -269,11 +326,12 @@ function processStateHistory(json_data, state_history, tier, callback) {
     async.each(json_data.participants, function(json_p, next_p) {
         var victory = (json_p.teamId == winning_team) ? true : false;
         var participant_history = state_history[json_p.participantId];
+        var truncated_patch = json_data.matchVersion.split('.',2).join('.');
 
         StatCollection.findOne({ championId: json_p.championId,
                                  tier: tier,
                                  victory: victory,
-                                 patch: json_data.matchVersion,
+                                 patch: truncated_patch,
                                  lane: json_p.timeline.lane,
                                  role: json_p.timeline.role },
             function(error, stat_collection){
@@ -285,11 +343,13 @@ function processStateHistory(json_data, state_history, tier, callback) {
                         stat_collection.championId = json_p.championId;
                         stat_collection.tier = tier;
                         stat_collection.victory = victory;
-                        stat_collection.patch = json_data.matchVersion;
+                        stat_collection.patch = truncated_patch;
                         stat_collection.lane = json_p.timeline.lane;
                         stat_collection.role = json_p.timeline.role;
                         stat_collection.samples = 0;
                         stat_collection.aggregateStats = [];
+                        stat_collection.itemBuilds = {};
+                        stat_collection.trinketBuilds = {};
                     } else { 
                         for (var j=0; j<stat_collection.matchFrameData.length; j++) {
                             if (stat_collection.matchFrameData[j]._id == json_data.matchId) {
@@ -324,7 +384,7 @@ function processStateHistory(json_data, state_history, tier, callback) {
                         aggregate_frame.trinketWardsPlaced = p_history.state.trinket_wards_placed;
                         aggregate_frame.visionWardsPlaced = p_history.state.vision_wards_placed;
                         aggregate_frame.sightWardsPlaced = p_history.state.sight_wards_placed;
-                        aggregate_frame.items = PrepareItems(p_history.state.items);
+                        //aggregate_frame.items = PrepareItems(p_history.state.items);
                         aggregate_frame.kills = p_history.state.kills;
                         aggregate_frame.assists = p_history.state.assists;
                         aggregate_frame.deaths = p_history.state.deaths;
@@ -332,21 +392,56 @@ function processStateHistory(json_data, state_history, tier, callback) {
                         aggregate_frame.baron = p_history.state.baron;
 
                         if (j > 0) {
+                            // Calculate frame delta stats
                             var last_frame = participant_history[j-1];
                             aggregate_frame.frameGold = p_history.pframe.totalGold - last_frame.pframe.totalGold;
                             aggregate_frame.frameMinionsKilled = p_history.pframe.minionsKilled - last_frame.pframe.minionsKilled;
                             aggregate_frame.frameJungleMinionsKilled = p_history.pframe.jungleMinionsKilled - last_frame.pframe.jungleMinionsKilled;
+
+                            // Save starting items in inventory
+                            if (j == 1 || j%5 == 0) {
+                                if (j != 1) {
+                                    RemoveConsumables(p_history.state.items);
+                                }
+
+                                var trinket_build_id = GetTrinketIdAndRemove(p_history.state.items);
+                                var item_build_string = GetQuantityItemIdString(p_history.state.items); // Grab all items for first build
+                                // Record this build into the stat_collection
+                                if (!stat_collection.itemBuilds[j]) {
+                                    stat_collection.itemBuilds[j] = {};
+                                }
+
+                                if (stat_collection.itemBuilds[j][item_build_string]) {
+                                    stat_collection.itemBuilds[j][item_build_string]++;
+                                } else {
+                                    stat_collection.itemBuilds[j][item_build_string] = 1;
+                                }
+
+                                // Record this build into the stat_collection
+                                if (!stat_collection.trinketBuilds[j]) {
+                                    stat_collection.trinketBuilds[j] = {};
+                                }
+
+                                if (stat_collection.trinketBuilds[j][trinket_build_id]) {
+                                    stat_collection.trinketBuilds[j][trinket_build_id]++;
+                                } else {
+                                    stat_collection.trinketBuilds[j][trinket_build_id] = 1;
+                                }
+                            }
                         }
 
                         if (stat_collection.aggregateStats[j] != undefined) {
                             aggregate_frame.mergeSamples(stat_collection.aggregateStats[j]);
                         }
+
                         stat_collection.aggregateStats[j] = aggregate_frame;
                     }
 
                     stat_collection.matchFrameData.push(match_frame_data);
 
                     stat_collection.markModified('aggregateStats');
+                    stat_collection.markModified('itemBuilds');
+                    stat_collection.markModified('trinketBuilds');
                     stat_collection.samples++;
                     stat_collection.save(
                         function(error)

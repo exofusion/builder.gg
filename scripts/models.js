@@ -12,7 +12,8 @@ var seedSummonerSchema = new Schema({
   wins: Number,
   losses: Number,
   last_updated: Date,
-  last_match_queued: Date
+  last_queued: Date,
+  last_active: Date
 });
 
 var matchQueueItemSchema = new Schema({
@@ -82,6 +83,9 @@ var statCollectionSchema = new Schema({
     lane: String,
     role: String,
     samples: Number,
+    itemBuilds: {},
+    trinketBuilds: {},
+    startingBuild: {},
     aggregateStats: [ {} ],
     matchFrameData: [matchFrameDataSchema]
 });

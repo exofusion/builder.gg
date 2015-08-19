@@ -3,50 +3,130 @@ html
   head
     title= title
     link(rel='stylesheet', href='/stylesheets/style.css')
+    link(rel='stylesheet', href='/stylesheets/bootstrap.css')
+    link(rel='stylesheet', href='/bower_components/angular-ui-select/dist/select.css')
     link(rel='stylesheet', href='/bower_components/angular-chart.js/dist/angular-chart.css')
+    script(src='/bower_components/jquery/dist/jquery.js')
     script(src='https://ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js')
-    script(src='/core.js')
     script(src='/bower_components/Chart.js/Chart.js')
+    script(src='/bower_components/angular-sanitize/angular-sanitize.min.js')
+    script(src='/bower_components/angular-ui-select/dist/select.js')
     script(src='/bower_components/Chart.StackedBar.js/src/Chart.StackedBar.js')
     script(src='/bower_components/angular-chart.js/dist/angular-chart.js')
+    script(src='/core.js')      
 
-  body(ng-app='coreApp', ng-controller='mainCtrl')
-    form(ng-submit='submit()')
-        select(ng-model='search.tier',
-               ng-init='search.tier = tiers[0].id',
-               ng-options='tier.id as tier.name for tier in tiers')
+  body(ng-app='coreApp', ng-controller='statDistributionCtrl')
+    //
+      form(ng-submit='submit()')
+          select(ng-model='search.tier',
+                 ng-init='search.tier = tiers[0].id',
+                 ng-options='tier.id as tier.name for tier in tiers')
 
-        select(ng-model='search.championId',
-               ng-options="champion.id as champion.name for champion in champion_array | orderBy: 'name'")
+          select(ng-model='search.championId',
+                 ng-options="champion.id as champion.name for champion in champion_array | orderBy: 'name'")
 
-        select(ng-model='search.patch', ng-init='search.patch=patches[0]', ng-options='patch for patch in patches')
+          select(ng-model='search.patch', ng-init='search.patch=patches[0]', ng-options='patch for patch in patches')
 
-        select(ng-model='search.victory', ng-init="search.victory='true'")
-            option(value='true') Victory
-            option(value='false') Defeat
-
-        input(type='submit')
-
-    {{stat_collection}}
-
+          input(type='submit')
     #mainCtrlDiv
-      //
-          canvas(class='chart chart-stacked-bar',
-                 data='data',
-                 labels='labels',
-                 legend='true',
-                 series='series',
-                 click='onClick')
+      #itemSelectionContainer
+        .buildItem#item0
+          a(href="#", ng-click="displayItemSearch(0)")
+            img(ng-src="{{build_item_image[0]}}")
+          ui-select(id="testid" ng-model="build_item0.selected"
+                    theme="bootstrap"
+                    ng-disabled="disabled"
+                    ng-change="itemChange(0,build_item0.selected.id)"
+                    ng-show="show_item_search[0]")
+            ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
+            ui-select-choices(repeat="item in itemlist_array | filter: $select.search")
+              span(ng-bind-html="item.name | highlight: $select.search")
 
-      canvas(id='line',
-             class='chart chart-line',
-             data='data',
-             labels='labels',
+        .buildItem#item1
+          a(href="#", ng-click="displayItemSearch(1)")
+            img(ng-src="{{build_item_image[1]}}")
+          ui-select(ng-model="build_item1.selected"
+                    theme="bootstrap"
+                    ng-disabled="disabled"
+                    ng-change="itemChange(1,build_item1.selected.id)"
+                    ng-show="show_item_search[1]")
+            ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
+            ui-select-choices(repeat="item in itemlist_array | filter: $select.search")
+              span(ng-bind-html="item.name | highlight: $select.search")
+
+        .buildItem#item2
+          a(href="#", ng-click="displayItemSearch(2)")
+            img(ng-src="{{build_item_image[2]}}")
+          ui-select(ng-model="build_item2.selected"
+                    theme="bootstrap"
+                    ng-disabled="disabled"
+                    ng-change="itemChange(2,build_item2.selected.id)"
+                    ng-show="show_item_search[2]")
+            ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
+            ui-select-choices(repeat="item in itemlist_array | filter: $select.search")
+              span(ng-bind-html="item.name | highlight: $select.search")
+
+        .buildItem#item3
+          a(href="#", ng-click="displayItemSearch(3)")
+            img(ng-src="{{build_item_image[3]}}")
+          ui-select(ng-model="build_item3.selected"
+                    theme="bootstrap"
+                    ng-disabled="disabled"
+                    ng-change="itemChange(3,build_item3.selected.id)"
+                    ng-show="show_item_search[3]")
+            ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
+            ui-select-choices(repeat="item in itemlist_array | filter: $select.search")
+              span(ng-bind-html="item.name | highlight: $select.search")
+
+        .buildItem#item4
+          a(href="#", ng-click="displayItemSearch(4)")
+            img(ng-src="{{build_item_image[4]}}")
+          ui-select(ng-model="build_item4.selected"
+                    theme="bootstrap"
+                    ng-disabled="disabled"
+                    ng-change="itemChange(4,build_item4.selected.id)"
+                    ng-show="show_item_search[4]")
+            ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
+            ui-select-choices(repeat="item in itemlist_array | filter: $select.search")
+              span(ng-bind-html="item.name | highlight: $select.search")
+
+        .buildItem#item5
+          a(href="#", ng-click="displayItemSearch(5)")
+            img(ng-src="{{build_item_image[5]}}")
+          ui-select(ng-model="build_item5.selected"
+                    theme="bootstrap"
+                    ng-disabled="disabled"
+                    ng-change="itemChange(5,build_item5.selected.id)"
+                    ng-show="show_item_search[5]")
+            ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
+            ui-select-choices(repeat="item in itemlist_array | filter: $select.search")
+              span(ng-bind-html="item.name | highlight: $select.search")
+
+      #statDistributionChartContainer
+        canvas(id='statDistributionChart')
+
+      //
+        canvas(class='chart chart-stacked-bar',
+               data='build_data',
+               labels='build_labels',
+               series='build_series',
+               click='onClick')
+
+      //
+        canvas(class='chart chart-stacked-bar',
+               data='build_data',
+               labels='build_labels',
+               series='build_series',
+               click='onClick')
+
+      canvas(class='chart chart-line',
+             data='kda_data',
+             labels='kda_labels',
              legend='true',
-             series='series',
+             series='kda_series',
              colours='kda_colors',
              options='kda_options',
-             click='onClick')
+             click='kda_click')
 
     //-
       ** File drop handling **

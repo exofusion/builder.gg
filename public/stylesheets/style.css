@@ -1,6 +1,10 @@
 body {
   padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+
+  margin: 0;
+  padding: 0;
+  text-align: center;
 }
 
 a {
@@ -8,10 +12,104 @@ a {
 }
 
 #mainCtrlDiv {
-    width: 50%;
-    height: 50%;
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
 }
 
+#itemSelectionContainer {
+  padding-top: 200px;
+  margin: 0 auto;
+  text-align: center;
+  display: inline-block;
+}
+
+#statDistributionChart {
+}
+
+#statDistributionChartContainer {
+  display: block;
+  width: 40%;
+  margin: 0 auto;
+}
+
+#kdaChartContainer {
+  display: block;
+  width: 70%;
+  margin: 0 auto;
+}
+
+#statSearchContainer {
+  padding-top: 100px;
+  margin: 0 auto;
+}
+
+.buildItem {
+  display: inline-block;
+  padding: 0 20px;
+  width: 125px;
+  height: 200px;
+  vertical-align: top;
+}
+
+.buildItem img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 20px;
+  width: 100px;
+  height: 100px;
+  z-index: 1;
+}
+.ui-select-container {
+  text-align: left;
+  position: absolute;
+  width: 170px;
+  margin: 0 -35px;
+  /*&box-shadow: 0px 0px 50px rgba(200,45,45,0.5);*/
+}
+
+#item0 .ui-select-container {
+  box-shadow: 0px 0px 25px rgba(200,45,45,0.5);
+}
+#item0 img {
+  box-shadow: 0px 20px 55px rgba(200,45,45,0.5);
+}
+
+#item1 .ui-select-container {
+  box-shadow: 0px 0px 25px rgba(200,200,45,0.5);
+}
+#item1 img {
+  box-shadow: 0px 20px 55px rgba(200,200,45,0.5);
+}
+
+#item2 .ui-select-container {
+  box-shadow: 0px 0px 25px rgba(45,200,45,0.5);
+}
+#item2 img {
+  box-shadow: 0px 20px 55px rgba(45,200,45,0.5);
+}
+
+#item3 .ui-select-container {
+  box-shadow: 0px 0px 25px rgba(45,200,200,0.5);
+}
+#item3 img {
+  box-shadow: 0px 20px 55px rgba(45,200,200,0.5);
+}
+
+#item4 .ui-select-container {
+  box-shadow: 0px 0px 25px rgba(45,45,200,0.5);
+}
+#item4 img {
+  box-shadow: 0px 20px 55px rgba(45,45,200,0.5);
+}
+
+#item5 .ui-select-container {
+  box-shadow: 0px 0px 25px rgba(200,45,200,0.5);
+}
+#item5 img {
+  box-shadow: 0px 20px 55px rgba(200,45,200,0.5);
+}
 /* File drop zone
 .dropzone {
     position:fixed;

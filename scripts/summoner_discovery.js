@@ -24,6 +24,38 @@ function stepTier() {
     selectMatchCacheItem();
 }
 
+function checkForMissingTier() {
+    SeedSummoner.findOne({ tier: {$exists: false}}, function(error, seed_summoner){
+        if (error) {
+            console.log(error);
+        } else {
+            if (seed_summoner) {
+                summoner_found = true;
+                console.log('[FOUND] Summoner without tier: '+seed_summoner.name+' ('+seed_summoner._id+')');
+                riot_api.getLeagueBySummonerId( seed_summoner._id,
+                                                function(json_data){
+                                                    if (json_data != null) {
+                                                        db_functions.insertLeagueSummoners(json_data);
+                                                    } else {
+                                                        seed_summoner.tier = 0;
+                                                        seed_summoner.save(function(error){
+                                                            if (error) {
+                                                                console.log(error);
+                                                            } else {
+                                                                console.log('[WARNING] No tier information found, setting tier as 0');
+                                                            }
+                                                        });
+                                                    }
+
+                                                    checkForMissingTier();
+                                                });
+            } else {
+                selectMatchCacheItem();
+            }
+        }
+    });
+}
+
 function selectMatchCacheItem() {
     if (skip_num == 0 /*&& current_tier == util_functions.tierInts['CHALLENGER']*/) {
         riot_api.getChallengerLeague(function(json_data){
@@ -84,8 +116,8 @@ function selectMatchCacheItem() {
                     stepTier();
                 }
             }
-        }).limit(1).sort({ timestamp: -1 }).skip(skip_num);
+        }).limit(1)/*sort({ timestamp: -1 }).*/.skip(skip_num);
     }
 }
 
-selectMatchCacheItem();
+checkForMissingTier();
