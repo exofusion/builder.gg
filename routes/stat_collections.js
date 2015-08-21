@@ -9,29 +9,31 @@ router.get('/', function(req, res, next) {
 
     if (req.query.championId) {
         search_options.championId = parseInt(req.query.championId);
-    }
 
-    if (req.query.tier) {
-        search_options.tier = parseInt(req.query.tier);
-    }
-
-    if (req.query.patch) {
-        search_options.patch = req.query.patch;
-    }
-
-    if (req.query.victory) {
-        search_options.victory = (req.query.victory == "true") ? true : false;
-    }
-
-    StatCollection.findOne(search_options, function(error, stat_collection) {
-        if (error) {
-            console.log(error);
-        } else if (stat_collection) {
-           res.send(stat_collection);
-        } else {
-            res.status(404).end();
+        if (req.query.tier) {
+            search_options.tier = parseInt(req.query.tier);
         }
-    }).sort({samples: -1});
+
+        if (req.query.patch) {
+            search_options.patch = req.query.patch;
+        }
+
+        if (req.query.victory) {
+            search_options.victory = (req.query.victory == "true") ? true : false;
+        }
+
+        StatCollection.findOne(search_options, function(error, stat_collection) {
+            if (error) {
+                 console.log(error);
+            } else if (stat_collection) {
+                res.send(stat_collection);
+            } else {
+                res.status(404).end();
+            }
+        }).sort({samples: -1});
+    } else {
+        res.status(404).end();
+    }
 });
 
 module.exports = router;

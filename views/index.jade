@@ -13,7 +13,7 @@ html
     script(src='/bower_components/angular-ui-select/dist/select.js')
     script(src='/bower_components/Chart.StackedBar.js/src/Chart.StackedBar.js')
     script(src='/bower_components/angular-chart.js/dist/angular-chart.js')
-    script(src='/core.js')      
+    script(src='/core.js')
 
   body(ng-app='coreApp', ng-controller='statDistributionCtrl')
     //
@@ -31,76 +31,105 @@ html
     #mainCtrlDiv
       #itemSelectionContainer
         .buildItem#item0
-          a(href="#", ng-click="displayItemSearch(0)")
-            img(ng-src="{{build_item_image[0]}}")
-          ui-select(id="testid" ng-model="build_item0.selected"
-                    theme="bootstrap"
-                    ng-disabled="disabled"
-                    ng-change="itemChange(0,build_item0.selected.id)"
-                    ng-show="show_item_search[0]")
-            ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
-            ui-select-choices(repeat="item in itemlist_array | filter: $select.search")
-              span(ng-bind-html="item.name | highlight: $select.search")
+            a(href="#", ng-click="displayItemSearch(0)")
+              img(class="item_display_img" ng-src="{{build_item_image[0]}}")
+            button(class="clear_button" ng-show="build_item_image[0] && (build_item_image[0] != '//:0')" ng-click="clearItem(0,build_item0)") Clear
+            ui-select(ng-model="build_item0.selected"
+                      theme="bootstrap"
+                      ng-disabled="disabled"
+                      ng-change="itemChange(0,build_item0.selected.id)"
+                      ng-show="show_item_search[0]")
+              ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
+              ui-select-choices(repeat="item in itemlist_array | orderBy:'-cost' | filter: $select.search")
+                img(style="position: absolute; margin: 0px -18px; height: 40px; width: 40px;" ng-src="{{item.image}}")
+                div(style="margin-left: 30px")
+                  div(ng-bind-html="item.name | highlight: $select.search")
+                  small {{item.cost}}g
 
-        .buildItem#item1
-          a(href="#", ng-click="displayItemSearch(1)")
-            img(ng-src="{{build_item_image[1]}}")
-          ui-select(ng-model="build_item1.selected"
-                    theme="bootstrap"
-                    ng-disabled="disabled"
-                    ng-change="itemChange(1,build_item1.selected.id)"
-                    ng-show="show_item_search[1]")
-            ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
-            ui-select-choices(repeat="item in itemlist_array | filter: $select.search")
-              span(ng-bind-html="item.name | highlight: $select.search")
+        .buildItem
+          #item1
+            a(href="#", ng-click="displayItemSearch(1)")
+              img(class="item_display_img" ng-src="{{build_item_image[1]}}")
+            button(class="clear_button" ng-show="build_item_image[1] && (build_item_image[1] != '//:0')" ng-click="clearItem(1,build_item1)") Clear
+            ui-select(ng-model="build_item1.selected"
+                      theme="bootstrap"
+                      ng-disabled="disabled"
+                      ng-change="itemChange(1,build_item1.selected.id)"
+                      ng-show="show_item_search[1]")
+              ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
+              ui-select-choices(repeat="item in itemlist_array | orderBy:'-cost' | filter: $select.search")
+                img(style="position: absolute; margin: 0px -18px; height: 40px; width: 40px;" ng-src="{{item.image}}")
+                div(style="margin-left: 30px")
+                  div(ng-bind-html="item.name | highlight: $select.search")
+                  small {{item.cost}}g
 
-        .buildItem#item2
-          a(href="#", ng-click="displayItemSearch(2)")
-            img(ng-src="{{build_item_image[2]}}")
-          ui-select(ng-model="build_item2.selected"
-                    theme="bootstrap"
-                    ng-disabled="disabled"
-                    ng-change="itemChange(2,build_item2.selected.id)"
-                    ng-show="show_item_search[2]")
-            ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
-            ui-select-choices(repeat="item in itemlist_array | filter: $select.search")
-              span(ng-bind-html="item.name | highlight: $select.search")
+        .buildItem
+          #item2
+            a(href="#", ng-click="displayItemSearch(2)")
+              img(class="item_display_img" ng-src="{{build_item_image[2]}}")
+            button(class="clear_button" ng-show="build_item_image[2] && (build_item_image[2] != '//:0')" ng-click="clearItem(2,build_item2)") Clear
+            ui-select(ng-model="build_item2.selected"
+                      theme="bootstrap"
+                      ng-disabled="disabled"
+                      ng-change="itemChange(2,build_item2.selected.id)"
+                      ng-show="show_item_search[2]")
+              ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
+              ui-select-choices(repeat="item in itemlist_array | orderBy:'-cost' | filter: $select.search")
+                img(style="position: absolute; margin: 0px -18px; height: 40px; width: 40px;" ng-src="{{item.image}}")
+                div(style="margin-left: 30px")
+                  div(ng-bind-html="item.name | highlight: $select.search")
+                  small {{item.cost}}g
 
-        .buildItem#item3
-          a(href="#", ng-click="displayItemSearch(3)")
-            img(ng-src="{{build_item_image[3]}}")
-          ui-select(ng-model="build_item3.selected"
-                    theme="bootstrap"
-                    ng-disabled="disabled"
-                    ng-change="itemChange(3,build_item3.selected.id)"
-                    ng-show="show_item_search[3]")
-            ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
-            ui-select-choices(repeat="item in itemlist_array | filter: $select.search")
-              span(ng-bind-html="item.name | highlight: $select.search")
+        .buildItem
+          #item3
+            a(href="#", ng-click="displayItemSearch(3)")
+              img(class="item_display_img" ng-src="{{build_item_image[3]}}")
+            button(class="clear_button" ng-show="build_item_image[3] && (build_item_image[3] != '//:0')" ng-click="clearItem(3,build_item3)") Clear
+            ui-select(ng-model="build_item3.selected"
+                      theme="bootstrap"
+                      ng-disabled="disabled"
+                      ng-change="itemChange(3,build_item3.selected.id)"
+                      ng-show="show_item_search[3]")
+              ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
+              ui-select-choices(repeat="item in itemlist_array | orderBy:'-cost' | filter: $select.search")
+                img(style="position: absolute; margin: 0px -18px; height: 40px; width: 40px;" ng-src="{{item.image}}")
+                div(style="margin-left: 30px")
+                  div(ng-bind-html="item.name | highlight: $select.search")
+                  small {{item.cost}}g
 
-        .buildItem#item4
-          a(href="#", ng-click="displayItemSearch(4)")
-            img(ng-src="{{build_item_image[4]}}")
-          ui-select(ng-model="build_item4.selected"
-                    theme="bootstrap"
-                    ng-disabled="disabled"
-                    ng-change="itemChange(4,build_item4.selected.id)"
-                    ng-show="show_item_search[4]")
-            ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
-            ui-select-choices(repeat="item in itemlist_array | filter: $select.search")
-              span(ng-bind-html="item.name | highlight: $select.search")
+        .buildItem
+          #item4
+            a(href="#", ng-click="displayItemSearch(4)")
+              img(class="item_display_img" ng-src="{{build_item_image[4]}}")
+            button(class="clear_button" ng-show="build_item_image[4] && (build_item_image[4] != '//:0')" ng-click="clearItem(4,build_item4)") Clear
+            ui-select(ng-model="build_item4.selected"
+                      theme="bootstrap"
+                      ng-disabled="disabled"
+                      ng-change="itemChange(4,build_item4.selected.id)"
+                      ng-show="show_item_search[4]")
+              ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
+              ui-select-choices(repeat="item in itemlist_array | orderBy:'-cost' | filter: $select.search")
+                img(style="position: absolute; margin: 0px -18px; height: 40px; width: 40px;" ng-src="{{item.image}}")
+                div(style="margin-left: 30px")
+                  div(ng-bind-html="item.name | highlight: $select.search")
+                  small {{item.cost}}g
 
-        .buildItem#item5
-          a(href="#", ng-click="displayItemSearch(5)")
-            img(ng-src="{{build_item_image[5]}}")
-          ui-select(ng-model="build_item5.selected"
-                    theme="bootstrap"
-                    ng-disabled="disabled"
-                    ng-change="itemChange(5,build_item5.selected.id)"
-                    ng-show="show_item_search[5]")
-            ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
-            ui-select-choices(repeat="item in itemlist_array | filter: $select.search")
-              span(ng-bind-html="item.name | highlight: $select.search")
+        .buildItem
+          #item5
+            a(href="#", ng-click="displayItemSearch(5)")
+              img(class="item_display_img" ng-src="{{build_item_image[5]}}")
+            button(class="clear_button" ng-show="build_item_image[5] && (build_item_image[5] != '//:0')" ng-click="clearItem(5,build_item5)") Clear
+            ui-select(ng-model="build_item5.selected"
+                      theme="bootstrap"
+                      ng-disabled="disabled"
+                      ng-change="itemChange(5,build_item5.selected.id)"
+                      ng-show="show_item_search[5]")
+              ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
+              ui-select-choices(repeat="item in itemlist_array | orderBy:'-cost' | filter: $select.search")
+                img(style="position: absolute; margin: 0px -18px; height: 40px; width: 40px;" ng-src="{{item.image}}")
+                div(style="margin-left: 30px")
+                  div(ng-bind-html="item.name | highlight: $select.search")
+                  small {{item.cost}}g
 
       #statDistributionChartContainer
         canvas(id='statDistributionChart')

@@ -1,5 +1,7 @@
 var app = angular.module('coreApp', ['chart.js','ui.select','ngSanitize']);
 
+var ddragon_url = 'http://ddragon.leagueoflegends.com/cdn/5.15.1/';
+
 var kda_interval = 5;
 var kda_last_minute = 50;
 var kda_timeline_length = kda_last_minute / kda_interval // 5 minute intervals up to 60
@@ -27,12 +29,19 @@ function GetItemlistJson($scope, $http) {
     $scope.itemlist_json = res.data.data;
     for (item in $scope.itemlist_json) {
       $scope.itemlist_array.push({ id: $scope.itemlist_json[item].id,
-                                   name: $scope.itemlist_json[item].name });
+                                   name: $scope.itemlist_json[item].name,
+                                   cost: $scope.itemlist_json[item].gold.total,
+                                   image: ddragon_url+'/img/item/'+$scope.itemlist_json[item].image.full,
+                                   plaintext: $scope.itemlist_json[item].plaintext });
     }
   });
 }
 
 app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
+  $scope.getNumber = function(num) {
+    return new Array(num);   
+  }
+
   $scope.displayItemSearch = function(item_slot) {
     var already_shown = ($scope.show_item_search && $scope.show_item_search[item_slot]) ? true : false;
     $scope.show_item_search = [];
@@ -51,28 +60,74 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
     }
   }
 
+  $scope.clearItem = function(item_slot, build_item) {
+    var datasets = $scope.stat_distribution_data.datasets;
+    datasets[item_slot].label = "N/A";
+
+    for (var i=0; i<datasets[item_slot].data.length; i++) {
+      datasets[item_slot].data[i] = 0;
+    }
+
+    $scope.build_item_image[item_slot] = '//:0';
+    $scope.stat_distribution_chart.update();
+    delete build_item.selected;
+  }
+
   $scope.itemChange = function(item_slot, item_id) {
     var this_item = $scope.itemlist_json[item_id];
     var datasets = $scope.stat_distribution_data.datasets;
 
     datasets[item_slot].label = this_item.name;
 
-    datasets[item_slot].data[0] =  this_item.stats.FlatHPPoolMod         ? this_item.stats.FlatHPPoolMod         : 0;
-    datasets[item_slot].data[1] =  this_item.stats.FlatMPPoolMod         ? this_item.stats.FlatMPPoolMod         : 0;
-    datasets[item_slot].data[2] =  this_item.stats.FlatArmorMod          ? this_item.stats.FlatArmorMod          : 0;
-    datasets[item_slot].data[3] =  this_item.stats.FlatSpellBlockMod     ? this_item.stats.FlatSpellBlockMod     : 0;
-    datasets[item_slot].data[4] =  this_item.stats.FlatPhysicalDamageMod ? this_item.stats.FlatPhysicalDamageMod : 0;
-    datasets[item_slot].data[5] =  this_item.stats.FlatMagicDamageMod    ? this_item.stats.FlatMagicDamageMod    : 0;
-    datasets[item_slot].data[6] =  this_item.stats.FlatHPRegenMod        ? this_item.stats.FlatHPRegenMod        : 0;
-    datasets[item_slot].data[7] =  this_item.stats.FlatMPRegenMod        ? this_item.stats.FlatMPRegenMod        : 0;
-    datasets[item_slot].data[8] =  this_item.stats.FlatCritChanceMod     ? this_item.stats.FlatCritChanceMod*100 : 0;
-    datasets[item_slot].data[9] =  this_item.stats.PercentAttackSpeedMod ? this_item.stats.PercentAttackSpeedMod*100    : 0;
-    datasets[item_slot].data[10] = this_item.stats.FlatMovementSpeedMod  ? this_item.stats.FlatMovementSpeedMod  : 0;
+    datasets[item_slot].data[0] =  this_item.stats.FlatPhysicalDamageMod    ? this_item.stats.FlatPhysicalDamageMod       : 0;
+    datasets[item_slot].data[3] =  this_item.stats.PercentAttackSpeedMod    ? this_item.stats.PercentAttackSpeedMod*100   : 0;
+    datasets[item_slot].data[4] =  this_item.stats.FlatCritChanceMod        ? this_item.stats.FlatCritChanceMod*100       : 0;
+    datasets[item_slot].data[5] =  this_item.stats.FlatSpellBlockMod        ? this_item.stats.FlatSpellBlockMod           : 0;
+    datasets[item_slot].data[6] =  this_item.stats.FlatHPPoolMod            ? this_item.stats.FlatHPPoolMod               : 0;
+    datasets[item_slot].data[7] =  this_item.stats.PercentHPRegenMod        ? this_item.stats.PercentHPRegenMod*100       : 0;
+    datasets[item_slot].data[8] =  this_item.stats.FlatArmorMod             ? this_item.stats.FlatArmorMod                : 0;
+    datasets[item_slot].data[9] =  this_item.stats.FlatMovementSpeedMod     ? this_item.stats.FlatMovementSpeedMod        : 0;
+    datasets[item_slot].data[10] = this_item.stats.PercentMovementSpeedMod  ? this_item.stats.PercentMovementSpeedMod*100 : 0;
+    datasets[item_slot].data[11] = this_item.stats.FlatMPPoolMod            ? this_item.stats.FlatMPPoolMod               : 0;
+    datasets[item_slot].data[15] = this_item.stats.FlatMagicDamageMod       ? this_item.stats.FlatMagicDamageMod          : 0;
+
+    var sanitizedDescription = $scope.itemlist_json[item_id].sanitizedDescription;
+    var armorPenetration = sanitizedDescription.indexOf("Armor Penetration");
+    var lifeSteal = sanitizedDescription.indexOf("Life Steal");
+    var baseManaRegen = sanitizedDescription.indexOf("Base Mana Regen");
+    var cooldownReduction = sanitizedDescription.indexOf("Cooldown Reduction");
+    var magicPenetration = sanitizedDescription.indexOf("Magic Penetration");
+
+    if (armorPenetration > -1) {
+      datasets[item_slot].data[1] = parseInt(sanitizedDescription.slice(armorPenetration-3, armorPenetration-1));
+      datasets[item_slot].data[1] = datasets[item_slot].data[1] || 0;
+    }
+    if (lifeSteal > -1) {
+      datasets[item_slot].data[2] = parseInt(sanitizedDescription.slice(lifeSteal-4, lifeSteal).split('%')[0]);
+      datasets[item_slot].data[2] = datasets[item_slot].data[2] || 0;
+    }
+    if (baseManaRegen > -1) {
+      datasets[item_slot].data[12] = parseInt(sanitizedDescription.slice(baseManaRegen-5, baseManaRegen).split('%')[0]);
+      datasets[item_slot].data[12] = datasets[item_slot].data[12] || 0;
+    }
+    if (cooldownReduction > -1) {
+      datasets[item_slot].data[13] = parseInt(sanitizedDescription.slice(cooldownReduction-4, cooldownReduction).split('%')[0]);
+      datasets[item_slot].data[13] = datasets[item_slot].data[13] || 0;
+    }
+    if (magicPenetration > -1) {
+      datasets[item_slot].data[14] = parseInt(sanitizedDescription.slice(magicPenetration-3, magicPenetration-1));
+      datasets[item_slot].data[14] = datasets[item_slot].data[14] || 0;
+    }
+
 
     // Get "Effective Gold" stat
-    for (var i=0; i<11; i++)
-      $scope.stat_distribution_data.datasets[item_slot].data[i] *= $scope.stat_distribution_stat_bases[i];
+    for (var i=0; i<$scope.stat_distribution_label_map.length; i++)
+    {
+      $scope.stat_distribution_data.datasets[item_slot].data[i] = Math.floor($scope.stat_distribution_data.datasets[item_slot].data[i]*
+                                                                             $scope.stat_distribution_stat_bases[i]);
+    }
 
+/*
     // Update labels with stat amount
     for (var i=0; i<11; i++) {
       var total_stat = 0;
@@ -80,29 +135,28 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
         total_stat += (datasets[j].data[i] / $scope.stat_distribution_stat_bases[i]);
       
       $scope.stat_distribution_data.labels[i] = $scope.stat_distribution_label_map[i]+' ('+total_stat+')';
-    }
+    }*/
 
 
     $scope.stat_distribution_chart.update();
-    $scope.build_item_image[item_slot] = 'http://ddragon.leagueoflegends.com/cdn/5.15.1/img/item/'+$scope.itemlist_json[item_id].image.full;
-
-    /*
-    $scope.stat_distribution_chart.destroy();
-    $scope.stat_distribution_chart = new Chart($scope.stat_distribution_ctx).StackedBar($scope.stat_distribution_data);
-    */
-
-    var uiSelect = angular.element('#item'+item_slot+' .ui-select-container').controller('uiSelect');
+    $scope.build_item_image[item_slot] = ddragon_url+'/img/item/'+$scope.itemlist_json[item_id].image.full;
 
     // Hide item selection box again
     $timeout(function() {
+      var uiSelect = angular.element('#item'+item_slot+' .ui-select-container').controller('uiSelect');
       uiSelect.focusser[0].blur();
       $scope.show_item_search = [];
       //uiSelect.open = true;
       //uiSelect.activate();
     });
-
-    //console.log($scope.itemlist_json[item_id]);
   }
+
+  $scope.build_item0 = {};
+  $scope.build_item1 = {};
+  $scope.build_item2 = {};
+  $scope.build_item3 = {};
+  $scope.build_item4 = {};
+  $scope.build_item5 = {};
 
   GetChampionJson($scope, $http);
   GetItemlistJson($scope, $http);
@@ -110,8 +164,45 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
   $scope.build_item_image = [];
 
   // Stat Distribution Chart Setup
-  $scope.stat_distribution_label_map = ["HP", "Mana", "Armor", "MR", "AD", "AP", "Health Regen", "Mana Regen", "Crit Chance", "AS", "MS"];
+  $scope.stat_distribution_label_map = [ "AD",
+                                         "Armor Pen",
+                                         "% Lifesteal",
+                                         "% AS",
+                                         "% Crit Chance",
+                                         "MR",
+                                         "HP",
+                                         "% BHR",
+                                         "Armor",
+                                         "MS",
+                                         "% MS",
+                                         "Mana",
+                                         "% BMR",
+                                         "CDR",
+                                         //"% Spellvamp",
+                                         "Magic Pen",
+                                         "AP" ];
   $scope.stat_distribution_labels = $scope.stat_distribution_label_map.slice();
+  $scope.stat_distribution_stat_bases = [ 36.00, // AD
+                                          12.00, // Armor Pen
+                                          55,    // % Lifesteal
+                                          30.00, // % AS
+                                          50.00, // % Crit Chance
+                                          20.00, // MR
+                                          2.67,  // HP
+                                          3.60,  // % Health Regen
+                                          20.00, // Armor
+                                          13.00, // MS
+                                          39.50, // % MS
+                                          2.00,  // Mana
+                                          7.20,  // % Base Mana Regen
+                                          31.67, // CDR
+                                          //27.50, // % Spellvamp
+                                          34.33, // Magic Pen
+                                          21.75  // AP
+                                        ];
+
+/*
+  $scope.stat_distribution_label_map = ["HP", "Mana", "Armor", "MR", "AD", "AP", "Health Regen", "Mana Regen", "Crit Chance", "AS", "MS"];
   $scope.stat_distribution_stat_bases = [ 2.67,
                                           2.00,
                                           20.00,
@@ -123,6 +214,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
                                           50.00,
                                           30.00,
                                           13.00 ];
+*/
   var stat_distribution_datasets =  [{
                             label: "N/A",
                             fillColor: "rgba(200,45,45,0.5)",
@@ -131,7 +223,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
                             pointStrokeColor: "#fff",
                             pointHighlightFill: "#fff",
                             pointHighlightStroke: "rgba(200,45,45,1)",
-                            data: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+                            data: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
                          },
                          {
                             label: "N/A",
@@ -141,7 +233,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
                             pointStrokeColor: "#fff",
                             pointHighlightFill: "#fff",
                             pointHighlightStroke: "rgba(200,200,45,1)",
-                            data: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+                            data: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
                          },
                          {
                             label: "N/A",
@@ -151,7 +243,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
                             pointStrokeColor: "#fff",
                             pointHighlightFill: "#fff",
                             pointHighlightStroke: "rgba(45,200,45,1)",
-                            data: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+                            data: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
                          },
                          {
                             label: "N/A",
@@ -161,7 +253,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
                             pointStrokeColor: "#fff",
                             pointHighlightFill: "#fff",
                             pointHighlightStroke: "rgba(45,200,200,1)",
-                            data: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+                            data: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
                          },
                          {
                             label: "N/A",
@@ -171,7 +263,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
                             pointStrokeColor: "#fff",
                             pointHighlightFill: "#fff",
                             pointHighlightStroke: "rgba(45,45,200,1)",
-                            data: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+                            data: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
                          },
                          {
                             label: "N/A",
@@ -181,7 +273,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
                             pointStrokeColor: "#fff",
                             pointHighlightFill: "#fff",
                             pointHighlightStroke: "rgba(200,45,200,1)",
-                            data: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+                            data: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
                          }];
 
   $scope.stat_distribution_options = { animationEasing: "easeOutElastic",
@@ -202,10 +294,9 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
 
 app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
   function parseStatCollection(stat_data) {
-    /*
-    datasets[0].data = [];
-    datasets[1].data = [];
-    datasets[2].data = [];*/
+    // Continuous flow effect
+    //$scope.kda_chart.removeData();
+    //$scope.kda_chart.addData([[], [], []], '');
 
     for (var i=0; i<=kda_timeline_length; i++) {
        $scope.kda_data.labels[i] = (i*5+' (0)');
@@ -213,6 +304,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
        $scope.kda_chart.datasets[1].points[i].value = 0;
        $scope.kda_chart.datasets[2].points[i].value = 0;
     }
+
 
     var killTally = 0;
     var deathTally = 0;
@@ -222,8 +314,8 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
       killTally += stat_data.aggregateStats[i].kills;
       deathTally += stat_data.aggregateStats[i].deaths;
       assistTally += stat_data.aggregateStats[i].assists;
-      if (!(i % 5)) {
-        var label_index = i/5;
+      if (!(i % kda_interval)) {
+        var label_index = i/kda_interval;
         var frame_samples = stat_data.aggregateStats[i].samples;
 
         if (i <= kda_last_minute) {
@@ -255,12 +347,12 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
 
   var kda_datasets =  [{
                           label: "Kills",
-                          fillColor: "rgba(70, 200, 70,0.02)",
-                          strokeColor: "rgba(70, 200, 70,1)",
-                          pointColor: "rgba(70, 200, 70,1)",
+                          fillColor: "rgba(70,200,70,0.02)",
+                          strokeColor: "rgba(70,200,70,1)",
+                          pointColor: "rgba(70,200,70,1)",
                           pointStrokeColor: "#fff",
                           pointHighlightFill: "#fff",
-                          pointHighlightStroke: "rgba(70, 200, 70,0.8)",
+                          pointHighlightStroke: "rgba(70,200,70,0.8)",
                           data: [ 0,0,0,0,0,0,0,0,0,0,0 ]
                        },
                        {
@@ -270,7 +362,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
                           pointColor: "rgba(247,70,74,1)",
                           pointStrokeColor: "#fff",
                           pointHighlightFill: "#fff",
-                          pointHighlightStroke: "rgba(200,200,45,1)",
+                          pointHighlightStroke: "rgba(247,70,74,1)",
                           data: [ 0,0,0,0,0,0,0,0,0,0,0 ]
                        },
                        {
@@ -280,7 +372,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
                           pointColor: "rgba(151,187,205,1)",
                           pointStrokeColor: "#fff",
                           pointHighlightFill: "#fff",
-                          pointHighlightStroke: "rgba(45,200,45,1)",
+                          pointHighlightStroke: "rgba(151,187,205,1)",
                           data: [ 0,0,0,0,0,0,0,0,0,0,0 ]
                        }];
 
@@ -291,7 +383,8 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
     scaleOverride: true,
     scaleSteps: 10,
     scaleStepWidth: 1,
-    scaleStartValue: 0
+    scaleStartValue: 0,
+    scaleFontSize: 22
   };
 
   $scope.kda_ctx = document.getElementById("kdaChart").getContext("2d");
@@ -335,7 +428,6 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
   };
 
   $scope.kda_click = function () {
-    console.log('wat');
     if ($scope.displayed) {
       if ($scope.displayed == 'victory' && $scope.defeat_response) {
         parseStatCollection( $scope.defeat_response );

@@ -50,64 +50,77 @@ a {
   width: 125px;
   height: 200px;
   vertical-align: top;
+  text-align: center;
 }
 
-.buildItem img {
-  display: block;
-  margin-left: auto;
+.item_display_img {
+  display: inline-block;
+  margin-left: -8px;
   margin-right: auto;
   margin-bottom: 20px;
   width: 100px;
   height: 100px;
   z-index: 1;
 }
+
+.clear_button {
+  position: absolute;
+  margin-left: -25px;
+}
+
 .ui-select-container {
   text-align: left;
   position: absolute;
-  width: 170px;
-  margin: 0 -35px;
+  width: 250px;
+  margin: 0 -75px;
+  z-index: 10;
   /*&box-shadow: 0px 0px 50px rgba(200,45,45,0.5);*/
+}
+
+.ui-select-choices-row img {
+  width: 30px;
+  height: 30px;
 }
 
 #item0 .ui-select-container {
   box-shadow: 0px 0px 25px rgba(200,45,45,0.5);
 }
-#item0 img {
+#item0 .item_display_img {
   box-shadow: 0px 20px 55px rgba(200,45,45,0.5);
 }
 
 #item1 .ui-select-container {
   box-shadow: 0px 0px 25px rgba(200,200,45,0.5);
 }
-#item1 img {
+#item1 .item_display_img {
   box-shadow: 0px 20px 55px rgba(200,200,45,0.5);
 }
 
 #item2 .ui-select-container {
   box-shadow: 0px 0px 25px rgba(45,200,45,0.5);
 }
-#item2 img {
+#item2 .item_display_img {
   box-shadow: 0px 20px 55px rgba(45,200,45,0.5);
 }
 
 #item3 .ui-select-container {
   box-shadow: 0px 0px 25px rgba(45,200,200,0.5);
 }
-#item3 img {
+#item3 .item_display_img {
   box-shadow: 0px 20px 55px rgba(45,200,200,0.5);
 }
 
 #item4 .ui-select-container {
   box-shadow: 0px 0px 25px rgba(45,45,200,0.5);
 }
-#item4 img {
+#item4 .item_display_img {
   box-shadow: 0px 20px 55px rgba(45,45,200,0.5);
 }
 
 #item5 .ui-select-container {
   box-shadow: 0px 0px 25px rgba(200,45,200,0.5);
 }
-#item5 img {
+#item5 .item_display_img {
   box-shadow: 0px 20px 55px rgba(200,45,200,0.5);
 }
 /* File drop zone

@@ -364,12 +364,14 @@ function processStateHistory(json_data, state_history, tier, callback) {
                     match_frame_data._id = json_data.matchId;
 
                     for (var j=0; j<participant_history.length; j++) {
+                        /*
                         if (participant_history[j].pframe.position) {
                             var this_coord = {};
                             this_coord.x = participant_history[j].pframe.position.x;
                             this_coord.y = participant_history[j].pframe.position.y;
                             match_frame_data.coords.push({ x: this_coord.x, y: this_coord.y });
                         }
+                        */
 
                         var p_history = participant_history[j];
 

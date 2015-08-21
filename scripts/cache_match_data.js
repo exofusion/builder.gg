@@ -34,34 +34,38 @@ function addMatchToCache(json_data) {
                                 '\t('+match_date.toLocaleString('en-US')+')'+
                                 '\t'+current_mqi._id);
 
-                    // Mark the last_active attribute for the summoners in this game
-                    json_data.participantIdentities.forEach( function(p){
-                        SeedSummoner.findOne({ _id: p.player.summonerId }, function(error, ss){
-                            if (error) {
-                                console.log(error);
-                            } else {
-                                // Check if we found a SeedSummoner
-                                if (ss) {
-                                    if (ss.last_active > match_date) {
-                                        // We already have a more recent date attached to last_active, so don't
-                                        // update with out of date info
-                                        return;
+                    if (json_data == null) {
+                        console.log('[WARNING] Null data returned');
+                    } else {
+                        // Mark the last_active attribute for the summoners in this game
+                        json_data.participantIdentities.forEach( function(p){
+                            SeedSummoner.findOne({ _id: p.player.summonerId }, function(error, ss){
+                                if (error) {
+                                    console.log(error);
+                                } else {
+                                    // Check if we found a SeedSummoner
+                                    if (ss) {
+                                        if (ss.last_active > match_date) {
+                                            // We already have a more recent date attached to last_active, so don't
+                                            // update with out of date info
+                                            return;
+                                        }
                                     }
-                                }
 
-                                SeedSummoner.update({ _id: p.player.summonerId },
-                                                    { _id: p.player.summonerId,
-                                                      name: p.player.summonerName,
-                                                      last_active: match_date },
-                                                    { upsert: true },
-                                                    function(error){
-                                                        if (error) {
-                                                            console.log(error);
-                                                        }
-                                                    });
-                            }
+                                    SeedSummoner.update({ _id: p.player.summonerId },
+                                                        { _id: p.player.summonerId,
+                                                          name: p.player.summonerName,
+                                                          last_active: match_date },
+                                                        { upsert: true },
+                                                        function(error){
+                                                            if (error) {
+                                                                console.log(error);
+                                                            }
+                                                        });
+                                }
+                            })
                         })
-                    })
+                    }
 
                     stepTier();
                     selectMatchQueueItem();
