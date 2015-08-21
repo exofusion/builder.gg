@@ -15,7 +15,7 @@
   "dependencies": {
     "angular-chart.js": "~0.7.3",
     "Chart.StackedBar.js": "~1.0.3",
-    "angular-colorthief": "~0.1.0",
-    "color-thief": "*"
+    "jquery": "~2.1.4",
+    "angular-ui-select": "~0.12.1"
   }
 }
