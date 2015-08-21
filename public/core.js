@@ -94,6 +94,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
     var sanitizedDescription = $scope.itemlist_json[item_id].sanitizedDescription;
     var armorPenetration = sanitizedDescription.indexOf("Armor Penetration");
     var lifeSteal = sanitizedDescription.indexOf("Life Steal");
+    var baseHealthRegen = sanitizedDescription.indexOf("Base Health Regen");
     var baseManaRegen = sanitizedDescription.indexOf("Base Mana Regen");
     var cooldownReduction = sanitizedDescription.indexOf("Cooldown Reduction");
     var magicPenetration = sanitizedDescription.indexOf("Magic Penetration");
@@ -105,6 +106,10 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
     if (lifeSteal > -1) {
       datasets[item_slot].data[2] = parseInt(sanitizedDescription.slice(lifeSteal-4, lifeSteal).split('%')[0]);
       datasets[item_slot].data[2] = datasets[item_slot].data[2] || 0;
+    }
+    if (baseHealthRegen > -1) {
+      datasets[item_slot].data[7] = parseInt(sanitizedDescription.slice(baseHealthRegen-5, baseHealthRegen).split('%')[0]);
+      datasets[item_slot].data[7] = datasets[item_slot].data[7] || 0;
     }
     if (baseManaRegen > -1) {
       datasets[item_slot].data[12] = parseInt(sanitizedDescription.slice(baseManaRegen-5, baseManaRegen).split('%')[0]);
