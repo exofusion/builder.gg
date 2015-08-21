@@ -16,6 +16,7 @@
     "angular-chart.js": "~0.7.3",
     "Chart.StackedBar.js": "~1.0.3",
     "jquery": "~2.1.4",
-    "angular-ui-select": "~0.12.1"
+    "angular-ui-select": "~0.12.1",
+    "angular-sanitize": "~1.4.4"
   }
 }
