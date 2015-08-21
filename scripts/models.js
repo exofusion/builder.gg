@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-mongoose.connect('mongodb://localhost/riotchallenge');
+//mongoose.connect('mongodb://localhost/riotchallenge');
 
 var seedSummonerSchema = new Schema({
   _id: Number,
@@ -100,4 +100,4 @@ exports.MatchFrameData = mongoose.model('MatchFrameData', matchFrameDataSchema);
 exports.StatCollection = mongoose.model('StatCollection', statCollectionSchema);
 
 exports.mongoose = mongoose;
-exports.disconnect = function(){ mongoose.disconnect(); }
+//exports.disconnect = function(){ mongoose.disconnect(); }
