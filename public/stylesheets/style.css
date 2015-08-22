@@ -79,6 +79,10 @@ a {
   margin-left: -27px;
 }
 
+.buildItem input {
+  background-color: rgba(0,0,0,0.2);
+}
+
 .buildItem .ui-select-container {
   text-align: left;
   position: absolute;
