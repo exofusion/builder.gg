@@ -44,6 +44,30 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
     return new Array(num);   
   }
 
+  $scope.getTotalCost = function() {
+    return $scope.actual_cost.reduce(function(prevValue, curValue){
+      return prevValue + curValue;
+    });
+  }
+
+  $scope.getTotalEffectiveGold = function() {
+    return $scope.effective_gold.reduce(function(prevValue, curValue){
+      return prevValue + curValue;
+    });
+  }
+
+  $scope.getTotalStat = function(index) {
+    var stat_total = 0;
+    for (var i=0; i<$scope.stat_tally.length; i++) {
+      stat_total += $scope.stat_tally[i][index];
+    }
+    return stat_total;
+  }
+
+  $scope.getStatFromCost = function(cost, index) {
+    return Math.round(cost/$scope.stat_distribution_stat_bases[index]);
+  }
+
   $scope.displayItemSearch = function(item_slot) {
     var already_shown = ($scope.show_item_search && $scope.show_item_search[item_slot]) ? true : false;
     $scope.show_item_search = [];
@@ -68,8 +92,11 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
 
     for (var i=0; i<datasets[item_slot].data.length; i++) {
       datasets[item_slot].data[i] = 0;
+      $scope.stat_tally[item_slot][i] = 0;
     }
 
+    $scope.effective_gold[item_slot] = 0;
+    $scope.actual_cost[item_slot] = 0;
     $scope.build_item_image[item_slot] = '//:0';
     $scope.stat_distribution_chart.update();
     delete build_item.selected;
@@ -78,11 +105,10 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
   $scope.itemChange = function(item_slot, item_id) {
     var this_item = $scope.itemlist_json[item_id];
     var datasets = $scope.stat_distribution_data.datasets;
-    console.log(item_id);
-    console.log($scope.itemlist_json);
+    var this_stat_tally = $scope.stat_tally[item_slot];
 
     datasets[item_slot].label = this_item.name;
-
+/*
     datasets[item_slot].data[0] =  this_item.stats.FlatPhysicalDamageMod    ? this_item.stats.FlatPhysicalDamageMod       : 0;
     datasets[item_slot].data[3] =  this_item.stats.PercentAttackSpeedMod    ? this_item.stats.PercentAttackSpeedMod*100   : 0;
     datasets[item_slot].data[4] =  this_item.stats.FlatCritChanceMod        ? this_item.stats.FlatCritChanceMod*100       : 0;
@@ -94,6 +120,18 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
     datasets[item_slot].data[10] = this_item.stats.PercentMovementSpeedMod  ? this_item.stats.PercentMovementSpeedMod*100 : 0;
     datasets[item_slot].data[11] = this_item.stats.FlatMPPoolMod            ? this_item.stats.FlatMPPoolMod               : 0;
     datasets[item_slot].data[15] = this_item.stats.FlatMagicDamageMod       ? this_item.stats.FlatMagicDamageMod          : 0;
+*/
+    this_stat_tally[0] =  this_item.stats.FlatPhysicalDamageMod    ? this_item.stats.FlatPhysicalDamageMod       : 0;
+    this_stat_tally[3] =  this_item.stats.PercentAttackSpeedMod    ? this_item.stats.PercentAttackSpeedMod*100   : 0;
+    this_stat_tally[4] =  this_item.stats.FlatCritChanceMod        ? this_item.stats.FlatCritChanceMod*100       : 0;
+    this_stat_tally[5] =  this_item.stats.FlatSpellBlockMod        ? this_item.stats.FlatSpellBlockMod           : 0;
+    this_stat_tally[6] =  this_item.stats.FlatHPPoolMod            ? this_item.stats.FlatHPPoolMod               : 0;
+    this_stat_tally[7] =  this_item.stats.PercentHPRegenMod        ? this_item.stats.PercentHPRegenMod*100       : 0;
+    this_stat_tally[8] =  this_item.stats.FlatArmorMod             ? this_item.stats.FlatArmorMod                : 0;
+    this_stat_tally[9] =  this_item.stats.FlatMovementSpeedMod     ? this_item.stats.FlatMovementSpeedMod        : 0;
+    this_stat_tally[10] = this_item.stats.PercentMovementSpeedMod  ? this_item.stats.PercentMovementSpeedMod*100 : 0;
+    this_stat_tally[11] = this_item.stats.FlatMPPoolMod            ? this_item.stats.FlatMPPoolMod               : 0;
+    this_stat_tally[15] = this_item.stats.FlatMagicDamageMod       ? this_item.stats.FlatMagicDamageMod          : 0;
 
     var sanitizedDescription = $scope.itemlist_json[item_id].sanitizedDescription;
     var armorPenetration = sanitizedDescription.indexOf("Armor Penetration");
@@ -104,36 +142,31 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
     var magicPenetration = sanitizedDescription.indexOf("Magic Penetration");
 
     if (armorPenetration > -1) {
-      datasets[item_slot].data[1] = parseInt(sanitizedDescription.slice(armorPenetration-3, armorPenetration-1));
-      datasets[item_slot].data[1] = datasets[item_slot].data[1] || 0;
+      this_stat_tally[1] = parseInt(sanitizedDescription.slice(armorPenetration-3, armorPenetration-1)) || 0;
     }
     if (lifeSteal > -1) {
-      datasets[item_slot].data[2] = parseInt(sanitizedDescription.slice(lifeSteal-4, lifeSteal).split('%')[0]);
-      datasets[item_slot].data[2] = datasets[item_slot].data[2] || 0;
+      this_stat_tally[2] = parseInt(sanitizedDescription.slice(lifeSteal-4, lifeSteal).split('%')[0]) || 0;
     }
     if (baseHealthRegen > -1) {
-      datasets[item_slot].data[7] = parseInt(sanitizedDescription.slice(baseHealthRegen-5, baseHealthRegen).split('%')[0]);
-      datasets[item_slot].data[7] = datasets[item_slot].data[7] || 0;
+      this_stat_tally[7] = parseInt(sanitizedDescription.slice(baseHealthRegen-5, baseHealthRegen).split('%')[0]) || 0;
     }
     if (baseManaRegen > -1) {
-      datasets[item_slot].data[12] = parseInt(sanitizedDescription.slice(baseManaRegen-5, baseManaRegen).split('%')[0]);
-      datasets[item_slot].data[12] = datasets[item_slot].data[12] || 0;
+      this_stat_tally[12] = parseInt(sanitizedDescription.slice(baseManaRegen-5, baseManaRegen).split('%')[0]) || 0;
     }
     if (cooldownReduction > -1) {
-      datasets[item_slot].data[13] = parseInt(sanitizedDescription.slice(cooldownReduction-4, cooldownReduction).split('%')[0]);
-      datasets[item_slot].data[13] = datasets[item_slot].data[13] || 0;
+      this_stat_tally[13] = parseInt(sanitizedDescription.slice(cooldownReduction-4, cooldownReduction).split('%')[0]) || 0;
     }
     if (magicPenetration > -1) {
-      datasets[item_slot].data[14] = parseInt(sanitizedDescription.slice(magicPenetration-3, magicPenetration-1));
-      datasets[item_slot].data[14] = datasets[item_slot].data[14] || 0;
+      this_stat_tally[14] = parseInt(sanitizedDescription.slice(magicPenetration-3, magicPenetration-1)) || 0;
     }
 
-
     // Get "Effective Gold" stat
+    var total_effective_gold = 0;
     for (var i=0; i<$scope.stat_distribution_label_map.length; i++)
     {
-      $scope.stat_distribution_data.datasets[item_slot].data[i] = Math.floor($scope.stat_distribution_data.datasets[item_slot].data[i]*
+      $scope.stat_distribution_data.datasets[item_slot].data[i] = Math.floor(this_stat_tally[i]*
                                                                              $scope.stat_distribution_stat_bases[i]);
+      total_effective_gold += $scope.stat_distribution_data.datasets[item_slot].data[i];
     }
 
 /*
@@ -146,6 +179,8 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
       $scope.stat_distribution_data.labels[i] = $scope.stat_distribution_label_map[i]+' ('+total_stat+')';
     }*/
 
+    $scope.actual_cost[item_slot] = this_item.gold.total;
+    $scope.effective_gold[item_slot] = total_effective_gold;
 
     $scope.stat_distribution_chart.update();
     $scope.build_item_image[item_slot] = ddragon_url+'img/item/'+$scope.itemlist_json[item_id].image.full;
@@ -158,14 +193,28 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
       //uiSelect.open = true;
       //uiSelect.activate();
     });
+
+    // Fill bars with icon
+    /*
+    $timeout(function() {
+      var img=document.getElementById('item'+item_slot).getElementsByTagName('img')[0];
+      var pat=$scope.stat_distribution_ctx.createPattern(img,"repeat");
+      $scope.stat_distribution_chart.data.datasets[item_slot].fillColor = pat;
+      $scope.stat_distribution_chart.update();
+    });
+    */
   }
 
-  $scope.build_item0 = {};
-  $scope.build_item1 = {};
-  $scope.build_item2 = {};
-  $scope.build_item3 = {};
-  $scope.build_item4 = {};
-  $scope.build_item5 = {};
+  $scope.build_item = [];
+  $scope.build_item[0] = {};
+  $scope.build_item[1] = {};
+  $scope.build_item[2] = {};
+  $scope.build_item[3] = {};
+  $scope.build_item[4] = {};
+  $scope.build_item[5] = {};
+
+  $scope.effective_gold = [0, 0, 0, 0, 0, 0];
+  $scope.actual_cost = [0, 0, 0, 0, 0, 0];
 
   GetChampionJson($scope, $http);
   GetItemlistJson($scope, $http);
@@ -186,7 +235,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
                                          "% MS",
                                          "Mana",
                                          "% BMR",
-                                         "CDR",
+                                         "% CDR",
                                          //"% Spellvamp",
                                          "Magic Pen",
                                          "AP" ];
@@ -210,6 +259,15 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
                                           21.75  // AP
                                         ];
 
+  $scope.stat_tally = [];
+  for(var i=0; i<6; i++) {
+    $scope.stat_tally[i] = [];
+    for (var j=0; j<$scope.stat_distribution_label_map.length; j++) {
+      $scope.stat_tally[i][j] = 0;
+    }
+  }
+
+
 /*
   $scope.stat_distribution_label_map = ["HP", "Mana", "Armor", "MR", "AD", "AP", "Health Regen", "Mana Regen", "Crit Chance", "AS", "MS"];
   $scope.stat_distribution_stat_bases = [ 2.67,
@@ -232,7 +290,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
                             pointStrokeColor: "#fff",
                             pointHighlightFill: "#fff",
                             pointHighlightStroke: "rgba(200,45,45,1)",
-                            data: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+                            data: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
                          },
                          {
                             label: "N/A",
@@ -242,7 +300,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
                             pointStrokeColor: "#fff",
                             pointHighlightFill: "#fff",
                             pointHighlightStroke: "rgba(200,200,45,1)",
-                            data: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+                            data: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
                          },
                          {
                             label: "N/A",
@@ -252,7 +310,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
                             pointStrokeColor: "#fff",
                             pointHighlightFill: "#fff",
                             pointHighlightStroke: "rgba(45,200,45,1)",
-                            data: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+                            data: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
                          },
                          {
                             label: "N/A",
@@ -262,7 +320,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
                             pointStrokeColor: "#fff",
                             pointHighlightFill: "#fff",
                             pointHighlightStroke: "rgba(45,200,200,1)",
-                            data: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+                            data: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
                          },
                          {
                             label: "N/A",
@@ -272,7 +330,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
                             pointStrokeColor: "#fff",
                             pointHighlightFill: "#fff",
                             pointHighlightStroke: "rgba(45,45,200,1)",
-                            data: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+                            data: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
                          },
                          {
                             label: "N/A",
@@ -282,7 +340,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
                             pointStrokeColor: "#fff",
                             pointHighlightFill: "#fff",
                             pointHighlightStroke: "rgba(200,45,200,1)",
-                            data: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+                            data: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
                          }];
 
   $scope.stat_distribution_options = { animationEasing: "easeOutElastic",

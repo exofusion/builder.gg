@@ -15,10 +15,10 @@ a {
   width: 100%;
   margin: 0 auto;
   text-align: center;
+  padding-top: 50px;
 }
 
 #itemSelectionContainer {
-  padding-top: 200px;
   margin: 0 auto;
   text-align: center;
   display: inline-block;
@@ -131,6 +131,8 @@ a {
 }
 #item0 .item_display_img {
   box-shadow: 0px 20px 55px rgba(200,45,45,0.5);
+  border: 3px solid rgba(200,45,45,1);
+  border-radius: 10px
 }
 
 #item1 .ui-select-container {
@@ -138,6 +140,8 @@ a {
 }
 #item1 .item_display_img {
   box-shadow: 0px 20px 55px rgba(200,200,45,0.5);
+  border: 3px solid rgba(200,200,45,1);
+  border-radius: 10px
 }
 
 #item2 .ui-select-container {
@@ -145,6 +149,8 @@ a {
 }
 #item2 .item_display_img {
   box-shadow: 0px 20px 55px rgba(45,200,45,0.5);
+  border: 3px solid rgba(45,200,45,1);
+  border-radius: 10px
 }
 
 #item3 .ui-select-container {
@@ -152,6 +158,8 @@ a {
 }
 #item3 .item_display_img {
   box-shadow: 0px 20px 55px rgba(45,200,200,0.5);
+  border: 3px solid rgba(45,200,200,1);
+  border-radius: 10px
 }
 
 #item4 .ui-select-container {
@@ -159,6 +167,8 @@ a {
 }
 #item4 .item_display_img {
   box-shadow: 0px 20px 55px rgba(45,45,200,0.5);
+  border: 3px solid rgba(45,45,200,1);
+  border-radius: 10px
 }
 
 #item5 .ui-select-container {
@@ -166,6 +176,8 @@ a {
 }
 #item5 .item_display_img {
   box-shadow: 0px 20px 55px rgba(200,45,200,0.5);
+  border: 3px solid rgba(200,45,200,1);
+  border-radius: 10px
 }
 /* File drop zone
 .dropzone {
