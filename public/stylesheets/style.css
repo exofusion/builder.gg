@@ -29,19 +29,25 @@ a {
 
 #statDistributionChartContainer {
   display: block;
-  width: 40%;
+  width: 60%;
   margin: 0 auto;
 }
 
 #kdaChartContainer {
+  padding-top: 50px;
   display: block;
   width: 70%;
   margin: 0 auto;
 }
 
 #statSearchContainer {
-  padding-top: 100px;
+  padding-top: 20px;
+  padding-bottom: 20px;
   margin: 0 auto;
+}
+
+#statSearchContainer {
+  zoom: 1.5;
 }
 
 .buildItem {
@@ -65,10 +71,10 @@ a {
 
 .clear_button {
   position: absolute;
-  margin-left: -25px;
+  margin-left: -27px;
 }
 
-.ui-select-container {
+.buildItem .ui-select-container {
   text-align: left;
   position: absolute;
   width: 250px;
@@ -77,9 +83,47 @@ a {
   /*&box-shadow: 0px 0px 50px rgba(200,45,45,0.5);*/
 }
 
-.ui-select-choices-row img {
+.buildItem .ui-select-choices-row img {
   width: 30px;
   height: 30px;
+}
+
+.tier_select .ui-select-choices-row img {
+  width: 30px;
+  height: 30px;
+  margin-left: -15px;
+  margin-right: 5px;
+}
+
+.tier_select .ui-select-match-text span {
+  margin-left: 30px;
+}
+
+.tier_select .ui-select-match img {
+  width: 30px;
+  height: 30px;
+  margin-top: -5px;
+  margin-left: -5px;
+  position: absolute;
+}
+
+.champion_select .ui-select-choices-row img {
+  width: 30px;
+  height: 30px;
+  margin-left: -15px;
+  margin-right: 5px;
+}
+
+.champion_select .ui-select-match img {
+  border-radius: 5px;
+  width: 30px;
+  height: 30px;
+  margin-top: -5px;
+  margin-left: -10px;
+  position: absolute;
+}
+.champion_select .ui-select-match-text span {
+  margin-left: 30px;
 }
 
 #item0 .ui-select-container {

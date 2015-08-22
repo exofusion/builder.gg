@@ -1,6 +1,6 @@
 var app = angular.module('coreApp', ['chart.js','ui.select','ngSanitize']);
 
-var ddragon_url = 'http://ddragon.leagueoflegends.com/cdn/5.15.1/';
+var ddragon_url = 'http://ddragon.leagueoflegends.com/cdn/5.16.1/';
 
 var kda_interval = 5;
 var kda_last_minute = 50;
@@ -14,7 +14,9 @@ function GetChampionJson($scope, $http) {
       $scope.champion_array = [];
       $scope.champion_json = res.data.data;
       for (champ in $scope.champion_json) {
-        $scope.champion_array.push($scope.champion_json[champ]);
+        var champ_json = $scope.champion_json[champ];
+        champ_json.image = ddragon_url+'img/champion/'+champ_json.key+'.png';
+        $scope.champion_array.push(champ_json);
       }
 
       //$scope.search.championId = $scope.champion_json['Katarina'].id;
@@ -31,7 +33,7 @@ function GetItemlistJson($scope, $http) {
       $scope.itemlist_array.push({ id: $scope.itemlist_json[item].id,
                                    name: $scope.itemlist_json[item].name,
                                    cost: $scope.itemlist_json[item].gold.total,
-                                   image: ddragon_url+'/img/item/'+$scope.itemlist_json[item].image.full,
+                                   image: ddragon_url+'img/item/'+$scope.itemlist_json[item].image.full,
                                    plaintext: $scope.itemlist_json[item].plaintext });
     }
   });
@@ -76,6 +78,8 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
   $scope.itemChange = function(item_slot, item_id) {
     var this_item = $scope.itemlist_json[item_id];
     var datasets = $scope.stat_distribution_data.datasets;
+    console.log(item_id);
+    console.log($scope.itemlist_json);
 
     datasets[item_slot].label = this_item.name;
 
@@ -144,7 +148,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
 
 
     $scope.stat_distribution_chart.update();
-    $scope.build_item_image[item_slot] = ddragon_url+'/img/item/'+$scope.itemlist_json[item_id].image.full;
+    $scope.build_item_image[item_slot] = ddragon_url+'img/item/'+$scope.itemlist_json[item_id].image.full;
 
     // Hide item selection box again
     $timeout(function() {
@@ -395,13 +399,13 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
   $scope.kda_ctx = document.getElementById("kdaChart").getContext("2d");
   $scope.kda_chart = new Chart($scope.kda_ctx).Line($scope.kda_data, $scope.kda_options);
 
-  $scope.tiers = [ { id: 1, name: 'Bronze' },
-                   { id: 2, name: 'Silver' },
-                   { id: 3, name: 'Gold' },
-                   { id: 4, name: 'Platinum' },
-                   { id: 5, name: 'Diamond' },
-                   { id: 6, name: 'Master' },
-                   { id: 7, name: 'Challenger' } ];
+  $scope.tiers = [ { id: 1, name: 'Bronze',     image:'./images/tier_icons/bronze.png' },
+                   { id: 2, name: 'Silver',     image:'./images/tier_icons/silver.png' },
+                   { id: 3, name: 'Gold',       image:'./images/tier_icons/gold.png' },
+                   { id: 4, name: 'Platinum',   image:'./images/tier_icons/platinum.png' },
+                   { id: 5, name: 'Diamond',    image:'./images/tier_icons/diamond.png' },
+                   { id: 6, name: 'Master',     image:'./images/tier_icons/master.png' },
+                   { id: 7, name: 'Challenger', image:'./images/tier_icons/challenger.png' } ];
 
   $scope.patches = [ '5.15',
                      '5.14' ];

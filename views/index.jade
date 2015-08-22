@@ -3,8 +3,8 @@ html
   head
     title= title
     link(rel='stylesheet', href='/stylesheets/style.css')
-    link(rel='stylesheet', href='/stylesheets/bootstrap.css')
     link(rel='stylesheet', href='/bower_components/angular-ui-select/dist/select.css')
+    link(rel='stylesheet', href='/bower_components/bootstrap/dist/css/bootstrap.css')
     link(rel='stylesheet', href='/bower_components/angular-chart.js/dist/angular-chart.css')
     script(src='/bower_components/jquery/dist/jquery.js')
     script(src='https://ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js')
@@ -15,7 +15,7 @@ html
     script(src='/bower_components/angular-chart.js/dist/angular-chart.js')
     script(src='/core.js')
 
-  body(ng-app='coreApp', ng-controller='statDistributionCtrl')
+  body(ng-app='coreApp', ng-controller='statDistributionCtrl', class='ng-cloak')
     //
       form(ng-submit='submit()')
           select(ng-model='search.tier',
@@ -33,7 +33,7 @@ html
         .buildItem#item0
             a(href="#", ng-click="displayItemSearch(0)")
               img(class="item_display_img" ng-src="{{build_item_image[0]}}")
-            button(class="clear_button" ng-show="build_item_image[0] && (build_item_image[0] != '//:0')" ng-click="clearItem(0,build_item0)") Clear
+            button(class="btn btn-default btn-sm clear_button" ng-show="build_item_image[0] && (build_item_image[0] != '//:0')" ng-click="clearItem(0,build_item0)") Clear
             ui-select(ng-model="build_item0.selected"
                       theme="bootstrap"
                       ng-disabled="disabled"
@@ -147,15 +147,15 @@ html
                labels='build_labels',
                series='build_series',
                click='onClick')
-
-      canvas(class='chart chart-line',
-             data='kda_data',
-             labels='kda_labels',
-             legend='true',
-             series='kda_series',
-             colours='kda_colors',
-             options='kda_options',
-             click='kda_click')
+      //
+        canvas(class='chart chart-line',
+               data='kda_data',
+               labels='kda_labels',
+               legend='true',
+               series='kda_series',
+               colours='kda_colors',
+               options='kda_options',
+               click='kda_click')
 
     //-
       ** File drop handling **
@@ -169,3 +169,5 @@ html
       div(class='image-container')
         img(ng-src="{{image}}")
         span(class='file-name') {{imageFileName}}
+
+    include ./analytics.jade
