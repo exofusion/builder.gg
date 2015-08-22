@@ -129,7 +129,7 @@ html
           table(class='table')
             thead
               tr
-                td Name
+                td
                 td Cost
                 td Efficiency
                 td(ng-repeat='stat in stat_distribution_label_map') {{stat}}
@@ -142,8 +142,8 @@ html
               tr(ng-repeat='n in stat_distribution_data.datasets track by $index'
                  ng-show='build_item[$index].selected')
                 td {{n.label}}
-                td {{actual_cost[$index] > 0 ? actual_cost[$index] : ''}}
-                td {{effective_gold[$index] > 0 ? effective_gold[$index] : ''}}
+                td {{actual_cost[$index]}}
+                td {{effective_gold[$index]}}
                 td(ng-repeat='val in n.data track by $index')
                   {{stat_tally[$parent.$index][$index] > 0 ? stat_tally[$parent.$index][$index] : ''}}
         .col-md-1

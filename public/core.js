@@ -222,6 +222,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
   $scope.build_item_image = [];
 
   // Stat Distribution Chart Setup
+  /*
   $scope.stat_distribution_label_map = [ "AD",
                                          "Armor Pen",
                                          "% Lifesteal",
@@ -238,6 +239,24 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
                                          "% CDR",
                                          //"% Spellvamp",
                                          "Magic Pen",
+                                         "AP" ];
+  */
+  $scope.stat_distribution_label_map = [ "AD",
+                                         "ArP",
+                                         "LS%",
+                                         "AS%",
+                                         "CrC%",
+                                         "MR",
+                                         "HP",
+                                         "HR%",
+                                         "Ar",
+                                         "MS",
+                                         "MS%",
+                                         "Ma",
+                                         "MaR%",
+                                         "CDR%",
+                                         //"% Spellvamp",
+                                         "MP",
                                          "AP" ];
   $scope.stat_distribution_labels = $scope.stat_distribution_label_map.slice();
   $scope.stat_distribution_stat_bases = [ 36.00, // AD
