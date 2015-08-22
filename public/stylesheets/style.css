@@ -5,17 +5,20 @@ body {
   margin: 0;
   padding: 0;
   text-align: center;
+
+  background-image: url("/images/dark_wood.png");
+
+  color: #DDDDDD !important;
 }
 
 a {
   color: #00B7FF;
 }
 
-#mainCtrlDiv {
-  width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  padding-top: 50px;
+.genericContainer {
+  background-color: rgba(255,255,255,0.1);
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 20px;
 }
 
 #itemSelectionContainer {
@@ -26,6 +29,7 @@ a {
 }
 
 #statDistributionChart {
+  padding: 20px;
 }
 
 #statDistributionChartContainer {
@@ -135,6 +139,9 @@ a {
   border: 3px solid rgba(200,45,45,1);
   border-radius: 10px
 }
+#stat_table_item0 {
+  background: rgba(200,45,45,0.2);
+}
 
 #item1 .ui-select-container {
   box-shadow: 0px 0px 25px rgba(200,200,45,0.5);
@@ -143,6 +150,9 @@ a {
   box-shadow: 0px 20px 55px rgba(200,200,45,0.5);
   border: 3px solid rgba(200,200,45,1);
   border-radius: 10px
+}
+#stat_table_item1 {
+  background: rgba(200,200,45,0.2);
 }
 
 #item2 .ui-select-container {
@@ -153,6 +163,9 @@ a {
   border: 3px solid rgba(45,200,45,1);
   border-radius: 10px
 }
+#stat_table_item2 {
+  background: rgba(45,200,45,0.2);
+}
 
 #item3 .ui-select-container {
   box-shadow: 0px 0px 25px rgba(45,200,200,0.5);
@@ -161,6 +174,9 @@ a {
   box-shadow: 0px 20px 55px rgba(45,200,200,0.5);
   border: 3px solid rgba(45,200,200,1);
   border-radius: 10px
+}
+#stat_table_item3 {
+  background: rgba(45,200,200,0.2);
 }
 
 #item4 .ui-select-container {
@@ -171,6 +187,9 @@ a {
   border: 3px solid rgba(45,45,200,1);
   border-radius: 10px
 }
+#stat_table_item4 {
+  background: rgba(45,45,200,0.2);
+}
 
 #item5 .ui-select-container {
   box-shadow: 0px 0px 25px rgba(200,45,200,0.5);
@@ -179,6 +198,9 @@ a {
   box-shadow: 0px 20px 55px rgba(200,45,200,0.5);
   border: 3px solid rgba(200,45,200,1);
   border-radius: 10px
+}
+#stat_table_item5 {
+  background: rgba(200,45,200,0.2);
 }
 /* File drop zone
 .dropzone {

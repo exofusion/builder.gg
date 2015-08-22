@@ -16,137 +16,137 @@ html
     script(src='/core.js')
 
   body(ng-app='coreApp', ng-controller='statDistributionCtrl', class='ng-cloak')
-    #mainCtrlDiv
-      #statDistributionChartContainer
+    #statDistributionChartContainer
+      .col-md-12.genericContainer
         canvas(id='statDistributionChart')
 
-      #itemSelectionContainer
-        .buildItem#item0
-            //div {{build_item0.selected.name}}
-            a(ng-click="displayItemSearch(0)")
-              img(class="item_display_img" ng-src="{{build_item_image[0]}}")
-            button(class="btn btn-default btn-sm clear_button" ng-show="build_item[0].selected" ng-click="clearItem(0,build_item[0])") Clear
-            ui-select(ng-model="build_item[0].selected"
-                      theme="bootstrap"
-                      ng-disabled="disabled"
-                      ng-change="itemChange(0,build_item[0].selected.id)"
-                      ng-show="show_item_search[0]")
-              ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
-              ui-select-choices(repeat="item in itemlist_array | orderBy:'-cost' | filter: $select.search")
-                img(style="position: absolute; margin: 0px -18px; height: 40px; width: 40px;" ng-src="{{item.image}}")
-                div(style="margin-left: 30px")
-                  div(ng-bind-html="item.name | highlight: $select.search")
-                  small {{item.cost}}g
+    #itemSelectionContainer.col-md-12
+      .buildItem#item0
+          //div {{build_item0.selected.name}}
+          a(ng-click="displayItemSearch(0)")
+            img(class="item_display_img" ng-src="{{build_item_image[0]}}")
+          button(class="btn btn-default btn-sm clear_button" ng-show="build_item[0].selected" ng-click="clearItem(0,build_item[0])") Clear
+          ui-select(ng-model="build_item[0].selected"
+                    theme="bootstrap"
+                    ng-disabled="disabled"
+                    ng-change="itemChange(0,build_item[0].selected.id)"
+                    ng-show="show_item_search[0]")
+            ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
+            ui-select-choices(repeat="item in itemlist_array | orderBy:'-cost' | filter: $select.search")
+              img(style="position: absolute; margin: 0px -18px; height: 40px; width: 40px;" ng-src="{{item.image}}")
+              div(style="margin-left: 30px")
+                div(ng-bind-html="item.name | highlight: $select.search")
+                small {{item.cost}}g
 
-        .buildItem
-          #item1
-            a(ng-click="displayItemSearch(1)")
-              img(class="item_display_img" ng-src="{{build_item_image[1]}}")
-            button(class="btn btn-default btn-sm clear_button" ng-show="build_item[1].selected" ng-click="clearItem(1,build_item[1])") Clear
-            ui-select(ng-model="build_item[1].selected"
-                      theme="bootstrap"
-                      ng-disabled="disabled"
-                      ng-change="itemChange(1,build_item[1].selected.id)"
-                      ng-show="show_item_search[1]")
-              ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
-              ui-select-choices(repeat="item in itemlist_array | orderBy:'-cost' | filter: $select.search")
-                img(style="position: absolute; margin: 0px -18px; height: 40px; width: 40px;" ng-src="{{item.image}}")
-                div(style="margin-left: 30px")
-                  div(ng-bind-html="item.name | highlight: $select.search")
-                  small {{item.cost}}g
+      .buildItem#item1
+          a(ng-click="displayItemSearch(1)")
+            img(class="item_display_img" ng-src="{{build_item_image[1]}}")
+          button(class="btn btn-default btn-sm clear_button" ng-show="build_item[1].selected" ng-click="clearItem(1,build_item[1])") Clear
+          ui-select(ng-model="build_item[1].selected"
+                    theme="bootstrap"
+                    ng-disabled="disabled"
+                    ng-change="itemChange(1,build_item[1].selected.id)"
+                    ng-show="show_item_search[1]")
+            ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
+            ui-select-choices(repeat="item in itemlist_array | orderBy:'-cost' | filter: $select.search")
+              img(style="position: absolute; margin: 0px -18px; height: 40px; width: 40px;" ng-src="{{item.image}}")
+              div(style="margin-left: 30px")
+                div(ng-bind-html="item.name | highlight: $select.search")
+                small {{item.cost}}g
 
-        .buildItem
-          #item2
-            a(ng-click="displayItemSearch(2)")
-              img(class="item_display_img" ng-src="{{build_item_image[2]}}")
-            button(class="btn btn-default btn-sm clear_button" ng-show="build_item[2].selected" ng-click="clearItem(2,build_item[2])") Clear
-            ui-select(ng-model="build_item[2].selected"
-                      theme="bootstrap"
-                      ng-disabled="disabled"
-                      ng-change="itemChange(2,build_item[2].selected.id)"
-                      ng-show="show_item_search[2]")
-              ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
-              ui-select-choices(repeat="item in itemlist_array | orderBy:'-cost' | filter: $select.search")
-                img(style="position: absolute; margin: 0px -18px; height: 40px; width: 40px;" ng-src="{{item.image}}")
-                div(style="margin-left: 30px")
-                  div(ng-bind-html="item.name | highlight: $select.search")
-                  small {{item.cost}}g
+      .buildItem#item2
+          a(ng-click="displayItemSearch(2)")
+            img(class="item_display_img" ng-src="{{build_item_image[2]}}")
+          button(class="btn btn-default btn-sm clear_button" ng-show="build_item[2].selected" ng-click="clearItem(2,build_item[2])") Clear
+          ui-select(ng-model="build_item[2].selected"
+                    theme="bootstrap"
+                    ng-disabled="disabled"
+                    ng-change="itemChange(2,build_item[2].selected.id)"
+                    ng-show="show_item_search[2]")
+            ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
+            ui-select-choices(repeat="item in itemlist_array | orderBy:'-cost' | filter: $select.search")
+              img(style="position: absolute; margin: 0px -18px; height: 40px; width: 40px;" ng-src="{{item.image}}")
+              div(style="margin-left: 30px")
+                div(ng-bind-html="item.name | highlight: $select.search")
+                small {{item.cost}}g
 
-        .buildItem
-          #item3
-            a(ng-click="displayItemSearch(3)")
-              img(class="item_display_img" ng-src="{{build_item_image[3]}}")
-            button(class="btn btn-default btn-sm clear_button" ng-show="build_item[3].selected" ng-click="clearItem(3,build_item[3])") Clear
-            ui-select(ng-model="build_item[3].selected"
-                      theme="bootstrap"
-                      ng-disabled="disabled"
-                      ng-change="itemChange(3,build_item[3].selected.id)"
-                      ng-show="show_item_search[3]")
-              ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
-              ui-select-choices(repeat="item in itemlist_array | orderBy:'-cost' | filter: $select.search")
-                img(style="position: absolute; margin: 0px -18px; height: 40px; width: 40px;" ng-src="{{item.image}}")
-                div(style="margin-left: 30px")
-                  div(ng-bind-html="item.name | highlight: $select.search")
-                  small {{item.cost}}g
+      .buildItem#item3
+          a(ng-click="displayItemSearch(3)")
+            img(class="item_display_img" ng-src="{{build_item_image[3]}}")
+          button(class="btn btn-default btn-sm clear_button" ng-show="build_item[3].selected" ng-click="clearItem(3,build_item[3])") Clear
+          ui-select(ng-model="build_item[3].selected"
+                    theme="bootstrap"
+                    ng-disabled="disabled"
+                    ng-change="itemChange(3,build_item[3].selected.id)"
+                    ng-show="show_item_search[3]")
+            ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
+            ui-select-choices(repeat="item in itemlist_array | orderBy:'-cost' | filter: $select.search")
+              img(style="position: absolute; margin: 0px -18px; height: 40px; width: 40px;" ng-src="{{item.image}}")
+              div(style="margin-left: 30px")
+                div(ng-bind-html="item.name | highlight: $select.search")
+                small {{item.cost}}g
 
-        .buildItem
-          #item4
-            a(ng-click="displayItemSearch(4)")
-              img(class="item_display_img" ng-src="{{build_item_image[4]}}")
-            button(class="btn btn-default btn-sm clear_button" ng-show="build_item[4].selected" ng-click="clearItem(4,build_item[4])") Clear
-            ui-select(ng-model="build_item[4].selected"
-                      theme="bootstrap"
-                      ng-disabled="disabled"
-                      ng-change="itemChange(4,build_item[4].selected.id)"
-                      ng-show="show_item_search[4]")
-              ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
-              ui-select-choices(repeat="item in itemlist_array | orderBy:'-cost' | filter: $select.search")
-                img(style="position: absolute; margin: 0px -18px; height: 40px; width: 40px;" ng-src="{{item.image}}")
-                div(style="margin-left: 30px")
-                  div(ng-bind-html="item.name | highlight: $select.search")
-                  small {{item.cost}}g
+      .buildItem#item4
+          a(ng-click="displayItemSearch(4)")
+            img(class="item_display_img" ng-src="{{build_item_image[4]}}")
+          button(class="btn btn-default btn-sm clear_button" ng-show="build_item[4].selected" ng-click="clearItem(4,build_item[4])") Clear
+          ui-select(ng-model="build_item[4].selected"
+                    theme="bootstrap"
+                    ng-disabled="disabled"
+                    ng-change="itemChange(4,build_item[4].selected.id)"
+                    ng-show="show_item_search[4]")
+            ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
+            ui-select-choices(repeat="item in itemlist_array | orderBy:'-cost' | filter: $select.search")
+              img(style="position: absolute; margin: 0px -18px; height: 40px; width: 40px;" ng-src="{{item.image}}")
+              div(style="margin-left: 30px")
+                div(ng-bind-html="item.name | highlight: $select.search")
+                small {{item.cost}}g
 
-        .buildItem
-          #item5
-            a(ng-click="displayItemSearch(5)")
-              img(class="item_display_img" ng-src="{{build_item_image[5]}}")
-            button(class="btn btn-default btn-sm clear_button" ng-show="build_item[5].selected" ng-click="clearItem(5,build_item[5])") Clear
-            ui-select(ng-model="build_item[5].selected"
-                      theme="bootstrap"
-                      ng-disabled="disabled"
-                      ng-change="itemChange(5,build_item[5].selected.id)"
-                      ng-show="show_item_search[5]")
-              ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
-              ui-select-choices(repeat="item in itemlist_array | orderBy:'-cost' | filter: $select.search")
-                img(style="position: absolute; margin: 0px -18px; height: 40px; width: 40px;" ng-src="{{item.image}}")
-                div(style="margin-left: 30px")
-                  div(ng-bind-html="item.name | highlight: $select.search")
-                  small {{item.cost}}g
+      .buildItem#item5
+          a(ng-click="displayItemSearch(5)")
+            img(class="item_display_img" ng-src="{{build_item_image[5]}}")
+          button(class="btn btn-default btn-sm clear_button" ng-show="build_item[5].selected" ng-click="clearItem(5,build_item[5])") Clear
+          ui-select(ng-model="build_item[5].selected"
+                    theme="bootstrap"
+                    ng-disabled="disabled"
+                    ng-change="itemChange(5,build_item[5].selected.id)"
+                    ng-show="show_item_search[5]")
+            ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
+            ui-select-choices(repeat="item in itemlist_array | orderBy:'-cost' | filter: $select.search")
+              img(style="position: absolute; margin: 0px -18px; height: 40px; width: 40px;" ng-src="{{item.image}}")
+              div(style="margin-left: 30px")
+                div(ng-bind-html="item.name | highlight: $select.search")
+                small {{item.cost}}g
 
-      #statDistributionTable
-        .col-md-1
-        .col-md-10
-          table(class='table')
-            thead
-              tr
-                td
-                td Cost
-                td Efficiency
-                td(ng-repeat='stat in stat_distribution_label_map') {{stat}}
-            tbody
-              tr
-                td Totals
-                td {{getTotalCost()}}
-                td {{getTotalEffectiveGold()}}
-                td(ng-repeat='val in stat_distribution_label_map track by $index') {{getTotalStat($index)}}
-              tr(ng-repeat='n in stat_distribution_data.datasets track by $index'
-                 ng-show='build_item[$index].selected')
-                td {{n.label}}
-                td {{actual_cost[$index]}}
-                td {{effective_gold[$index]}}
-                td(ng-repeat='val in n.data track by $index')
-                  {{stat_tally[$parent.$index][$index] > 0 ? stat_tally[$parent.$index][$index] : ''}}
-        .col-md-1
+    #statDistributionTable
+      .col-md-1
+      .col-md-10.genericContainer
+        table(class='table')
+          thead
+            tr
+              td
+              td Cost
+              td Efficiency
+              td(ng-repeat='stat in stat_distribution_label_map') {{stat}}
+          tbody
+            tr
+              td 
+                strong Total
+              td
+                strong {{getTotalCost()}}
+              td
+                strong {{Math.round(100*(getTotalEffectiveGold()/getTotalCost()))}}%
+              td(ng-repeat='val in stat_distribution_label_map track by $index')
+                strong {{getTotalStat($index)}}
+            tr(ng-repeat='n in stat_distribution_data.datasets track by $index'
+               ng-show='build_item[$index].selected'
+               id='stat_table_item{{$index}}')
+              td {{n.label}}
+              td {{actual_cost[$index]}}
+              td {{Math.round(100*(effective_gold[$index]/actual_cost[$index]))}}%
+              td(ng-repeat='val in n.data track by $index')
+                {{stat_tally[$parent.$index][$index] > 0 ? stat_tally[$parent.$index][$index] : ''}}
+      .col-md-1
 
     //-
       ** File drop handling **

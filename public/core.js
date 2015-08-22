@@ -205,6 +205,8 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
     */
   }
 
+  $scope.Math = Math;
+
   $scope.build_item = [];
   $scope.build_item[0] = {};
   $scope.build_item[1] = {};
@@ -248,12 +250,12 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
                                          "CrC%",
                                          "MR",
                                          "HP",
-                                         "HR%",
+                                         "HRe%",
                                          "Ar",
                                          "MS",
                                          "MS%",
                                          "Ma",
-                                         "MaR%",
+                                         "MRe%",
                                          "CDR%",
                                          //"% Spellvamp",
                                          "MP",
@@ -363,7 +365,10 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
                          }];
 
   $scope.stat_distribution_options = { animationEasing: "easeOutElastic",
-                                       scaleFontSize: 14 };
+                                       scaleFontSize: 14,
+                                       scaleFontColor: "#DDDDDD",
+                                       scaleGridLineColor : "rgba(255,255,255,.15)",
+                                       scaleShowVerticalLines: false };
 
   $scope.stat_distribution_data = { labels: $scope.stat_distribution_labels,
                                     datasets: stat_distribution_datasets };
