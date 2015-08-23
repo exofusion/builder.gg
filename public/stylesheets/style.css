@@ -51,10 +51,16 @@ a {
 }
 
 #kdaChartContainer {
-  padding-top: 50px;
-  display: block;
-  width: 70%;
-  margin: 0 auto;
+  width: 80%;
+  margin-top: 50px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+#kdaChart {
+  padding: 20px;
+  display: inline;
 }
 
 #statSearchContainer {
@@ -92,8 +98,8 @@ a {
   margin-left: -27px;
 }
 
-.buildItem input {
-  background-color: rgba(0,0,0,0.8);
+.ui-select-container input {
+  background-color: rgba(0,0,0,0.8) !important;
 }
 
 .ui-select-toggle, .ui-select-match {
@@ -101,19 +107,20 @@ a {
 }
 
 .ui-select-match-text, .ui-select-search {
-  color: #DDDDDD;
+  color: #DDDDDD !important;
 }
 
 .ui-select-choices {
-  background-color: rgba(0,0,0,0.8);
+  background-color: rgba(0,0,0,0.8) !important;
 }
 
 .item-selection-choice {
   color: #DDDDDD;
 }
 
-.buildItem button {
-  opacity: 0.8;
+.btn-default {
+  background-color: rgba(0,0,0,0.8) !important;
+  color: #DDDDDD !important;
 }
 
 .buildItem .ui-select-container {
