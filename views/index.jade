@@ -2,10 +2,10 @@ doctype html
 html
   head
     title= title
-    link(rel='stylesheet', href='/stylesheets/style.css')
     link(rel='stylesheet', href='/bower_components/angular-ui-select/dist/select.css')
     link(rel='stylesheet', href='/bower_components/bootstrap/dist/css/bootstrap.css')
     link(rel='stylesheet', href='/bower_components/angular-chart.js/dist/angular-chart.css')
+    link(rel='stylesheet', href='/stylesheets/style.css')
     script(src='/bower_components/jquery/dist/jquery.js')
     script(src='https://ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js')
     script(src='/bower_components/Chart.js/Chart.js')
@@ -21,6 +21,23 @@ html
         canvas(id='statDistributionChart')
 
     #itemSelectionContainer.col-md-12
+      div(ng-repeat='n in build_item track by $index', class="buildItem", id="item{{$index}}")
+        a(ng-click="displayItemSearch($index)")
+          img(class="item_display_img" ng-src="{{build_item_image[$index]}}")
+        button(class="btn btn-default btn-sm clear_button" ng-show="build_item[{{$index}}].selected" ng-click="clearItem($index,build_item[$index])") Clear
+        ui-select(ng-model="build_item[$index].selected"
+                  theme="bootstrap"
+                  ng-disabled="disabled"
+                  ng-change="itemChange($index,build_item[$index].selected.id)"
+                  ng-show="show_item_search[$index]")
+          ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
+          ui-select-choices(repeat="item in itemlist_array | orderBy:'-cost' | filter: $select.search")
+            img(style="position: absolute; margin: 0px -18px; height: 40px; width: 40px;" ng-src="{{item.image}}")
+            div(style="margin-left: 30px", class="item-selection-choice")
+              div(ng-bind-html="item.name | highlight: $select.search")
+              small {{item.cost}}g
+
+    //
       .buildItem#item0
           //div {{build_item0.selected.name}}
           a(ng-click="displayItemSearch(0)")
@@ -34,7 +51,7 @@ html
             ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
             ui-select-choices(repeat="item in itemlist_array | orderBy:'-cost' | filter: $select.search")
               img(style="position: absolute; margin: 0px -18px; height: 40px; width: 40px;" ng-src="{{item.image}}")
-              div(style="margin-left: 30px")
+              div(style="margin-left: 30px", class="item-selection-choice")
                 div(ng-bind-html="item.name | highlight: $select.search")
                 small {{item.cost}}g
 

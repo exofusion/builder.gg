@@ -80,14 +80,34 @@ a {
 }
 
 .buildItem input {
-  background-color: rgba(0,0,0,0.2);
+  background-color: rgba(0,0,0,0.8);
+}
+
+.ui-select-toggle, .ui-select-match {
+  background-color: rgba(0,0,0,0.8) !important;
+}
+
+.ui-select-match-text, .ui-select-search {
+  color: #DDDDDD;
+}
+
+.ui-select-choices {
+  background-color: rgba(0,0,0,0.8);
+}
+
+.item-selection-choice {
+  color: #DDDDDD;
+}
+
+.buildItem button {
+  opacity: 0.8;
 }
 
 .buildItem .ui-select-container {
   text-align: left;
   position: absolute;
   width: 250px;
-  margin: 0 -75px;
+  margin: 0 -80px;
   z-index: 10;
   /*&box-shadow: 0px 0px 50px rgba(200,45,45,0.5);*/
 }
