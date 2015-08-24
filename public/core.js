@@ -8,6 +8,15 @@ var kda_timeline_length = kda_last_minute / kda_interval // 5 minute intervals u
 
 var qty_item_id_constant = 10000;
 
+function ItemlistEntry(id, name, cost, image, plaintext) {
+  this.id = id;
+  this.name = name;
+  this.cost = cost;
+  this.image = image;
+  this.plaintext = plaintext;
+  return this;
+}
+
 function GetChampionJson($scope, $http) {
   $http.get('/static-json/champion.json')
     .then(function(res){
@@ -30,11 +39,11 @@ function GetItemlistJson($scope, $http) {
     $scope.item = {};
     $scope.itemlist_json = res.data.data;
     for (item in $scope.itemlist_json) {
-      $scope.itemlist_array.push({ id: $scope.itemlist_json[item].id,
-                                   name: $scope.itemlist_json[item].name,
-                                   cost: $scope.itemlist_json[item].gold.total,
-                                   image: ddragon_url+'img/item/'+$scope.itemlist_json[item].image.full,
-                                   plaintext: $scope.itemlist_json[item].plaintext });
+      $scope.itemlist_array.push( new ItemlistEntry( $scope.itemlist_json[item].id,
+                                                     $scope.itemlist_json[item].name,
+                                                     $scope.itemlist_json[item].gold.total,
+                                                     ddragon_url+'img/item/'+$scope.itemlist_json[item].image.full,
+                                                     $scope.itemlist_json[item].plaintext ));
     }
   });
 }
@@ -86,7 +95,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
     }
   }
 
-  $scope.clearItem = function(item_slot, build_item) {
+  $scope.clearItem = function(item_slot) {
     var datasets = $scope.stat_distribution_data.datasets;
     datasets[item_slot].label = "N/A";
 
@@ -99,7 +108,11 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
     $scope.actual_cost[item_slot] = 0;
     $scope.build_item_image[item_slot] = '//:0';
     $scope.stat_distribution_chart.update();
-    delete build_item.selected;
+    delete $scope.build_item[item_slot].selected;
+  }
+
+  $scope.getItemImage = function(item_id) {
+    return ddragon_url+'img/item/'+$scope.itemlist_json[item_id].image.full;
   }
 
   $scope.itemChange = function(item_slot, item_id) {
@@ -108,19 +121,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
     var this_stat_tally = $scope.stat_tally[item_slot];
 
     datasets[item_slot].label = this_item.name;
-/*
-    datasets[item_slot].data[0] =  this_item.stats.FlatPhysicalDamageMod    ? this_item.stats.FlatPhysicalDamageMod       : 0;
-    datasets[item_slot].data[3] =  this_item.stats.PercentAttackSpeedMod    ? this_item.stats.PercentAttackSpeedMod*100   : 0;
-    datasets[item_slot].data[4] =  this_item.stats.FlatCritChanceMod        ? this_item.stats.FlatCritChanceMod*100       : 0;
-    datasets[item_slot].data[5] =  this_item.stats.FlatSpellBlockMod        ? this_item.stats.FlatSpellBlockMod           : 0;
-    datasets[item_slot].data[6] =  this_item.stats.FlatHPPoolMod            ? this_item.stats.FlatHPPoolMod               : 0;
-    datasets[item_slot].data[7] =  this_item.stats.PercentHPRegenMod        ? this_item.stats.PercentHPRegenMod*100       : 0;
-    datasets[item_slot].data[8] =  this_item.stats.FlatArmorMod             ? this_item.stats.FlatArmorMod                : 0;
-    datasets[item_slot].data[9] =  this_item.stats.FlatMovementSpeedMod     ? this_item.stats.FlatMovementSpeedMod        : 0;
-    datasets[item_slot].data[10] = this_item.stats.PercentMovementSpeedMod  ? this_item.stats.PercentMovementSpeedMod*100 : 0;
-    datasets[item_slot].data[11] = this_item.stats.FlatMPPoolMod            ? this_item.stats.FlatMPPoolMod               : 0;
-    datasets[item_slot].data[15] = this_item.stats.FlatMagicDamageMod       ? this_item.stats.FlatMagicDamageMod          : 0;
-*/
+
     this_stat_tally[0] =  this_item.stats.FlatPhysicalDamageMod    ? this_item.stats.FlatPhysicalDamageMod       : 0;
     this_stat_tally[3] =  this_item.stats.PercentAttackSpeedMod    ? this_item.stats.PercentAttackSpeedMod*100   : 0;
     this_stat_tally[4] =  this_item.stats.FlatCritChanceMod        ? this_item.stats.FlatCritChanceMod*100       : 0;
@@ -183,7 +184,14 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
     $scope.effective_gold[item_slot] = total_effective_gold;
 
     $scope.stat_distribution_chart.update();
-    $scope.build_item_image[item_slot] = ddragon_url+'img/item/'+$scope.itemlist_json[item_id].image.full;
+    $scope.build_item_image[item_slot] = $scope.getItemImage(item_id);
+
+    $scope.current_block.selected.items[item_slot] = item_id;
+    $scope.build_item[item_slot].selected = new ItemlistEntry(this_item.id,
+                                                              this_item.name,
+                                                              this_item.gold.total,
+                                                              $scope.getItemImage(this_item.id),
+                                                              this_item.plaintext);
 
     // Hide item selection box again
     $timeout(function() {
@@ -205,6 +213,34 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
     */
   }
 
+  $scope.createNewBlock = function() {
+    $scope.build_blocks.push({id: $scope.build_blocks.length, name: 'New Build', items: []});
+    $scope.current_block.selected = $scope.build_blocks[$scope.build_blocks.length-1];
+    $scope.loadBlock($scope.current_block.selected);       
+  }
+
+  $scope.loadBlock = function(block) {
+    if (block) {
+      if ($scope.last_block != block) {
+        console.log('set last block');
+        $scope.last_block = block;
+      } else {
+        console.log('same block');
+      }
+
+      for(var i=0; i<6; i++) { // Magic number...
+        if (block.items[i] != undefined &&
+            block.items[i] > 0) {
+          $scope.itemChange(i, block.items[i])
+        } else {
+          $scope.clearItem(i)
+        }
+      }
+    } else {
+      console.log('undefined block');
+    }
+  }
+
   $scope.Math = Math;
 
   $scope.build_item = [];
@@ -214,6 +250,10 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
   $scope.build_item[3] = {};
   $scope.build_item[4] = {};
   $scope.build_item[5] = {};
+
+  $scope.build_blocks = [];
+  $scope.build_blocks[0] = {id: 0, name: 'Default', items: []};
+  $scope.current_block = {};
 
   $scope.effective_gold = [0, 0, 0, 0, 0, 0];
   $scope.actual_cost = [0, 0, 0, 0, 0, 0];
@@ -368,7 +408,8 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
                                        scaleFontSize: 14,
                                        scaleFontColor: "#DDDDDD",
                                        scaleGridLineColor : "rgba(255,255,255,.15)",
-                                       scaleShowVerticalLines: false };
+                                       scaleShowVerticalLines: false,
+                                       responsive: true };
 
   $scope.stat_distribution_data = { labels: $scope.stat_distribution_labels,
                                     datasets: stat_distribution_datasets };
