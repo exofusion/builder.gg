@@ -24,10 +24,10 @@ html
     #itemSelectionContainer.col-md-12
       .col-md-2
       #blockSelectionContainer.col-md-2
-        button(class='btn btn-default' ng-click='createNewBlock()') New
-        button(class='btn btn-default') Copy
-        button(class='btn btn-default') Rename
-        button(class='btn btn-default') Delete
+        button(class='btn btn-default btn-xs' ng-click='createNewBlock()') New
+        button(class='btn btn-default btn-xs' ng-click='copyNewBlock()') Copy
+        button(class='btn btn-default btn-xs') Rename
+        button(class='btn btn-default btn-xs') Delete
 
         ui-select(ng-model="current_block.selected"
                   theme="bootstrap" ng-disabled="disabled"
@@ -37,7 +37,7 @@ html
                   on-select='loadBlock(current_block.selected)')
           ui-select-match(placeholder="Select a patch")
             {{$select.selected.name}}
-          ui-select-choices(repeat="block in build_blocks")
+          ui-select-choices(repeat="block in build_blocks track by $index")
             span(class='block_choice_name'
                  ng-bind-html="block.name")
             span(class='block_item_img_container')
@@ -45,7 +45,7 @@ html
                 img(class='block_item_img' ng-src="{{getItemImage(item)}}")
 
 
-        button(class='btn btn-default' ng-click='loadBlock(last_block)') Last Block
+        button(class='btn btn-default btn-xs' ng-click='loadBlock(last_block)') Last Block
 
       div(ng-repeat='n in build_item track by $index', class="buildItem col-md-1", id="item{{$index}}")
         a(ng-click="displayItemSearch($index)")

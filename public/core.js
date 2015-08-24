@@ -214,19 +214,24 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
   }
 
   $scope.createNewBlock = function() {
-    $scope.build_blocks.push({id: $scope.build_blocks.length, name: 'New Build', items: []});
+    $scope.build_blocks.push({name: 'New Build', items: []});
     $scope.current_block.selected = $scope.build_blocks[$scope.build_blocks.length-1];
-    $scope.loadBlock($scope.current_block.selected);       
+    $scope.loadBlock($scope.current_block.selected);
+  }
+
+  $scope.copyNewBlock = function() {
+    $scope.build_blocks.push(JSON.parse(JSON.stringify($scope.this_block)));
+    $scope.current_block.selected = $scope.build_blocks[$scope.build_blocks.length-1];
+    $scope.loadBlock($scope.current_block.selected);
   }
 
   $scope.loadBlock = function(block) {
     if (block) {
-      if ($scope.last_block != block) {
-        console.log('set last block');
-        $scope.last_block = block;
-      } else {
-        console.log('same block');
-      }
+      $scope.current_block.selected = block;
+
+      var temp = $scope.this_block;
+      $scope.this_block = block;
+      $scope.last_block = temp;
 
       for(var i=0; i<6; i++) { // Magic number...
         if (block.items[i] != undefined &&
@@ -236,8 +241,6 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
           $scope.clearItem(i)
         }
       }
-    } else {
-      console.log('undefined block');
     }
   }
 
@@ -252,7 +255,8 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
   $scope.build_item[5] = {};
 
   $scope.build_blocks = [];
-  $scope.build_blocks[0] = {id: 0, name: 'Default', items: []};
+  $scope.build_blocks[0] = {name: 'Default', items: []};
+  $scope.this_block = $scope.build_blocks[0];
   $scope.current_block = {};
 
   $scope.effective_gold = [0, 0, 0, 0, 0, 0];
