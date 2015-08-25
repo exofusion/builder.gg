@@ -51,7 +51,7 @@ a {
 }
 
 #kdaChartContainer {
-  width: 80%;
+  width: 50%;
   margin-top: 50px;
   margin-left: auto;
   margin-right: auto;
@@ -61,6 +61,12 @@ a {
 #kdaChart {
   padding: 20px;
   display: inline;
+}
+
+#minuteSlider {
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 #statSearchContainer {
@@ -77,7 +83,8 @@ a {
   margin: 2px;
 }
 
-#blockSelectionContainer .ui-select-container {
+#blockSelectionContainer .ui-select-container,
+#blockSelectionContainer input {
   margin-top: 12px;
   margin-bottom: 12px;
 }
@@ -127,31 +134,22 @@ a {
   margin-left: -27px;
 }
 
-.ui-select-container input {
-  background-color: rgba(0,0,0,0.9) !important;
-}
-
-.ui-select-toggle, .ui-select-match {
-  background-color: rgba(0,0,0,0.9) !important;
-}
-
-.ui-select-match-text, .ui-select-search {
-  color: #DDDDDD !important;
-}
-
+.ui-select-container input,
+.ui-select-toggle,
+.ui-select-match,
 .ui-select-choices {
-  background-color: rgba(0,0,0,0.8) !important;
+  background-color: rgba(0,0,0,0.9) !important;
 }
 
-.ui-select-choices-row-inner {
-  color: #DDDDDD !important;
-}
-
+.ui-select-match-text,
+.ui-select-search,
+.ui-select-choices-row-inner,
 .item-selection-choice {
   color: #DDDDDD !important;
 }
 
-.btn-default {
+.btn-default,
+.form-control {
   background-color: rgba(0,0,0,0.8) !important;
   color: #DDDDDD !important;
 }

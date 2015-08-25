@@ -108,6 +108,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
     $scope.actual_cost[item_slot] = 0;
     $scope.build_item_image[item_slot] = '//:0';
     $scope.stat_distribution_chart.update();
+    delete $scope.current_block.selected.items[item_slot];
     delete $scope.build_item[item_slot].selected;
   }
 
@@ -215,14 +216,39 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
 
   $scope.createNewBlock = function() {
     $scope.build_blocks.push({name: 'New Build', items: []});
-    $scope.current_block.selected = $scope.build_blocks[$scope.build_blocks.length-1];
-    $scope.loadBlock($scope.current_block.selected);
+    var bb_length = $scope.build_blocks.length;
+    $scope.loadBlock($scope.build_blocks[bb_length-1]);
   }
 
   $scope.copyNewBlock = function() {
     $scope.build_blocks.push(JSON.parse(JSON.stringify($scope.this_block)));
-    $scope.current_block.selected = $scope.build_blocks[$scope.build_blocks.length-1];
-    $scope.loadBlock($scope.current_block.selected);
+    var bb_length = $scope.build_blocks.length;
+    $scope.loadBlock($scope.build_blocks[bb_length-1]);
+  }
+
+  $scope.startRenaming = function() {
+    $scope.currently_renaming = true;
+    $scope.new_block_name = $scope.current_block.selected.name;
+
+    $timeout(function(){
+      angular.element('#rename-input-box').select();
+    });
+  }
+
+  $scope.renameBlock = function(block, new_name) {
+    block.name = new_name;
+    $scope.currently_renaming = false;
+  }
+
+  $scope.deleteBlock = function(block) {
+    $scope.build_blocks.splice($scope.build_blocks.indexOf(block),1);
+    var bb_length = $scope.build_blocks.length;
+
+    if ($scope.build_blocks.length > 0) {
+      $scope.loadBlock($scope.build_blocks[bb_length-1]);
+    } else {
+      $scope.createNewBlock();
+    }
   }
 
   $scope.loadBlock = function(block) {
@@ -244,6 +270,40 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
     }
   }
 
+  $scope.exportItemSet = function() {
+    var item_set = {};
+    item_set.title = "Item Set Title";
+    item_set.type = "custom";
+    item_set.map = "any";
+    item_set.mode = "any";
+    item_set.priority = false;
+    item_set.sortrank = 0;
+    item_set.blocks = [];
+
+    for (var i=0; i<$scope.build_blocks.length; i++) {
+      var block = {};
+      block.type = $scope.build_blocks[i].name;
+      block.recMath = false;
+      block.minSummonerLevel = -1;
+      block.maxSummonerLevel = -1;
+      block.showIfSummonerSpell = "";
+      block.hideIfSummonerSpell = "";
+      block.items = [];
+
+      for (var j=0; j<$scope.build_blocks[i].items.length; j++) {
+        block.items.push({ id: $scope.build_blocks[i].items[j].toString(),
+                           count: 1 });
+      }
+
+      item_set.blocks.push(block);
+    }
+
+    var content = JSON.stringify(item_set);
+    var filename = 'testfilename';
+    var blob = new Blob([content], {type: "text/plain;charset=utf-8"});
+    saveAs(blob, filename+".json");
+  }
+
   $scope.Math = Math;
 
   $scope.build_item = [];
@@ -254,10 +314,10 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
   $scope.build_item[4] = {};
   $scope.build_item[5] = {};
 
-  $scope.build_blocks = [];
-  $scope.build_blocks[0] = {name: 'Default', items: []};
-  $scope.this_block = $scope.build_blocks[0];
-  $scope.current_block = {};
+  //$scope.build_blocks[0] = {name: 'Default', items: []};
+  //$scope.this_block = $scope.build_blocks[0];
+
+  $scope.currently_renaming = false;
 
   $scope.effective_gold = [0, 0, 0, 0, 0, 0];
   $scope.actual_cost = [0, 0, 0, 0, 0, 0];
@@ -268,25 +328,6 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
   $scope.build_item_image = [];
 
   // Stat Distribution Chart Setup
-  /*
-  $scope.stat_distribution_label_map = [ "AD",
-                                         "Armor Pen",
-                                         "% Lifesteal",
-                                         "% AS",
-                                         "% Crit Chance",
-                                         "MR",
-                                         "HP",
-                                         "% BHR",
-                                         "Armor",
-                                         "MS",
-                                         "% MS",
-                                         "Mana",
-                                         "% BMR",
-                                         "% CDR",
-                                         //"% Spellvamp",
-                                         "Magic Pen",
-                                         "AP" ];
-  */
   $scope.stat_distribution_label_map = [ "AD",
                                          "ArP",
                                          "LS%",
@@ -421,6 +462,9 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
   $scope.stat_distribution_ctx = document.getElementById("statDistributionChart").getContext("2d");
   $scope.stat_distribution_chart = new Chart($scope.stat_distribution_ctx).StackedBar($scope.stat_distribution_data, $scope.stat_distribution_options);
 
+  $scope.build_blocks = [];
+  $scope.current_block = {};
+  $scope.createNewBlock();
   /*
   $scope.build_data = [
     [0, 10, 0, 30, 40, 50, 0, 70, 80, 90, 100]
@@ -433,6 +477,9 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
     // Continuous flow effect
     //$scope.kda_chart.removeData();
     //$scope.kda_chart.addData([[], [], []], '');
+
+    var champObject = $.grep($scope.champion_array, function(e){ return e.id == stat_data.championId; })[0];
+    $scope.current_champion = champObject.name;
 
     for (var i=0; i<=kda_timeline_length; i++) {
        $scope.kda_data.labels[i] = (i*5+' (0)');
@@ -470,10 +517,20 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
     }
 
     $scope.kda_chart.update();
+
+    $scope.item_builds = [];
+    for (item_build in stat_data.itemBuilds) {
+      $scope.item_builds.push(stat_data.itemBuilds[item_build]);
+    }
   }
 
   GetChampionJson($scope, $http);
   GetItemlistJson($scope, $http);
+
+  $scope.search = {};
+  $scope.search.championId = {};
+  $scope.search.tier = {};
+  $scope.search.patch = {};
 
   // KDA Chart
   $scope.kda_labels = [];
@@ -520,7 +577,8 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
     scaleSteps: 10,
     scaleStepWidth: 1,
     scaleStartValue: 0,
-    scaleFontSize: 22
+    scaleFontSize: 18,
+    scaleFontColor: "#DDDDDD"
   };
 
   $scope.kda_ctx = document.getElementById("kdaChart").getContext("2d");
@@ -538,40 +596,44 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
                      '5.14' ];
 
   $scope.submit = function() {
-  delete $scope.victory_response;
-  delete $scope.defeat_response;
+    delete $scope.victory_response;
+    delete $scope.defeat_response;
 
-  $http.get('/stat_collections?championId='+$scope.search.championId+
-            '&tier='+$scope.search.tier+
-            '&patch='+$scope.search.patch+
-            '&victory=true')
-    .then(function(res){
-      $scope.victory_response = res.data;
-      parseStatCollection( $scope.victory_response );
-      $scope.displayed = 'victory';
-    }, function(res){
-      // 404 / Error Handling
-    });
-  $http.get('/stat_collections?championId='+$scope.search.championId+
-            '&tier='+$scope.search.tier+
-            '&patch='+$scope.search.patch+
-            '&victory=false')
-    .then(function(res){
-      $scope.defeat_response = res.data;
-    }, function(res){
-      // 404 / Error Handling
-    });
+    var championId = $scope.search.championId.selected.id;
+    var tier = $scope.search.tier.selected.id;
+    var patch = $scope.search.patch.selected;
+
+    $http.get('/stat_collections?championId='+championId+
+              '&tier='+tier+
+              '&patch='+patch+
+              '&victory=true')
+      .then(function(res){
+        $scope.victory_response = res.data;
+        parseStatCollection( $scope.victory_response );
+        $scope.displayed = 'Victory';
+      }, function(res){
+        // 404 / Error Handling
+      });
+    $http.get('/stat_collections?championId='+championId+
+              '&tier='+tier+
+              '&patch='+patch+
+              '&victory=false')
+      .then(function(res){
+        $scope.defeat_response = res.data;
+      }, function(res){
+        // 404 / Error Handling
+      });
   };
 
   $scope.kda_click = function () {
     if ($scope.displayed) {
-      if ($scope.displayed == 'victory' && $scope.defeat_response) {
+      if ($scope.displayed == 'Victory' && $scope.defeat_response) {
         parseStatCollection( $scope.defeat_response );
-        $scope.displayed = 'defeat';
-      } else if ($scope.displayed == 'defeat' && $scope.victory_response) {
+        $scope.displayed = 'Defeat';
+      } else if ($scope.displayed == 'Defeat' && $scope.victory_response) {
         parseStatCollection ( $scope.victory_response );
-        $scope.displayed = 'victory';
+        $scope.displayed = 'Victory';
       }
-    }
+    };
   };
 });

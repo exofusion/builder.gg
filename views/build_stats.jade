@@ -51,7 +51,20 @@ html
             input(type='submit', class='btn btn-default', value='Lookup')
 
     #kdaChartContainer.genericContainer
+      #kdaChartTitle
+        span {{current_champion}} - {{displayed}}
       canvas(id='kdaChart',
              ng-click='kda_click()')
+
+      #minuteBuilds
+        input(type="range"
+              ng-model="minute_selection"
+              ng-init="minute_selection=0"
+              min="0"
+              max="10"
+              value="5"
+              id="minuteSlider")
+
+        div(ng-repeat="(key, value) in item_builds[minute_selection]") {{key}}
 
     include ./analytics.jade

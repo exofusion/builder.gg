@@ -43,8 +43,8 @@ function AggregateStats() {
     this.deaths = 0;
     this.dragon = 0;
     this.baron = 0;
-    this.items = {};
-    this.startingBuild = {};
+    //this.items = {};
+    //this.startingBuild = {};
 
     this.frameGold = 0;
     this.frameMinionsKilled = 0;

@@ -13,6 +13,7 @@ html
     script(src='/bower_components/angular-ui-select/dist/select.js')
     script(src='/bower_components/Chart.StackedBar.js/src/Chart.StackedBar.js')
     script(src='/bower_components/angular-chart.js/dist/angular-chart.js')
+    script(src='/bower_components/file-saver.js/FileSaver.js')
     script(src='/core.js')
 
   body(ng-app='coreApp', ng-controller='statDistributionCtrl', class='ng-cloak')
@@ -24,18 +25,38 @@ html
     #itemSelectionContainer.col-md-12
       .col-md-2
       #blockSelectionContainer.col-md-2
-        button(class='btn btn-default btn-xs' ng-click='createNewBlock()') New
-        button(class='btn btn-default btn-xs' ng-click='copyNewBlock()') Copy
-        button(class='btn btn-default btn-xs') Rename
-        button(class='btn btn-default btn-xs') Delete
+        button(class='btn btn-default btn-xs'
+               ng-click='createNewBlock()'
+               ng-disabled='currently_renaming') New
+        button(class='btn btn-default btn-xs'
+               ng-click='copyNewBlock()'
+               ng-disabled='currently_renaming') Copy
+        button(class='btn btn-default btn-xs'
+               ng-click='startRenaming()'
+               ng-disabled='currently_renaming') Rename
+        button(class='btn btn-default btn-xs'
+               ng-disabled='currently_renaming'
+               ng-click='deleteBlock(current_block.selected)') Delete
+
+        input(ng-show='currently_renaming'
+              id='rename-input-box'
+              ng-model='new_block_name'
+              class='form-control')
+        button(class='btn btn-default btn-xs'
+               ng-click='renameBlock(current_block.selected,new_block_name)'
+               ng-show='currently_renaming') Apply
+        button(class='btn btn-default btn-xs'
+               ng-click='currently_renaming=false'
+               ng-show='currently_renaming') Cancel
 
         ui-select(ng-model="current_block.selected"
                   theme="bootstrap" ng-disabled="disabled"
                   class="block-select"
                   search-enabled="false"
                   ng-init='current_block.selected=build_blocks[0]'
-                  on-select='loadBlock(current_block.selected)')
-          ui-select-match(placeholder="Select a patch")
+                  on-select='loadBlock(current_block.selected,$index)'
+                  ng-show='!currently_renaming')
+          ui-select-match(placeholder="Select a block")
             {{$select.selected.name}}
           ui-select-choices(repeat="block in build_blocks track by $index")
             span(class='block_choice_name'
@@ -45,7 +66,9 @@ html
                 img(class='block_item_img' ng-src="{{getItemImage(item)}}")
 
 
-        button(class='btn btn-default btn-xs' ng-click='loadBlock(last_block)') Last Block
+        button(class='btn btn-default btn-xs'
+               ng-click='loadBlock(last_block)'
+               ng-show='!currently_renaming') Last Block
 
       div(ng-repeat='n in build_item track by $index', class="buildItem col-md-1", id="item{{$index}}")
         a(ng-click="displayItemSearch($index)")
@@ -62,7 +85,9 @@ html
             div(style="margin-left: 30px", class="item-selection-choice")
               div(ng-bind-html="item.name | highlight: $select.search")
               small {{item.cost}}g
-      .col-md-3
+      .col-md-1
+        button(class='btn btn-default'
+               ng-click='exportItemSet()') Export Item Set
 
     #statDistributionTable
       .col-md-1
