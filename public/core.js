@@ -48,6 +48,10 @@ function GetItemlistJson($scope, $http) {
   });
 }
 
+function GetItemImage(scope, item_id) {
+  return ddragon_url+'img/item/'+scope.itemlist_json[item_id].image.full;
+}
+
 app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
   $scope.getNumber = function(num) {
     return new Array(num);   
@@ -113,7 +117,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
   }
 
   $scope.getItemImage = function(item_id) {
-    return ddragon_url+'img/item/'+$scope.itemlist_json[item_id].image.full;
+    return GetItemImage($scope, item_id);
   }
 
   $scope.itemChange = function(item_slot, item_id) {
@@ -505,9 +509,9 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
           // This causes data to reset before tweening to next values, dig into ChartJS to see where it's
           // verifying the labels are the same
           $scope.kda_data.labels[label_index] = i+' ('+stat_data.aggregateStats[i].samples+')';
-          $scope.kda_chart.datasets[0].points[label_index].value = (killTally/frame_samples);
-          $scope.kda_chart.datasets[1].points[label_index].value = (deathTally/frame_samples);
-          $scope.kda_chart.datasets[2].points[label_index].value = (assistTally/frame_samples);
+          $scope.kda_chart.datasets[0].points[label_index].value = (killTally/frame_samples).toFixed(2);
+          $scope.kda_chart.datasets[1].points[label_index].value = (deathTally/frame_samples).toFixed(2);
+          $scope.kda_chart.datasets[2].points[label_index].value = (assistTally/frame_samples).toFixed(2);
 
           killTally = 0;
           deathTally = 0;
@@ -519,10 +523,69 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
     $scope.kda_chart.update();
 
     $scope.item_builds = [];
-    for (item_build in stat_data.itemBuilds) {
-      $scope.item_builds.push(stat_data.itemBuilds[item_build]);
+    for (item_frame in stat_data.itemBuilds) {
+      var build_frame = {};
+      //build_frame.builds = [];
+      var unsorted_item_count = {};
+
+      for (item_build in stat_data.itemBuilds[item_frame]) {
+        var split_build = item_build.split(':');
+        split_build.pop();
+
+        for (var i=0; i<split_build.length; i++) {
+          var item_id = (split_build[i]%10000).toString();
+          //var quantity = Math.floor(split_build[i]/10000);
+          if (unsorted_item_count[item_id]) {
+            unsorted_item_count[item_id] += stat_data.itemBuilds[item_frame][item_build];
+          } else {
+            unsorted_item_count[item_id] = stat_data.itemBuilds[item_frame][item_build];
+          }
+        }
+      }
+
+      var sorted_array = Object.keys(unsorted_item_count).sort(function(a,b){return unsorted_item_count[b]-unsorted_item_count[a]});
+      var sorted_items = [];
+
+      var count = 6;
+      for (item in sorted_array) {
+        sorted_items.push({id: sorted_array[item], count: unsorted_item_count[sorted_array[item]]})
+
+        count--;
+        if (count < 0)
+          break;
+      }
+      build_frame.item_count = sorted_items;
+
+/*
+      for (item_build in stat_data.itemBuilds[item_frame]) {
+        var split_build = item_build.split(':');
+        split_build.pop();
+
+        var this_build_frame_build = {};
+        this_build_frame_build.items = {};
+
+        for (var i=0; i<split_build.length; i++) {
+          var item_id = (split_build[i]%10000).toString();
+          var quantity = Math.floor(split_build[i]/10000);
+          this_build_frame_build.items[item_id] = quantity;
+        }
+
+        this_build_frame_build.count = stat_data.itemBuilds[item_frame][item_build];
+        build_frame.builds.push(this_build_frame_build);
+      }*/
+
+      build_frame.samples = stat_data.aggregateStats[item_frame].samples;
+      //console.log(build_frame);
+      $scope.item_builds.push(build_frame);
     }
+    console.log($scope.item_builds);
   }
+
+  $scope.getItemImage = function(item_id) {
+    return GetItemImage($scope, item_id);
+  }
+
+  $scope.Math = Math;
 
   GetChampionJson($scope, $http);
   GetItemlistJson($scope, $http);

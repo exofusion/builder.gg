@@ -65,6 +65,9 @@ html
               value="5"
               id="minuteSlider")
 
-        div(ng-repeat="(key, value) in item_builds[minute_selection]") {{key}}
+        {{minute_selection*5}} minutes
+        div(ng-repeat="item in item_builds[minute_selection].item_count")
+          img(height="30px" width="30px" ng-src="{{getItemImage(item.id)}}")
+          span {{Math.floor(100*(item.count/item_builds[minute_selection].samples))}}%
 
     include ./analytics.jade
