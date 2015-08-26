@@ -616,7 +616,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
         var popularity = Math.floor(100*(this_item_count/frame_samples));
 
         // Detailed sort stats
-        //sorted_items.push({id: sorted_array[item], popularity: popularity});
+        sorted_items.push({id: sorted_array[item], popularity: popularity});
 
         if (popularity >= 50 &&
             item_purchase_history.indexOf(this_item_id) < 0) {
@@ -632,7 +632,9 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
 
           item_purchase_history.push(this_item_id);
 
-          if ($scope.core_build.length < 6 && !$scope.itemlist_json[this_item_id].into) {
+          if (item_frame > 1 &&
+              $scope.core_build.length < 6 &&
+              !$scope.itemlist_json[this_item_id].into) {
             $scope.core_build.push(this_item_id);
           }
         }

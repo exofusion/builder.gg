@@ -454,6 +454,8 @@ function processStateHistory(json_data, state_history, tier, callback) {
                                 //      name: 'VersionError' }
                                 console.log(error);
                             }
+
+
                             
                             next_p();
                         });
@@ -521,8 +523,10 @@ function processFrames(json_data, tier, callback) {
 }
 
 function selectMatch() {
+    console.log('[INFO] Selecting MatchQueueItems');
     MatchQueueItem.find({cached: true},
         function(error, mqi) {
+        console.log('[INFO] MatchQueueItems loaded');
         if (error) {
             console.log(error);
         } else if (mqi.length) {
