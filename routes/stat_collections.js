@@ -8,15 +8,37 @@ router.get('/', function(req, res, next) {
     var search_options = {};
 
     if (req.query.championId) {
+        search_options.patch = '5.15';
+
         search_options.championId = parseInt(req.query.championId);
 
         if (req.query.tier) {
             search_options.tier = parseInt(req.query.tier);
         }
 
+        if (req.query.position) {
+            console.log(req.query.position);
+            switch(req.query.position) {
+                case 'Top':
+                    search_options.lane = 'TOP';
+                    break;
+                case 'Jungle':
+                    search_options.lane = 'JUNGLE';
+                    break;
+                case 'Mid':
+                    search_options.lane = 'MIDDLE';
+                    break;
+                case 'Bottom':
+                    search_options.lane = 'BOTTOM';
+                    break;
+            }
+            // switch case
+        }
+
+        /*
         if (req.query.patch) {
             search_options.patch = req.query.patch;
-        }
+        }*/
 
         if (req.query.victory) {
             search_options.victory = (req.query.victory == "true") ? true : false;

@@ -31,24 +31,22 @@ var TrinketItemIds = [ 3340,   // Warding Totem
 function AggregateStats() {
     this.gameTime = 0;
     this.samples = 0;
-    this.mergedTotalGold = 0;
-    this.mergedCurrentGold = 0;
-    this.healthPotsUsed = 0;
-    this.manaPotsUsed = 0;
-    this.trinketWardsPlaced = 0;
-    this.visionWardsPlaced = 0;
-    this.sightWardsPlaced = 0;
+    //this.mergedTotalGold = 0;
+    //this.mergedCurrentGold = 0;
+    //this.healthPotsUsed = 0;
+    //this.manaPotsUsed = 0;
+    //this.trinketWardsPlaced = 0;
+    //this.visionWardsPlaced = 0;
+    //this.sightWardsPlaced = 0;
     this.kills = 0;
     this.assists = 0;
     this.deaths = 0;
-    this.dragon = 0;
-    this.baron = 0;
-    //this.items = {};
-    //this.startingBuild = {};
+    //this.dragon = 0;
+    //this.baron = 0;
 
-    this.frameGold = 0;
-    this.frameMinionsKilled = 0;
-    this.frameJungleMinionsKilled = 0;
+    //this.frameGold = 0;
+    //this.frameMinionsKilled = 0;
+    //this.frameJungleMinionsKilled = 0;
 }
 
 function mergeStat(thisStat, thisSamples, otherStat, otherSamples) {
@@ -56,21 +54,21 @@ function mergeStat(thisStat, thisSamples, otherStat, otherSamples) {
 }
 
 AggregateStats.prototype.mergeSamples = function(otherStats){
-    this.mergedTotalGold = mergeStat(this.mergedTotalGold, this.samples, otherStats.mergedTotalGold, otherStats.samples);
-    this.mergedCurrentGold = mergeStat(this.mergedCurrentGold, this.samples, otherStats.mergedCurrentGold, otherStats.samples);
-    this.healthPotsUsed += otherStats.healthPotsUsed;
-    this.manaPotsUsed += otherStats.manaPotsUsed;
-    this.trinketWardsPlaced += otherStats.trinketWardsPlaced;
-    this.visionWardsPlaced += otherStats.visionWardsPlaced;
-    this.sightWardsPlaced += otherStats.sightWardsPlaced;
+    //this.mergedTotalGold = mergeStat(this.mergedTotalGold, this.samples, otherStats.mergedTotalGold, otherStats.samples);
+    //this.mergedCurrentGold = mergeStat(this.mergedCurrentGold, this.samples, otherStats.mergedCurrentGold, otherStats.samples);
+    //this.healthPotsUsed += otherStats.healthPotsUsed;
+    //this.manaPotsUsed += otherStats.manaPotsUsed;
+    //this.trinketWardsPlaced += otherStats.trinketWardsPlaced;
+    //this.visionWardsPlaced += otherStats.visionWardsPlaced;
+    //this.sightWardsPlaced += otherStats.sightWardsPlaced;
     this.kills += otherStats.kills;
     this.assists += otherStats.assists;
     this.deaths += otherStats.deaths;
-    this.dragon += otherStats.dragon;
-    this.baron += otherStats.baron;
-    this.frameGold = mergeStat(this.frameGold, this.samples, otherStats.frameGold, otherStats.samples);
-    this.frameMinionsKilled = mergeStat(this.frameMinionsKilled, this.samples, otherStats.frameMinionsKilled, otherStats.samples);
-    this.frameJungleMinionsKilled = mergeStat(this.frameJungleMinionsKilled, this.samples, otherStats.frameJungleMinionsKilled, otherStats.samples);
+    //this.dragon += otherStats.dragon;
+    //this.baron += otherStats.baron;
+    //this.frameGold = mergeStat(this.frameGold, this.samples, otherStats.frameGold, otherStats.samples);
+    //this.frameMinionsKilled = mergeStat(this.frameMinionsKilled, this.samples, otherStats.frameMinionsKilled, otherStats.samples);
+    //this.frameJungleMinionsKilled = mergeStat(this.frameJungleMinionsKilled, this.samples, otherStats.frameJungleMinionsKilled, otherStats.samples);
 
 /*
     for (i in otherStats.items) {
@@ -379,26 +377,26 @@ function processStateHistory(json_data, state_history, tier, callback) {
 
                         aggregate_frame.gameTime = p_history.timestamp;
                         aggregate_frame.samples = 1;
-                        aggregate_frame.totalGold = p_history.pframe.totalGold;
-                        aggregate_frame.currentGold = p_history.pframe.currentGold;
-                        aggregate_frame.healthPotsUsed = p_history.state.health_pots_used;
-                        aggregate_frame.manaPotsUsed = p_history.state.mana_pots_used;
-                        aggregate_frame.trinketWardsPlaced = p_history.state.trinket_wards_placed;
-                        aggregate_frame.visionWardsPlaced = p_history.state.vision_wards_placed;
-                        aggregate_frame.sightWardsPlaced = p_history.state.sight_wards_placed;
+                        //aggregate_frame.totalGold = p_history.pframe.totalGold;
+                        //aggregate_frame.currentGold = p_history.pframe.currentGold;
+                        //aggregate_frame.healthPotsUsed = p_history.state.health_pots_used;
+                        //aggregate_frame.manaPotsUsed = p_history.state.mana_pots_used;
+                        //aggregate_frame.trinketWardsPlaced = p_history.state.trinket_wards_placed;
+                        //aggregate_frame.visionWardsPlaced = p_history.state.vision_wards_placed;
+                        //aggregate_frame.sightWardsPlaced = p_history.state.sight_wards_placed;
                         //aggregate_frame.items = PrepareItems(p_history.state.items);
                         aggregate_frame.kills = p_history.state.kills;
                         aggregate_frame.assists = p_history.state.assists;
                         aggregate_frame.deaths = p_history.state.deaths;
-                        aggregate_frame.dragon = p_history.state.dragon;
-                        aggregate_frame.baron = p_history.state.baron;
+                        //aggregate_frame.dragon = p_history.state.dragon;
+                        //aggregate_frame.baron = p_history.state.baron;
 
                         if (j > 0) {
                             // Calculate frame delta stats
                             var last_frame = participant_history[j-1];
-                            aggregate_frame.frameGold = p_history.pframe.totalGold - last_frame.pframe.totalGold;
-                            aggregate_frame.frameMinionsKilled = p_history.pframe.minionsKilled - last_frame.pframe.minionsKilled;
-                            aggregate_frame.frameJungleMinionsKilled = p_history.pframe.jungleMinionsKilled - last_frame.pframe.jungleMinionsKilled;
+                            //aggregate_frame.frameGold = p_history.pframe.totalGold - last_frame.pframe.totalGold;
+                            //aggregate_frame.frameMinionsKilled = p_history.pframe.minionsKilled - last_frame.pframe.minionsKilled;
+                            //aggregate_frame.frameJungleMinionsKilled = p_history.pframe.jungleMinionsKilled - last_frame.pframe.jungleMinionsKilled;
 
                             // Save starting items in inventory
                             if (j == 1 || j%5 == 0) {
@@ -523,8 +521,6 @@ function processFrames(json_data, tier, callback) {
 }
 
 function selectMatch() {
-    // EGF: 1918011420
-    // 1918055064
     MatchQueueItem.find({cached: true},
         function(error, mqi) {
         if (error) {
@@ -537,7 +533,7 @@ function selectMatch() {
                         console.log(error);
                     } else {
                         if (!mp) {
-                            MatchCacheItem.findOne({ _id: mqi_entry._id }, function(error, mci) {
+                            MatchCacheItem.findOne({ _id: mqi_entry._id, 'data.matchVersion': /^5.16/ }, function(error, mci) {
                                 if (error) {
                                     console.log(error);
                                 } else if (mci) {
@@ -547,8 +543,6 @@ function selectMatch() {
                                         console.log("[ERROR] MatchCacheItem's data is null: "+mqi_entry._id);
                                         next_mqi();
                                     }
-                                } else {
-                                    console.log("[ERROR] MatchCacheItem doesn't exist: "+mqi_entry._id);
                                 }
                             });
                         } else {

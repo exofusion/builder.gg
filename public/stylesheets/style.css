@@ -50,9 +50,39 @@ a {
   margin: 0 auto;
 }
 
+#victorySelect {
+  margin-top: 5px;
+}
+
+#alertContainer {
+  min-height: 50px;
+  margin-top: 50px;
+}
+
+.alert {
+  width: 40%;
+  margin-left: auto;
+  margin-right: auto;
+  color: white !important;
+  font-size: 18px !important;
+  padding: 10px !important;
+}
+
+.alert-success {
+  background-color: rgba(150,255,150,0.3) !important;
+}
+
+.alert-info {
+  background-color: rgba(150,255,255,0.3) !important;
+}
+
+.alert-danger {
+  background-color: rgba(255,150,150,0.3) !important;
+}
+
 #kdaChartContainer {
   width: 50%;
-  margin-top: 50px;
+  margin-top: 40px;
   margin-left: auto;
   margin-right: auto;
   text-align: center;
@@ -63,8 +93,16 @@ a {
   display: inline;
 }
 
-#minuteSlider {
-  width: 90%;
+#startEndBuilds {
+  margin: 25px;
+  width: 60%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#minuteBuilds {
+  margin: 50px;
+  width: 70%;
   margin-left: auto;
   margin-right: auto;
 }

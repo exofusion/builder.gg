@@ -20,8 +20,8 @@ html
     #statSearchContainer
         form(ng-submit='submit()')
           .col-md-1
-          .col-md-3
-            ui-select(ng-model="search.tier.selected" theme="bootstrap" ng-disabled="disabled" class="tier_select" search-enabled="false" ng-init='search.tier.selected = tiers[0]')
+          .col-md-2
+            ui-select(ng-model="search.tier.selected" theme="bootstrap" ng-disabled="disabled" class="tier_select" search-enabled="false" ng-init='search.tier.selected = tiers[4]')
               ui-select-match(placeholder="Select a tier")
                 img(ng-src="{{$select.selected.image}}")
                 {{$select.selected.name}}
@@ -30,9 +30,9 @@ html
                   img(ng-src="{{tier.image}}")
                   span(ng-bind-html="tier.name")
 
-          .col-md-3
+          .col-md-2
             ui-select(ng-model="search.championId.selected" theme="bootstrap" ng-disabled="disabled" class="champion_select" search-enabled="true")
-              ui-select-match(placeholder="Enter a champion name")
+              ui-select-match(placeholder="Enter a champion")
                 img(ng-src="{{$select.selected.image}}")
                 {{$select.selected.name}}
               ui-select-choices(repeat="champion in champion_array | filter: $select.search")
@@ -41,33 +41,72 @@ html
                   span(ng-bind-html="champion.name | highlight: $select.search")
 
           .col-md-2
-            ui-select(ng-model="search.patch.selected" theme="bootstrap" ng-disabled="disabled" class="patch_select" search-enabled="false" ng-init='search.patch.selected=patches[0]')
-                ui-select-match(placeholder="Select a patch")
-                  {{$select.selected}}
-                ui-select-choices(repeat="patch in patches")
-                  .item-selection-choice
-                    span(ng-bind-html="patch")
-          .col-md-2
-            input(type='submit', class='btn btn-default', value='Lookup')
+            ui-select(ng-model="search.position.selected" theme="bootstrap" ng-disabled="disabled" class="position_select" search-enabled="false")
+              ui-select-match(placeholder="Select a position")
+                {{$select.selected}}
+              ui-select-choices(repeat="position in positions")
+                .item-selection-choice
+                  span(ng-bind-html="position")
+
+          .col-md-2#victorySelect
+            label(class='radio-inline')
+              input(type='radio'
+                    ng-model='search.victory'
+                    value='true'
+                    ng-checked='true')
+              span Victory
+
+            label(class='radio-inline')
+              input(type='radio'
+                    ng-model='search.victory'
+                    value='false')
+              span Defeat
+
+          .col-md-1
+            input(type='submit' class='btn btn-default' value='Lookup' ng-show='!alert_loading')
+            input(type='submit' class='btn btn-default disabled' ng-show='alert_loading' value="Loading...")
+
+    #alertContainer
+      div(class="alert alert-danger" ng-show="alert_error")
+        <strong>Error:</strong> {{alert_error_message}}
+      div(class="alert alert-success" ng-show="alert_current_match")
+        {{alert_current_match_message}}
 
     #kdaChartContainer.genericContainer
-      #kdaChartTitle
-        span {{current_champion}} - {{displayed}}
-      canvas(id='kdaChart',
-             ng-click='kda_click()')
+      canvas(id='kdaChart')
 
-      #minuteBuilds
-        input(type="range"
-              ng-model="minute_selection"
-              ng-init="minute_selection=0"
-              min="0"
-              max="10"
-              value="5"
-              id="minuteSlider")
+    #startEndBuilds.genericContainer
+      table(width="100%")
+        thead
+          tr
+            td(width="50%") Start Build
+            td(width="50%") Core Build
+        tbody
+          tr
+            td
+              span(ng-repeat="item in start_build.items track by $index")
+                img(height="50px" width="50px" ng-src="{{getItemImage(item)}}")
+              div {{Math.floor(100*(start_build.count/item_builds[0].samples))}}%
+            td
+              span(ng-repeat="item in core_build track by $index")
+                img(height="50px" width="50px" ng-src="{{getItemImage(item)}}")
 
-        {{minute_selection*5}} minutes
-        div(ng-repeat="item in item_builds[minute_selection].item_count")
-          img(height="30px" width="30px" ng-src="{{getItemImage(item.id)}}")
-          span {{Math.floor(100*(item.count/item_builds[minute_selection].samples))}}%
+    #minuteBuilds.genericContainer
+      table(width="100%")
+        thead
+          tr
+            td(ng-repeat="n in getNumber(10) track by $index") {{5+($index*5)}}:00
+        tbody
+          tr
+            td(ng-repeat="frame in item_builds track by $index" ng-if="$index > 0 && $index < 11")
+              span(ng-repeat="item in frame.significant_purchases")
+                img(height="50px" width="50px" ng-src="{{getItemImage(item.id)}}")
+                div {{item.popularity}}%
+          tr
+            td(ng-repeat="frame in item_builds track by $index" ng-if="$index < 11")
+              div(ng-repeat="item in item_builds[$index].item_count")
+                img(height="30px" width="30px" ng-src="{{getItemImage(item.id)}}")
+                span {{item.popularity}}%
+
 
     include ./analytics.jade

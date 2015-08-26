@@ -22,13 +22,12 @@ function GetChampionJson($scope, $http) {
     .then(function(res){
       $scope.champion_array = [];
       $scope.champion_json = res.data.data;
-      for (champ in $scope.champion_json) {
-        var champ_json = $scope.champion_json[champ];
+      var sorted_champions = Object.keys($scope.champion_json).sort(function(a,b){return $scope.champion_json[a].name.localeCompare($scope.champion_json[b].name);});
+      for (champ in sorted_champions) {
+        var champ_json = $scope.champion_json[sorted_champions[champ]];
         champ_json.image = ddragon_url+'img/champion/'+champ_json.key+'.png';
         $scope.champion_array.push(champ_json);
       }
-
-      //$scope.search.championId = $scope.champion_json['Katarina'].id;
     });
 }
 
@@ -49,6 +48,7 @@ function GetItemlistJson($scope, $http) {
 }
 
 function GetItemImage(scope, item_id) {
+  console.log(item_id);
   return ddragon_url+'img/item/'+scope.itemlist_json[item_id].image.full;
 }
 
@@ -477,6 +477,10 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
 
 
 app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
+  $scope.getNumber = function(num) {
+    return new Array(num);   
+  }
+
   function parseStatCollection(stat_data) {
     // Continuous flow effect
     //$scope.kda_chart.removeData();
@@ -484,6 +488,15 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
 
     var champObject = $.grep($scope.champion_array, function(e){ return e.id == stat_data.championId; })[0];
     $scope.current_champion = champObject.name;
+    $scope.current_victory = (stat_data.victory) ? 'Victory' : 'Defeat';
+    $scope.current_role = stat_data.role;
+    $scope.current_lane = stat_data.lane;
+
+    $scope.alert_current_match_message = $scope.current_champion + ' - ' +
+                                         $scope.current_victory + ' - ' +
+                                         $scope.current_role + ' - ' +
+                                         $scope.current_lane;
+    $scope.alert_current_match = true;
 
     for (var i=0; i<=kda_timeline_length; i++) {
        $scope.kda_data.labels[i] = (i*5+' (0)');
@@ -523,7 +536,45 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
     $scope.kda_chart.update();
 
     $scope.item_builds = [];
+    $scope.core_build = [];
+    var idx = 0;
+    var item_purchase_history = [];
     for (item_frame in stat_data.itemBuilds) {
+      var frame_samples = stat_data.aggregateStats[idx*kda_interval].samples;
+      // If item_frame > 50, break
+      // Handle end game builds somehow
+
+      // Fetch most popular Starting Build
+      if (item_frame == 1) {
+        var most_popular = {};
+        most_popular.count = 0;
+        for (build in stat_data.itemBuilds[item_frame]) {
+          if (stat_data.itemBuilds[item_frame][build] > most_popular.count) {
+            most_popular.count = stat_data.itemBuilds[item_frame][build];
+            most_popular.idx = build;
+          }
+        }
+
+        if (most_popular.idx) {
+          $scope.start_build = {};
+          $scope.start_build.items = [];
+          $scope.start_build.count = most_popular.count;
+          var split_build = most_popular.idx.split(':');
+          split_build.pop();
+          for (var i=0; i<split_build.length; i++) {
+            var item_id = (split_build[i]%10000).toString();
+            var quantity = Math.floor(split_build[i]/10000);
+            
+            for (var j=0; j<quantity; j++) {
+              $scope.start_build.items.push(item_id);
+            }
+
+            item_purchase_history.push(item_id);
+          }
+        }
+      }
+
+      // Count most popular items per frame
       var build_frame = {};
       //build_frame.builds = [];
       var unsorted_item_count = {};
@@ -535,10 +586,21 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
         for (var i=0; i<split_build.length; i++) {
           var item_id = (split_build[i]%10000).toString();
           //var quantity = Math.floor(split_build[i]/10000);
-          if (unsorted_item_count[item_id]) {
-            unsorted_item_count[item_id] += stat_data.itemBuilds[item_frame][item_build];
-          } else {
-            unsorted_item_count[item_id] = stat_data.itemBuilds[item_frame][item_build];
+
+          var including_subitems = [];
+          including_subitems.push(item_id);
+          var item_subitems = $scope.itemlist_json[item_id].from;
+          for (subitem_idx in item_subitems) {
+            including_subitems.push(item_subitems[subitem_idx]);
+          }
+
+          for (item_idx in including_subitems) {
+            var curr_item_id =  including_subitems[item_idx];
+            if (unsorted_item_count[curr_item_id]) {
+              unsorted_item_count[curr_item_id] += stat_data.itemBuilds[item_frame][item_build];
+            } else {
+              unsorted_item_count[curr_item_id] = stat_data.itemBuilds[item_frame][item_build];
+            }
           }
         }
       }
@@ -546,14 +608,48 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
       var sorted_array = Object.keys(unsorted_item_count).sort(function(a,b){return unsorted_item_count[b]-unsorted_item_count[a]});
       var sorted_items = [];
 
-      var count = 6;
+      build_frame.significant_purchases = [];
+      var subitem_history = [];
       for (item in sorted_array) {
-        sorted_items.push({id: sorted_array[item], count: unsorted_item_count[sorted_array[item]]})
+        var this_item_id = sorted_array[item];
+        var this_item_count = unsorted_item_count[this_item_id];
+        var popularity = Math.floor(100*(this_item_count/frame_samples));
 
-        count--;
-        if (count < 0)
+        // Detailed sort stats
+        //sorted_items.push({id: sorted_array[item], popularity: popularity});
+
+        if (popularity >= 50 &&
+            item_purchase_history.indexOf(this_item_id) < 0) {
+          // Record subitems of each parent item
+          build_frame.significant_purchases.push({ id: this_item_id, popularity: popularity });
+
+          var from_items = $scope.itemlist_json[this_item_id].from;
+          for (subitem in from_items) {
+            if (subitem_history.indexOf(from_items[subitem]) < 0) {
+              subitem_history.push(from_items[subitem]);
+            }
+          }
+
+          item_purchase_history.push(this_item_id);
+
+          if ($scope.core_build.length < 6 && !$scope.itemlist_json[this_item_id].into) {
+            $scope.core_build.push(this_item_id);
+          }
+        }
+        
+        if (popularity < 50) {
           break;
+        }
       }
+
+      // Remove subitem if parent item is in this frame
+      for (var i=0; i<build_frame.significant_purchases.length; i++) {
+        if (subitem_history.indexOf(build_frame.significant_purchases[i].id) > -1) {
+          build_frame.significant_purchases.splice(i,1);
+          i--;
+        }
+      }
+
       build_frame.item_count = sorted_items;
 
 /*
@@ -577,8 +673,8 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
       build_frame.samples = stat_data.aggregateStats[item_frame].samples;
       //console.log(build_frame);
       $scope.item_builds.push(build_frame);
+      idx++;
     }
-    console.log($scope.item_builds);
   }
 
   $scope.getItemImage = function(item_id) {
@@ -593,7 +689,12 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
   $scope.search = {};
   $scope.search.championId = {};
   $scope.search.tier = {};
-  $scope.search.patch = {};
+  $scope.search.position = {};
+  $scope.search.victory = true;
+
+  $scope.alert_loading = false;
+  $scope.alert_error = false;
+  $scope.alert_current_match = false;
 
   // KDA Chart
   $scope.kda_labels = [];
@@ -655,39 +756,65 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
                    { id: 6, name: 'Master',     image:'./images/tier_icons/master.png' },
                    { id: 7, name: 'Challenger', image:'./images/tier_icons/challenger.png' } ];
 
-  $scope.patches = [ '5.15',
-                     '5.14' ];
+  $scope.positions = [ 'Top',
+                       'Jungle',
+                       'Mid',
+                       'Bottom' ];
 
   $scope.submit = function() {
     delete $scope.victory_response;
     delete $scope.defeat_response;
 
+    $scope.alert_error = false;
+
+    if (!$scope.search.championId.selected ||
+        !$scope.search.tier.selected ||
+        !$scope.search.position.selected) {
+      $scope.alert_error = true;
+      $scope.alert_error_message = 'Populate each search box';
+      return;
+    }
+
     var championId = $scope.search.championId.selected.id;
     var tier = $scope.search.tier.selected.id;
-    var patch = $scope.search.patch.selected;
+    var position = $scope.search.position.selected;
+    var victory = $scope.search.victory;
+
+    $scope.alert_loading = true;
 
     $http.get('/stat_collections?championId='+championId+
               '&tier='+tier+
-              '&patch='+patch+
-              '&victory=true')
+              '&position='+position+
+              '&victory='+victory)
       .then(function(res){
         $scope.victory_response = res.data;
         parseStatCollection( $scope.victory_response );
-        $scope.displayed = 'Victory';
+        $scope.alert_loading = false;
+        //$scope.displayed = 'Victory';
       }, function(res){
+        $scope.alert_error = true;
+        $scope.alert_loading = false;
+
+        if (res.status == 404) {
+          $scope.alert_error_message = 'Sorry, no champion data for that search.'
+        } else {
+          $scope.alert_error_message = res.data;
+        }
         // 404 / Error Handling
       });
+    /*
     $http.get('/stat_collections?championId='+championId+
               '&tier='+tier+
-              '&patch='+patch+
+              '&position='+position+
               '&victory=false')
       .then(function(res){
         $scope.defeat_response = res.data;
       }, function(res){
         // 404 / Error Handling
-      });
+      });*/
   };
 
+  /*
   $scope.kda_click = function () {
     if ($scope.displayed) {
       if ($scope.displayed == 'Victory' && $scope.defeat_response) {
@@ -699,4 +826,5 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
       }
     };
   };
+  */
 });
