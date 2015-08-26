@@ -65,17 +65,18 @@ html
         .col-md-1#searchSubmit
           div(class='btn btn-default' ng-show='!alert_loading' ng-click='submit()') Summon
           div(class='btn btn-default disabled' ng-show='alert_loading') <img id='loading_icon' src='/images/loading.svg'>
-        .col-md-1
-          div(class='btn btn-default' ng-show='previous_stats' ng-click='loadPrevious()') Load Previous
 
     #alertContainer
       div(class="alert alert-danger" ng-show="alert_error")
         <strong>Error:</strong> {{alert_error_message}}
-      div(class="alert alert-success" ng-show="alert_current_match")
-        {{alert_current_match_message}}
 
     #kdaChartContainer.genericContainer
       canvas(id='kdaChart')
+
+    #kdaTitleContainer
+      div(class="alert alert-success" ng-show="alert_current_match")
+        {{alert_current_match_message}}
+      div(class='btn btn-default' ng-show='previous_stats' ng-click='loadPrevious()') Load Previous
 
     #startEndBuilds.genericContainer
       table(width="100%")
