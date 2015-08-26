@@ -3,20 +3,12 @@ html
   head
     title= title
     
-    link(rel='stylesheet', href='/stylesheets/style.css')
-    link(rel='stylesheet', href='/bower_components/bootstrap/dist/css/bootstrap.css')
-    link(rel='stylesheet', href='/bower_components/angular-ui-select/dist/select.css')
-    link(rel='stylesheet', href='/bower_components/angular-chart.js/dist/angular-chart.css')
-    script(src='/bower_components/jquery/dist/jquery.js')
-    script(src='https://ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js')
-    script(src='/bower_components/Chart.js/Chart.js')
-    script(src='/bower_components/Chart.StackedBar.js/src/Chart.StackedBar.js')
-    script(src='/bower_components/angular-chart.js/dist/angular-chart.js')
-    script(src='/bower_components/angular-sanitize/angular-sanitize.min.js')
-    script(src='/bower_components/angular-ui-select/dist/select.js')
-    script(src='/core.js')
+    include ./common_includes.jade
 
   body(ng-app='coreApp', ng-controller='buildStatsCtrl', class='ng-cloak')
+    include ./header.jade
+    #headerSubText(ng-click='randomSearch()') How does {{random_tier}} build {{random_lane}} {{random_champion}}?
+
     #statSearchContainer
       .row
         .col-md-3

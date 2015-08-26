@@ -15,6 +15,23 @@ a {
   color: #00B7FF;
 }
 
+#siteHeader {
+}
+
+#siteHeader h1 {
+  font-size: 90px;
+  text-shadow: 0px 1px 0px #999, 0px 2px 0px #888, 0px 3px 0px #777, 0px 4px 0px #666, 0px 5px 0px #555, 0px 6px 0px #444, 0px 7px 0px #333, 0px 8px 7px #001135;
+  color: #dddddd;
+  font-family: 'Lobster', cursive;
+}
+
+#headerSubText {
+  font-size: 26px;
+  margin-bottom: 50px;
+  color: #cccccc;
+  font-family: 'Lobster', cursive;
+}
+
 .genericContainer {
   background-color: rgba(0,0,0,0.85);
   border: 2px solid rgba(255,255,255,0.3);
@@ -113,7 +130,6 @@ a {
 }
 
 #statSearchContainer {
-  padding-top: 30px;
   padding-bottom: 10px;
   margin: 0 auto;
 }

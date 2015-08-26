@@ -17,6 +17,21 @@ function ItemlistEntry(id, name, cost, image, plaintext) {
   return this;
 }
 
+function SetRandoms($scope) {
+  $scope.random_champ_idx = Math.round(Math.random()*($scope.champion_array.length-1));
+  $scope.random_tier_idx = Math.round(Math.random()*($scope.tiers.length-1));
+
+  var lanes = [ 'toplane',
+                'jungle',
+                'midlane',
+                'botlane' ];
+  $scope.random_lane_idx = Math.round(Math.random()*(lanes.length-1));
+
+  $scope.random_champion = $scope.champion_array[$scope.random_champ_idx].name;
+  $scope.random_tier = $scope.tiers[$scope.random_tier_idx].name;
+  $scope.random_lane = lanes[$scope.random_lane_idx];
+}
+
 function GetChampionJson($scope, $http) {
   $http.get('/static-json/champion.json')
     .then(function(res){
@@ -28,6 +43,8 @@ function GetChampionJson($scope, $http) {
         champ_json.image = ddragon_url+'img/champion/'+champ_json.key+'.png';
         $scope.champion_array.push(champ_json);
       }
+
+      SetRandoms($scope);
     });
 }
 
@@ -325,7 +342,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
   $scope.effective_gold = [0, 0, 0, 0, 0, 0];
   $scope.actual_cost = [0, 0, 0, 0, 0, 0];
 
-  GetChampionJson($scope, $http);
+  //GetChampionJson($scope, $http);
   GetItemlistJson($scope, $http);
 
   $scope.build_item_image = [];
@@ -768,6 +785,14 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
                        'Jungle',
                        'Mid',
                        'Bottom' ];
+
+  $scope.randomSearch = function() {
+    $scope.search.championId.selected = $scope.champion_array[$scope.random_champ_idx];
+    $scope.search.tier.selected = $scope.tiers[$scope.random_tier_idx];
+    $scope.search.position.selected = $scope.positions[$scope.random_lane_idx];
+    $scope.submit();
+    SetRandoms($scope);
+  }
 
   $scope.loadPrevious = function() {
     if ( $scope.previous_stats ) {
