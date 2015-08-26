@@ -1,3 +1,8 @@
+@font-face {
+  font-family: Sofia;
+  src: url("/fonts/Sofia-Regular.otf") format("opentype");
+}
+
 body {
   padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
@@ -23,14 +28,14 @@ a {
   font-size: 90px;
   text-shadow: 0px 1px 0px #999, 0px 2px 0px #888, 0px 3px 0px #777, 0px 4px 0px #666, 0px 5px 0px #555, 0px 6px 0px #444, 0px 7px 0px #333, 0px 8px 7px #001135;
   color: #dddddd;
-  font-family: 'Lobster', cursive;
+  font-family: 'Sofia';
 }
 
 #headerSubText {
   font-size: 26px;
   margin-bottom: 50px;
   color: #cccccc;
-  font-family: 'Lobster', cursive;
+  font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
 }
 
 .genericContainer {
