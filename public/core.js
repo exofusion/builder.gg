@@ -491,11 +491,13 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
     $scope.current_victory = (stat_data.victory) ? 'Victory' : 'Defeat';
     $scope.current_role = stat_data.role;
     $scope.current_lane = stat_data.lane;
+    $scope.current_patch = stat_data.patch;
 
     $scope.alert_current_match_message = $scope.current_champion + ' - ' +
                                          $scope.current_victory + ' - ' +
                                          $scope.current_role + ' - ' +
-                                         $scope.current_lane;
+                                         $scope.current_lane + ' - ' +
+                                         'Patch: ' + $scope.current_patch;
     $scope.alert_current_match = true;
 
     for (var i=0; i<=kda_timeline_length; i++) {
@@ -706,7 +708,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
 
   var kda_datasets =  [{
                           label: "Kills",
-                          fillColor: "rgba(70,200,70,0.02)",
+                          fillColor: "rgba(70,200,70,0.05)",
                           strokeColor: "rgba(70,200,70,1)",
                           pointColor: "rgba(70,200,70,1)",
                           pointStrokeColor: "#fff",
@@ -716,7 +718,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
                        },
                        {
                           label: "Deaths",
-                          fillColor: "rgba(247,70,74,0.02)",
+                          fillColor: "rgba(247,70,74,0.05)",
                           strokeColor: "rgba(247,70,74,1)",
                           pointColor: "rgba(247,70,74,1)",
                           pointStrokeColor: "#fff",
@@ -726,7 +728,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
                        },
                        {
                           label: "Assists",
-                          fillColor: "rgba(151,187,205,0.02)",
+                          fillColor: "rgba(151,187,205,0.05)",
                           strokeColor: "rgba(151,187,205,1)",
                           pointColor: "rgba(151,187,205,1)",
                           pointStrokeColor: "#fff",

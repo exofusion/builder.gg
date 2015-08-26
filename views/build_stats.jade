@@ -19,7 +19,7 @@ html
   body(ng-app='coreApp', ng-controller='buildStatsCtrl', class='ng-cloak')
     #statSearchContainer
       .row
-        .col-md-2
+        .col-md-3
         .col-md-2
           ui-select(ng-model="search.tier.selected" theme="bootstrap" ng-disabled="disabled" class="tier_select" search-enabled="false" ng-init='search.tier.selected = tiers[4]')
             ui-select-match(placeholder="Select a tier")
@@ -40,7 +40,9 @@ html
                 img(ng-src="{{champion.image}}")
                 span(ng-bind-html="champion.name | highlight: $select.search")
 
+      .row
         .col-md-3
+        .col-md-2
           ui-select(ng-model="search.position.selected" theme="bootstrap" ng-disabled="disabled" class="position_select" search-enabled="false")
             ui-select-match(placeholder="Select a position")
               {{$select.selected}}
@@ -48,23 +50,20 @@ html
               .item-selection-choice
                 span(ng-bind-html="position")
 
-      .row
-        .col-md-3
-        .col-md-3#victorySelect
+        .col-md-2#victorySelect
           label(class='radio-inline')
             input(type='radio'
                   ng-model='search.victory'
                   value='true'
                   ng-checked='true')
             span Victory
-
           label(class='radio-inline')
             input(type='radio'
                   ng-model='search.victory'
                   value='false')
             span Defeat
-        .col-md-2#searchSubmit
-          div(class='btn btn-default' ng-show='!alert_loading' ng-click='submit()') Lookup
+        .col-md-1#searchSubmit
+          div(class='btn btn-default' ng-show='!alert_loading' ng-click='submit()') Summon
           div(class='btn btn-default disabled' ng-show='alert_loading') <img id='loading_icon' src='/images/loading.svg'>
 
     #alertContainer
