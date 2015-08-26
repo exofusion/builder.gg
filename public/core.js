@@ -616,7 +616,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
         var popularity = Math.floor(100*(this_item_count/frame_samples));
 
         // Detailed sort stats
-        sorted_items.push({id: sorted_array[item], popularity: popularity});
+        //sorted_items.push({id: sorted_array[item], popularity: popularity});
 
         if (popularity >= 50 &&
             item_purchase_history.indexOf(this_item_id) < 0) {
