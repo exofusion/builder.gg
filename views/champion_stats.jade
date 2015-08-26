@@ -6,9 +6,12 @@ html
     include ./common_includes.jade
 
   body(ng-app='coreApp', ng-controller='buildStatsCtrl', class='ng-cloak')
-    #siteHeader
+    include ./navigation.jade
+
+    #siteHeader.col-md-8
       h1 champion.builder.gg
-    #headerSubText(ng-click='randomSearch()') How does {{random_tier}} build {{random_lane}} {{random_champion}}?
+      #headerSubText
+        #randomSelect(ng-click='randomSearch()') How does {{random_tier}} build {{random_lane}} {{random_champion}}?
 
     #statSearchContainer
       .row

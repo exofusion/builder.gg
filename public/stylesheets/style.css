@@ -3,6 +3,11 @@
   src: url("/fonts/Sofia-Regular.otf") format("opentype");
 }
 
+@font-face {
+  font-family: LobsterTwo Italic;
+  src: url("/fonts/LobsterTwo-Italic.otf") format("opentype");
+}
+
 body {
   padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
@@ -18,6 +23,16 @@ body {
 
 a {
   color: #00B7FF;
+}
+
+#navigation {
+  margin-top: 20px;
+  font-family: 'Sofia';
+  text-align: right;
+}
+
+#navigation a {
+  color: #BBBBBB;
 }
 
 #siteHeader {
@@ -36,7 +51,11 @@ a {
   padding-top: 10px;
   margin-bottom: 50px;
   color: #cccccc;
-  font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+  font-family: 'LobsterTwo Italic';
+}
+
+#randomSelect {
+  cursor: pointer; cursor: hand;
 }
 
 .genericContainer {
@@ -211,6 +230,7 @@ a {
   height: 100px;
   z-index: 1;
   background-color: rgba(0,0,0,0.85);
+  cursor: pointer; cursor: hand;
 }
 
 .clear_button {

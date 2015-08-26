@@ -7,9 +7,11 @@ html
     include ./common_includes.jade
 
   body(ng-app='coreApp', ng-controller='statDistributionCtrl', class='ng-cloak')
-    #siteHeader
+    include ./navigation.jade
+
+    #siteHeader.col-md-8
       h1 item.builder.gg
-    #headerSubText
+      #headerSubText
 
     #statDistributionChartContainer
       .col-md-12.genericContainer
