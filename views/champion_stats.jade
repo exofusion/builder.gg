@@ -7,7 +7,7 @@ html
 
   body(ng-app='coreApp', ng-controller='buildStatsCtrl', class='ng-cloak')
     #siteHeader
-      h1= title
+      h1 champion.builder.gg
     #headerSubText(ng-click='randomSearch()') How does {{random_tier}} build {{random_lane}} {{random_champion}}?
 
     #statSearchContainer
@@ -58,7 +58,7 @@ html
         .col-md-1#searchSubmit
           div(class='btn btn-default' ng-show='!alert_loading' ng-click='submit()') Summon
           div(class='btn btn-default disabled' ng-show='alert_loading') <img id='loading_icon' src='/images/loading.svg'>
-
+  
     #alertContainer
       div(class="alert alert-danger" ng-show="alert_error")
         <strong>Error:</strong> {{alert_error_message}}
