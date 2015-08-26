@@ -615,7 +615,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
       for (item in sorted_array) {
         var this_item_id = sorted_array[item];
         var this_item_count = unsorted_item_count[this_item_id];
-        var popularity = Math.floor(100*(this_item_count/frame_samples));
+        var popularity = 100*(this_item_count/frame_samples);
 
         // Detailed sort stats
         //sorted_items.push({id: sorted_array[item], popularity: popularity});
@@ -623,7 +623,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
         if (popularity >= 50 &&
             item_purchase_history.indexOf(this_item_id) < 0) {
           // Record subitems of each parent item
-          build_frame.significant_purchases.push({ id: this_item_id, popularity: popularity });
+          build_frame.significant_purchases.push({ id: this_item_id, popularity: Math.floor(popularity) });
 
           var from_items = $scope.itemlist_json[this_item_id].from;
           for (subitem in from_items) {
