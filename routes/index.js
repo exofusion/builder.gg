@@ -3,7 +3,11 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+  if (req.subdomains.indexOf('test') > -1) {
+    res.render('build_stats', { title: 'Build Stats' });
+  } else {
+    res.render('index', { title: 'Express' });
+  }
 });
 
 router.get('/build_stats', function(req, res, next) {
