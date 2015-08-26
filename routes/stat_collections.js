@@ -8,7 +8,7 @@ router.get('/', function(req, res, next) {
     var search_options = {};
 
     if (req.query.championId) {
-        search_options.patch = '5.15';
+        search_options.patch = '5.16';
 
         search_options.championId = parseInt(req.query.championId);
 
