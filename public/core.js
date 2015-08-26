@@ -490,12 +490,14 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
 
     var champObject = $.grep($scope.champion_array, function(e){ return e.id == stat_data.championId; })[0];
     $scope.current_champion = champObject.name;
+    $scope.current_tier = stat_data.tier;
     $scope.current_victory = (stat_data.victory) ? 'Victory' : 'Defeat';
     $scope.current_role = stat_data.role;
     $scope.current_lane = stat_data.lane;
     $scope.current_patch = stat_data.patch;
 
     $scope.alert_current_match_message = $scope.current_champion + ' - ' +
+                                         $scope.tiers[$scope.current_tier-1].name + ' - ' +
                                          $scope.current_victory + ' - ' +
                                          $scope.current_role + ' - ' +
                                          $scope.current_lane + ' - ' +
