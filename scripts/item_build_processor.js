@@ -543,6 +543,8 @@ function selectMatch() {
                                         console.log("[ERROR] MatchCacheItem's data is null: "+mqi_entry._id);
                                         next_mqi();
                                     }
+                                } else {
+                                    next_mqi();
                                 }
                             });
                         } else {

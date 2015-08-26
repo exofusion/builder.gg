@@ -51,7 +51,7 @@ a {
 }
 
 #victorySelect {
-  margin-top: 5px;
+  margin-top: 4px;
 }
 
 #alertContainer {
@@ -115,6 +115,11 @@ a {
 
 #statSearchContainer {
   zoom: 1.5;
+}
+
+#loading_icon {
+  height: 15px;
+  width: 15px;
 }
 
 #blockSelectionContainer button {
