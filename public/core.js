@@ -48,7 +48,6 @@ function GetItemlistJson($scope, $http) {
 }
 
 function GetItemImage(scope, item_id) {
-  console.log(item_id);
   return ddragon_url+'img/item/'+scope.itemlist_json[item_id].image.full;
 }
 
@@ -482,6 +481,9 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
   }
 
   function parseStatCollection(stat_data) {
+    $scope.previous_stats = $scope.current_stats;
+    $scope.current_stats = stat_data;
+
     // Continuous flow effect
     //$scope.kda_chart.removeData();
     //$scope.kda_chart.addData([[], [], []], '');
@@ -764,6 +766,12 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
                        'Jungle',
                        'Mid',
                        'Bottom' ];
+
+  $scope.loadPrevious = function() {
+    if ( $scope.previous_stats ) {
+      parseStatCollection( $scope.previous_stats );
+    }
+  }
 
   $scope.submit = function() {
     delete $scope.victory_response;
