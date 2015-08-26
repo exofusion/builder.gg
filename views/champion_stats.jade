@@ -6,7 +6,8 @@ html
     include ./common_includes.jade
 
   body(ng-app='coreApp', ng-controller='buildStatsCtrl', class='ng-cloak')
-    include ./header.jade
+    #siteHeader
+      h1= title
     #headerSubText(ng-click='randomSearch()') How does {{random_tier}} build {{random_lane}} {{random_champion}}?
 
     #statSearchContainer
