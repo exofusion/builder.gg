@@ -19,7 +19,7 @@ html
   body(ng-app='coreApp', ng-controller='buildStatsCtrl', class='ng-cloak')
     #statSearchContainer
       .row
-        .col-md-3
+        .col-md-2
         .col-md-2
           ui-select(ng-model="search.tier.selected" theme="bootstrap" ng-disabled="disabled" class="tier_select" search-enabled="false" ng-init='search.tier.selected = tiers[4]')
             ui-select-match(placeholder="Select a tier")
@@ -30,7 +30,7 @@ html
                 img(ng-src="{{tier.image}}")
                 span(ng-bind-html="tier.name")
 
-        .col-md-2
+        .col-md-3
           ui-select(ng-model="search.championId.selected" theme="bootstrap" ng-disabled="disabled" class="champion_select" search-enabled="true")
             ui-select-match(placeholder="Enter a champion")
               img(ng-src="{{$select.selected.image}}")
@@ -40,7 +40,7 @@ html
                 img(ng-src="{{champion.image}}")
                 span(ng-bind-html="champion.name | highlight: $select.search")
 
-        .col-md-2
+        .col-md-3
           ui-select(ng-model="search.position.selected" theme="bootstrap" ng-disabled="disabled" class="position_select" search-enabled="false")
             ui-select-match(placeholder="Select a position")
               {{$select.selected}}
@@ -49,8 +49,8 @@ html
                 span(ng-bind-html="position")
 
       .row
-        .col-md-4
-        .col-md-2#victorySelect
+        .col-md-3
+        .col-md-3#victorySelect
           label(class='radio-inline')
             input(type='radio'
                   ng-model='search.victory'
@@ -63,9 +63,9 @@ html
                   ng-model='search.victory'
                   value='false')
             span Defeat
-        .col-md-1
+        .col-md-2#searchSubmit
           div(class='btn btn-default' ng-show='!alert_loading' ng-click='submit()') Lookup
-          div(class='btn btn-default disabled' ng-show='alert_loading') Loading <img id='loading_icon' src='/images/loading.svg'>
+          div(class='btn btn-default disabled' ng-show='alert_loading') <img id='loading_icon' src='/images/loading.svg'>
 
     #alertContainer
       div(class="alert alert-danger" ng-show="alert_error")
