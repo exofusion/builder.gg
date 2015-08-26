@@ -56,12 +56,14 @@ a {
 
 #alertContainer {
   min-height: 50px;
+  margin-bottom: 20px;
 }
 
 .alert {
   width: 40%;
   margin-left: auto;
   margin-right: auto;
+  margin-bottom: 0 !important;
   color: white !important;
   font-size: 18px !important;
   padding: 10px !important;
