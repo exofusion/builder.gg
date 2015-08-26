@@ -771,11 +771,9 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
 
     $scope.alert_error = false;
 
-    if (!$scope.search.championId.selected ||
-        !$scope.search.tier.selected ||
-        !$scope.search.position.selected) {
+    if (!$scope.search.championId.selected) {
       $scope.alert_error = true;
-      $scope.alert_error_message = 'Populate each search box';
+      $scope.alert_error_message = 'Please at least select a champion';
       return;
     }
 
