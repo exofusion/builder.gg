@@ -517,6 +517,10 @@ function CombineStats(victory_stats, defeat_stats) {
     return victory_stats;
   }
 
+  // Make a copy of our source stats so we don't end up changing anything
+  victory_stats = JSON.parse(JSON.stringify(victory_stats));
+  defeat_stats = JSON.parse(JSON.stringify(defeat_stats));
+
   var combined_stats = {};
   combined_stats.samples = victory_stats.samples + defeat_stats.samples;
   combined_stats.role = victory_stats.role;
@@ -527,7 +531,7 @@ function CombineStats(victory_stats, defeat_stats) {
 
   // trinketBuilds
 
-  combined_stats.itemBuilds = JSON.parse(JSON.stringify(victory_stats.itemBuilds));
+  combined_stats.itemBuilds = victory_stats.itemBuilds;
   for (frame in defeat_stats.itemBuilds) {
       if (combined_stats.itemBuilds[frame]) {
           for (build in defeat_stats.itemBuilds[frame]) {
@@ -544,7 +548,7 @@ function CombineStats(victory_stats, defeat_stats) {
 
   // matchFrameData
 
-  combined_stats.aggregateStats = JSON.parse(JSON.stringify(victory_stats.aggregateStats));
+  combined_stats.aggregateStats = victory_stats.aggregateStats;
   for (frame in defeat_stats.aggregateStats) {
       if (combined_stats.aggregateStats[frame]) {
           combined_stats.aggregateStats[frame].samples += defeat_stats.aggregateStats[frame].samples;
@@ -579,7 +583,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
         break;
       case 'all':
         stat_data = CombineStats($scope.current_stats.victories, $scope.current_stats.defeats);
-        $scope.current_victory = 'All Games'; // Winrate
+        $scope.current_victory = 'All Games';
         break;
     }
 
