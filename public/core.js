@@ -791,12 +791,14 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
                        'Bottom' ];
 
   $scope.randomSearch = function() {
-    $scope.search.championId.selected = $scope.champion_array[$scope.random_champ_idx];
-    $scope.search.tier.selected = $scope.tiers[$scope.random_tier_idx];
-    $scope.search.position.selected = $scope.positions[$scope.random_lane_idx];
-    $scope.search.victory = 'both';
-    $scope.submit();
-    SetRandoms($scope);
+    if (!$scope.alert_loading) {
+      $scope.search.championId.selected = $scope.champion_array[$scope.random_champ_idx];
+      $scope.search.tier.selected = $scope.tiers[$scope.random_tier_idx];
+      $scope.search.position.selected = $scope.positions[$scope.random_lane_idx];
+      $scope.search.victory = 'both';
+      $scope.submit();
+      SetRandoms($scope);
+    }
   }
 
   $scope.loadPrevious = function() {
