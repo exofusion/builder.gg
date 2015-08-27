@@ -99,7 +99,9 @@ html
       table(width="100%")
         thead
           tr
-            td(ng-repeat="n in getNumber(10) track by $index") {{5+($index*5)}}:00
+            td(ng-repeat="n in getNumber(10) track by $index")
+              div {{5+($index*5)}}:00
+              div ({{item_builds[$index+1].samples ? item_builds[$index+1].samples : 0}})
         tbody
           tr
             td(ng-repeat="frame in item_builds track by $index" ng-if="$index > 0 && $index < 11")
@@ -107,7 +109,7 @@ html
                 img(height="50px" width="50px" ng-src="{{getItemImage(item.id)}}")
                 div {{item.popularity}}%
           tr
-            td(ng-repeat="frame in item_builds track by $index" ng-if="$index < 11")
+            td(ng-repeat="frame in item_builds track by $index" ng-if="$index > 0 && $index < 11")
               div(ng-repeat="item in item_builds[$index].item_count")
                 img(height="30px" width="30px" ng-src="{{getItemImage(item.id)}}")
                 span {{item.popularity}}%

@@ -164,6 +164,10 @@ a {
   margin-right: auto;
 }
 
+#minuteBuilds table {
+  table-layout: fixed;
+}
+
 #statSearchContainer {
   padding-bottom: 10px;
   margin: 0 auto;

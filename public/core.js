@@ -683,7 +683,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
           }
         }
         
-        if (popularity < 50) {
+        if (popularity <= 50) {
           break;
         }
       }
