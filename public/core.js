@@ -235,7 +235,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
   }
 
   $scope.createNewBlock = function() {
-    $scope.build_blocks.push({name: 'New Build', items: []});
+    $scope.build_blocks.push({name: 'New Block', items: []});
     var bb_length = $scope.build_blocks.length;
     $scope.loadBlock($scope.build_blocks[bb_length-1]);
   }
@@ -508,7 +508,11 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
     var champObject = $.grep($scope.champion_array, function(e){ return e.id == stat_data.championId; })[0];
     $scope.current_champion = champObject.name;
     $scope.current_tier = stat_data.tier;
-    $scope.current_victory = (stat_data.victory) ? 'Victory' : 'Defeat';
+    if (stat_data.victory == undefined) {
+      $scope.current_victory = 'Both';
+    } else {
+      $scope.current_victory = (stat_data.victory) ? 'Victory' : 'Defeat';
+    }
     $scope.current_role = stat_data.role;
     $scope.current_lane = stat_data.lane;
     $scope.current_patch = stat_data.patch;
@@ -790,6 +794,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
     $scope.search.championId.selected = $scope.champion_array[$scope.random_champ_idx];
     $scope.search.tier.selected = $scope.tiers[$scope.random_tier_idx];
     $scope.search.position.selected = $scope.positions[$scope.random_lane_idx];
+    $scope.search.victory = 'both';
     $scope.submit();
     SetRandoms($scope);
   }

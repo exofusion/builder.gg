@@ -58,6 +58,11 @@ html
                   ng-model='search.victory'
                   value='false')
             span Defeat
+          label(class='radio-inline')
+            input(type='radio'
+                  ng-model='search.victory'
+                  value='both')
+            span Both
         .col-md-2#searchSubmit
           div(class='btn btn-default' ng-show='!alert_loading' ng-click='submit()') Summon
           div(class='btn btn-default disabled' ng-show='alert_loading') <img id='loading_icon' src='/images/loading.svg'>

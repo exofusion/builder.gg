@@ -18,8 +18,8 @@
 9 verbose stack     at maybeClose (child_process.js:1015:16)
 9 verbose stack     at Process.ChildProcess._handle.onexit (child_process.js:1087:5)
 10 verbose pkgid buildergg@0.0.0
-11 verbose cwd C:\Projects\RiotChallengeSummer2015\buildergg
-12 error Windows_NT 6.3.9600
+11 verbose cwd D:\Projects\RiotSummerAPIChallenge2015
+12 error Windows_NT 6.1.7601
 13 error argv "C:\\Program Files\\nodejs\\\\node.exe" "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js" "start"
 14 error node v0.12.7
 15 error npm  v2.11.3
