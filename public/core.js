@@ -290,6 +290,23 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
     }
   }
 
+  $scope.shareItemSet = function() {
+    $scope.currently_saving = true;
+    var save_object = {};
+    save_object.name = $scope.build_name;
+    save_object.blocks = $scope.build_blocks;
+    var parameter = JSON.stringify(save_object);
+      $http.post('/linkify', parameter).
+      success(function(data, status, headers, config) {
+          $scope.share_link = data;
+          $scope.currently_saving = false;
+        }).
+        error(function(data, status, headers, config) {
+          // Error saving item set
+          $scope.currently_saving = false;
+        });
+  }
+
   $scope.exportItemSet = function() {
     var item_set = {};
     item_set.title = "Item Set Title";

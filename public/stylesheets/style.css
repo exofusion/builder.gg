@@ -200,6 +200,12 @@ a {
   margin-bottom: 12px;
 }
 
+#shareItemSetButton {
+  width: 126px;
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
 .block_item_img_container {
   float: right;
   margin-right: -18px;

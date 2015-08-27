@@ -82,6 +82,19 @@ html
               div(ng-bind-html="item.name | highlight: $select.search")
               small {{item.cost}}g
       .col-md-1
+        input(type='text'
+              ng-model='build_name'
+              class='form-control'
+              placeholder='Build Name')
+        button(class='btn btn-default'
+               id='shareItemSetButton'
+               ng-click='shareItemSet()'
+               ng-show='!currently_saving && !share_link') Share Item Set
+        input(type='text'
+              ng-model='share_link'
+              class='form-control'
+              ng-show='share_link')
+        div(class='btn btn-default disabled' id='shareItemSetButton' ng-show='currently_saving') <img id='loading_icon' src='/images/loading.svg'>
         button(class='btn btn-default'
                ng-click='exportItemSet()') Export Item Set
 

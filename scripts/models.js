@@ -91,6 +91,11 @@ var statCollectionSchema = new Schema({
     matchFrameData: [matchFrameDataSchema]
 });
 
+var itemSetEntrySchema = new Schema({
+    _id: String,
+    data: {}
+});
+
 //statCollectionSchema.index({ championId: 1, tier: 1, patch: 1, victory: 1, lane: 1, role: 1 });
 
 exports.SeedSummoner = mongoose.model('SeedSummoner', seedSummonerSchema);
@@ -99,6 +104,7 @@ exports.MatchCacheItem = mongoose.model('MatchCacheItem', matchCacheItemSchema);
 exports.MatchProcessed = mongoose.model('MatchProcessed', matchProcessedSchema);
 exports.MatchFrameData = mongoose.model('MatchFrameData', matchFrameDataSchema);
 exports.StatCollection = mongoose.model('StatCollection', statCollectionSchema);
+exports.ItemSetEntry = mongoose.model('ItemSetEntry', itemSetEntrySchema);
 
 exports.mongoose = mongoose;
 exports.disconnect = function(){ mongoose.disconnect(); }
