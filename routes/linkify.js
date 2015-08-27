@@ -15,6 +15,7 @@ router.post('/', function(req, res, next) {
     var itemSetEntry = new ItemSetEntry();
     itemSetEntry._id = hashed_json;
     itemSetEntry.data = req.body;
+    itemSetEntry.date = new Date();
     itemSetEntry.save(function(error){
         if (error) {
             console.log(error);

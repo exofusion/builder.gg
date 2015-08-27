@@ -543,7 +543,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
     $scope.alert_current_match = true;
 
     for (var i=0; i<=kda_timeline_length; i++) {
-       $scope.kda_data.labels[i] = (i*5+' (0)');
+       $scope.kda_data.labels[i] = (i*5+'′ (0)');
        $scope.kda_chart.datasets[0].points[i].value = 0;
        $scope.kda_chart.datasets[1].points[i].value = 0;
        $scope.kda_chart.datasets[2].points[i].value = 0;
@@ -565,7 +565,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
         if (i <= kda_last_minute) {
           // This causes data to reset before tweening to next values, dig into ChartJS to see where it's
           // verifying the labels are the same
-          $scope.kda_data.labels[label_index] = i+' ('+stat_data.aggregateStats[i].samples+')';
+          $scope.kda_data.labels[label_index] = i+'′ ('+stat_data.aggregateStats[i].samples+')';
           $scope.kda_chart.datasets[0].points[label_index].value = (killTally/frame_samples).toFixed(2);
           $scope.kda_chart.datasets[1].points[label_index].value = (deathTally/frame_samples).toFixed(2);
           $scope.kda_chart.datasets[2].points[label_index].value = (assistTally/frame_samples).toFixed(2);
@@ -662,7 +662,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
         // Detailed sort stats
         //sorted_items.push({id: sorted_array[item], popularity: popularity});
 
-        if (popularity >= 50 &&
+        if (popularity > 50 &&
             item_purchase_history.indexOf(this_item_id) < 0) {
           // Record subitems of each parent item
           build_frame.significant_purchases.push({ id: this_item_id, popularity: Math.floor(popularity) });
@@ -745,7 +745,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
   // KDA Chart
   $scope.kda_labels = [];
   for (var i=0; i<=kda_timeline_length; i++) {
-      $scope.kda_labels.push(i*5+' (0)');
+      $scope.kda_labels.push(i*5+'′ (0)');
   }
 
   var kda_datasets =  [{
@@ -805,7 +805,8 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
   $scope.positions = [ 'Top',
                        'Jungle',
                        'Mid',
-                       'Bottom' ];
+                       'Bottom',
+                       'Most Popular Lane' ];
 
   $scope.randomSearch = function() {
     if (!$scope.alert_loading) {

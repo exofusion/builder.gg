@@ -37,7 +37,7 @@ html
                 span(ng-bind-html="champion.name | highlight: $select.search")
 
         .col-md-2
-          ui-select(ng-model="search.position.selected" theme="bootstrap" ng-disabled="disabled" class="position_select" search-enabled="false")
+          ui-select(ng-model="search.position.selected" theme="bootstrap" ng-disabled="disabled" class="position_select" search-enabled="false" ng-init="search.position.selected = positions[4]")
             ui-select-match(placeholder="Select a position")
               {{$select.selected}}
             ui-select-choices(repeat="position in positions")

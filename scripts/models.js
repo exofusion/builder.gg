@@ -93,6 +93,7 @@ var statCollectionSchema = new Schema({
 
 var itemSetEntrySchema = new Schema({
     _id: String,
+    date_added: Date,
     data: {}
 });
 
