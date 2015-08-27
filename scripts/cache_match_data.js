@@ -80,9 +80,13 @@ function selectMatchQueueItem(){
                           function(error, mqi){
                             if (error) {
                                 console.log(error);
-                            } else {
+                            } else if (mqi[0]) {
                                 current_mqi = mqi[0];
                                 riot_api.getMatch(current_mqi._id, addMatchToCache);
+                            } else {
+                                console.log('[WARNING] No match queue items found for tier: '+current_tier);
+                                stepTier();
+                                selectMatchQueueItem();
                             }
                         }).limit(1).sort({ timestamp: -1 });
 }
