@@ -114,16 +114,17 @@ router.get('/', function(req, res, next) {
                 StatCollection.findOne(search_options, function(error, stat_collection_defeat) {
                     if (error) {
                          console.log(error);
-                    } else if (stat_collection_defeat) {
+                    } else if (stat_collection && stat_collection_defeat) {
                         res.send(CombineStats(stat_collection, stat_collection_defeat));
+                    } else if (stat_collection_defeat) {
+                        // No victories, but we found a defeat
+                        res.send(stat_collection_defeat);
+                    } else if (stat_collection) {
+                        // No defeats found, just return victories
+                        res.send(stat_collection);
                     } else {
-                        if (stat_collection_defeat) {
-                            // No defeats found, just return victories
-                            res.send(stat_collection);
-                        } else {
-                            // Didn't find victories or defeats for search terms
-                            res.status(404).end();
-                        }
+                        // Didn't find victories or defeats for search terms
+                        res.status(404).end();
                     }
                 });
             } else if (stat_collection) {
