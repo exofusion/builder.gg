@@ -508,218 +508,295 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
   ];*/
 });
 
+function CombineStats(victory_stats, defeat_stats) {
+  if (!victory_stats && !defeat_stats) {
+    return null;
+  } else if (!victory_stats) {
+    return defeat_stats;
+  } else if (!defeat_stats) {
+    return victory_stats;
+  }
+
+  var combined_stats = {};
+  combined_stats.samples = victory_stats.samples + defeat_stats.samples;
+  combined_stats.role = victory_stats.role;
+  combined_stats.lane = victory_stats.lane;
+  combined_stats.patch = victory_stats.patch;
+  combined_stats.tier = victory_stats.tier;
+  combined_stats.championId = victory_stats.championId;
+
+  // trinketBuilds
+
+  combined_stats.itemBuilds = JSON.parse(JSON.stringify(victory_stats.itemBuilds));
+  for (frame in defeat_stats.itemBuilds) {
+      if (combined_stats.itemBuilds[frame]) {
+          for (build in defeat_stats.itemBuilds[frame]) {
+              if (combined_stats.itemBuilds[frame][build]) {
+                  combined_stats.itemBuilds[frame][build] += defeat_stats.itemBuilds[frame][build];
+              } else {
+                  combined_stats.itemBuilds[frame][build] = defeat_stats.itemBuilds[frame][build];
+              }
+          }
+      } else {
+          combined_stats.itemBuilds[frame] = defeat_stats.itemBuilds[frame];
+      }
+  }
+
+  // matchFrameData
+
+  combined_stats.aggregateStats = JSON.parse(JSON.stringify(victory_stats.aggregateStats));
+  for (frame in defeat_stats.aggregateStats) {
+      if (combined_stats.aggregateStats[frame]) {
+          combined_stats.aggregateStats[frame].samples += defeat_stats.aggregateStats[frame].samples;
+          combined_stats.aggregateStats[frame].kills += defeat_stats.aggregateStats[frame].kills;
+          combined_stats.aggregateStats[frame].assists += defeat_stats.aggregateStats[frame].assists;
+          combined_stats.aggregateStats[frame].deaths += defeat_stats.aggregateStats[frame].deaths;
+      } else {
+          combined_stats.aggregateStats[frame] = defeat_stats.aggregateStats[frame];
+      }
+  }
+
+  return combined_stats;
+}
 
 app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
   $scope.getNumber = function(num) {
     return new Array(num);   
   }
 
-  function parseStatCollection(stat_data) {
-    $scope.previous_stats = $scope.current_stats;
-    $scope.current_stats = stat_data;
+  $scope.parseStatCollection = function(stats_to_parse) {
+    var stat_data = null;
 
-    // Continuous flow effect
-    //$scope.kda_chart.removeData();
-    //$scope.kda_chart.addData([[], [], []], '');
 
-    var champObject = $.grep($scope.champion_array, function(e){ return e.id == stat_data.championId; })[0];
-    $scope.current_champion = champObject.name;
-    $scope.current_tier = stat_data.tier;
-    if (stat_data.victory == undefined) {
-      $scope.current_victory = 'Both';
-    } else {
-      $scope.current_victory = (stat_data.victory) ? 'Victory' : 'Defeat';
-    }
-    $scope.current_role = stat_data.role;
-    $scope.current_lane = stat_data.lane;
-    $scope.current_patch = stat_data.patch;
-
-    $scope.alert_current_match_message = $scope.current_champion + ' - ' +
-                                         $scope.tiers[$scope.current_tier-1].name + ' - ' +
-                                         $scope.current_victory + ' - ' +
-                                         $scope.current_role + ' - ' +
-                                         $scope.current_lane + ' - ' +
-                                         'Patch: ' + $scope.current_patch;
-    $scope.alert_current_match = true;
-
-    for (var i=0; i<=kda_timeline_length; i++) {
-       $scope.kda_data.labels[i] = (i*5+'′ (0)');
-       $scope.kda_chart.datasets[0].points[i].value = 0;
-       $scope.kda_chart.datasets[1].points[i].value = 0;
-       $scope.kda_chart.datasets[2].points[i].value = 0;
+    switch (stats_to_parse) {
+      case 'victories':
+        stat_data = $scope.current_stats.victories;
+        $scope.current_victory = 'Victories';
+        break;
+      case 'defeats':
+        stat_data = $scope.current_stats.defeats;
+        $scope.current_victory = 'Defeats';
+        break;
+      case 'all':
+        stat_data = CombineStats($scope.current_stats.victories, $scope.current_stats.defeats);
+        $scope.current_victory = 'All Games'; // Winrate
+        break;
     }
 
+    if (stat_data) {
+      var victories = 0;
+      var defeats = 0;
+      var total_games = 0;
 
-    var killTally = 0;
-    var deathTally = 0;
-    var assistTally = 0
-    
-    for (var i = 0; i<stat_data.aggregateStats.length; i++) {
-      killTally += stat_data.aggregateStats[i].kills;
-      deathTally += stat_data.aggregateStats[i].deaths;
-      assistTally += stat_data.aggregateStats[i].assists;
-      if (!(i % kda_interval)) {
-        var label_index = i/kda_interval;
-        var frame_samples = stat_data.aggregateStats[i].samples;
+      if ($scope.current_stats.victories) {
+        victories = $scope.current_stats.victories.samples;
+        total_games += victories;
+      }
+      if ($scope.current_stats.defeats) {
+        defeats = $scope.current_stats.defeats.samples;
+        total_games += defeats;
+      }
 
-        if (i <= kda_last_minute) {
-          // This causes data to reset before tweening to next values, dig into ChartJS to see where it's
-          // verifying the labels are the same
-          $scope.kda_data.labels[label_index] = i+'′ ('+stat_data.aggregateStats[i].samples+')';
-          $scope.kda_chart.datasets[0].points[label_index].value = (killTally/frame_samples).toFixed(2);
-          $scope.kda_chart.datasets[1].points[label_index].value = (deathTally/frame_samples).toFixed(2);
-          $scope.kda_chart.datasets[2].points[label_index].value = (assistTally/frame_samples).toFixed(2);
+      // Continuous flow effect
+      //$scope.kda_chart.removeData();
+      //$scope.kda_chart.addData([[], [], []], '');
 
-          killTally = 0;
-          deathTally = 0;
-          assistTally = 0;
+      var champObject = $.grep($scope.champion_array, function(e){ return e.id == stat_data.championId; })[0];
+      $scope.current_champion = champObject.name;
+      $scope.current_tier = stat_data.tier;
+      $scope.current_role = stat_data.role;
+      $scope.current_lane = stat_data.lane;
+      $scope.current_patch = stat_data.patch;
+      $scope.current_winrate = (100*(victories/total_games)).toFixed(1);
+
+      $scope.alert_current_match_message = $scope.current_champion + ' - ' +
+                                           $scope.tiers[$scope.current_tier-1].name + ' - ' +
+                                           $scope.current_victory + ' - ' +
+                                           $scope.current_winrate + '% winrate - ' +
+                                           $scope.current_role + ' - ' +
+                                           $scope.current_lane + ' - ' +
+                                           'Patch: ' + $scope.current_patch;
+      $scope.alert_current_match = true;
+
+      for (var i=0; i<=kda_timeline_length; i++) {
+         $scope.kda_data.labels[i] = (i*5+'′ (0)');
+         $scope.kda_chart.datasets[0].points[i].value = 0;
+         $scope.kda_chart.datasets[1].points[i].value = 0;
+         $scope.kda_chart.datasets[2].points[i].value = 0;
+      }
+
+
+      var killTally = 0;
+      var deathTally = 0;
+      var assistTally = 0
+      
+      for (var i = 0; i<stat_data.aggregateStats.length; i++) {
+        killTally += stat_data.aggregateStats[i].kills;
+        deathTally += stat_data.aggregateStats[i].deaths;
+        assistTally += stat_data.aggregateStats[i].assists;
+        if (!(i % kda_interval)) {
+          var label_index = i/kda_interval;
+          var frame_samples = stat_data.aggregateStats[i].samples;
+
+          if (i <= kda_last_minute) {
+            // This causes data to reset before tweening to next values, dig into ChartJS to see where it's
+            // verifying the labels are the same
+            $scope.kda_data.labels[label_index] = i+'′ ('+stat_data.aggregateStats[i].samples+')';
+            $scope.kda_chart.datasets[0].points[label_index].value = (killTally/frame_samples).toFixed(2);
+            $scope.kda_chart.datasets[1].points[label_index].value = (deathTally/frame_samples).toFixed(2);
+            $scope.kda_chart.datasets[2].points[label_index].value = (assistTally/frame_samples).toFixed(2);
+
+            killTally = 0;
+            deathTally = 0;
+            assistTally = 0;
+          }
         }
       }
-    }
 
-    $scope.kda_chart.update();
+      $scope.kda_chart.update();
 
-    $scope.item_builds = [];
-    $scope.core_build = [];
-    var idx = 0;
-    var item_purchase_history = [];
-    for (item_frame in stat_data.itemBuilds) {
-      var frame_samples = stat_data.aggregateStats[idx*kda_interval].samples;
-      // If item_frame > 50, break
-      // Handle end game builds somehow
+      $scope.item_builds = [];
+      $scope.core_build = [];
+      var idx = 0;
+      var item_purchase_history = [];
+      for (item_frame in stat_data.itemBuilds) {
+        var frame_samples = stat_data.aggregateStats[idx*kda_interval].samples;
+        // If item_frame > 50, break
+        // Handle end game builds somehow
 
-      // Fetch most popular Starting Build
-      if (item_frame == 1) {
-        var most_popular = {};
-        most_popular.count = 0;
-        for (build in stat_data.itemBuilds[item_frame]) {
-          if (stat_data.itemBuilds[item_frame][build] > most_popular.count) {
-            most_popular.count = stat_data.itemBuilds[item_frame][build];
-            most_popular.idx = build;
+        // Fetch most popular Starting Build
+        if (item_frame == 1) {
+          var most_popular = {};
+          most_popular.count = 0;
+          for (build in stat_data.itemBuilds[item_frame]) {
+            if (stat_data.itemBuilds[item_frame][build] > most_popular.count) {
+              most_popular.count = stat_data.itemBuilds[item_frame][build];
+              most_popular.idx = build;
+            }
+          }
+
+          if (most_popular.idx) {
+            $scope.start_build = {};
+            $scope.start_build.items = [];
+            $scope.start_build.count = most_popular.count;
+            var split_build = most_popular.idx.split(':');
+            split_build.pop();
+            for (var i=0; i<split_build.length; i++) {
+              var item_id = (split_build[i]%10000).toString();
+              var quantity = Math.floor(split_build[i]/10000);
+              
+              for (var j=0; j<quantity; j++) {
+                $scope.start_build.items.push(item_id);
+              }
+
+              item_purchase_history.push(item_id);
+            }
           }
         }
 
-        if (most_popular.idx) {
-          $scope.start_build = {};
-          $scope.start_build.items = [];
-          $scope.start_build.count = most_popular.count;
-          var split_build = most_popular.idx.split(':');
+        // Count most popular items per frame
+        var build_frame = {};
+        //build_frame.builds = [];
+        var unsorted_item_count = {};
+
+        for (item_build in stat_data.itemBuilds[item_frame]) {
+          var split_build = item_build.split(':');
           split_build.pop();
+
+          for (var i=0; i<split_build.length; i++) {
+            var item_id = (split_build[i]%10000).toString();
+            //var quantity = Math.floor(split_build[i]/10000);
+
+            var including_subitems = [];
+            including_subitems.push(item_id);
+            var item_subitems = $scope.itemlist_json[item_id].from;
+            for (subitem_idx in item_subitems) {
+              including_subitems.push(item_subitems[subitem_idx]);
+            }
+
+            for (item_idx in including_subitems) {
+              var curr_item_id =  including_subitems[item_idx];
+              if (unsorted_item_count[curr_item_id]) {
+                unsorted_item_count[curr_item_id] += stat_data.itemBuilds[item_frame][item_build];
+              } else {
+                unsorted_item_count[curr_item_id] = stat_data.itemBuilds[item_frame][item_build];
+              }
+            }
+          }
+        }
+
+        var sorted_array = Object.keys(unsorted_item_count).sort(function(a,b){return unsorted_item_count[b]-unsorted_item_count[a]});
+        var sorted_items = [];
+
+        build_frame.significant_purchases = [];
+        var subitem_history = [];
+        for (item in sorted_array) {
+          var this_item_id = sorted_array[item];
+          var this_item_count = unsorted_item_count[this_item_id];
+          var popularity = 100*(this_item_count/frame_samples);
+
+          // Detailed sort stats
+          //sorted_items.push({id: sorted_array[item], popularity: popularity});
+
+          if (popularity > 50 &&
+              item_purchase_history.indexOf(this_item_id) < 0) {
+            // Record subitems of each parent item
+            build_frame.significant_purchases.push({ id: this_item_id, popularity: Math.floor(popularity) });
+
+            var from_items = $scope.itemlist_json[this_item_id].from;
+            for (subitem in from_items) {
+              if (subitem_history.indexOf(from_items[subitem]) < 0) {
+                subitem_history.push(from_items[subitem]);
+              }
+            }
+
+            item_purchase_history.push(this_item_id);
+
+            if (item_frame > 1 &&
+                $scope.core_build.length < 6 &&
+                !$scope.itemlist_json[this_item_id].into) {
+              $scope.core_build.push(this_item_id);
+            }
+          }
+          
+          if (popularity <= 50) {
+            break;
+          }
+        }
+
+        // Remove subitem if parent item is in this frame
+        for (var i=0; i<build_frame.significant_purchases.length; i++) {
+          if (subitem_history.indexOf(build_frame.significant_purchases[i].id) > -1) {
+            build_frame.significant_purchases.splice(i,1);
+            i--;
+          }
+        }
+
+        build_frame.item_count = sorted_items;
+
+  /*
+        for (item_build in stat_data.itemBuilds[item_frame]) {
+          var split_build = item_build.split(':');
+          split_build.pop();
+
+          var this_build_frame_build = {};
+          this_build_frame_build.items = {};
+
           for (var i=0; i<split_build.length; i++) {
             var item_id = (split_build[i]%10000).toString();
             var quantity = Math.floor(split_build[i]/10000);
-            
-            for (var j=0; j<quantity; j++) {
-              $scope.start_build.items.push(item_id);
-            }
-
-            item_purchase_history.push(item_id);
+            this_build_frame_build.items[item_id] = quantity;
           }
-        }
+
+          this_build_frame_build.count = stat_data.itemBuilds[item_frame][item_build];
+          build_frame.builds.push(this_build_frame_build);
+        }*/
+
+        build_frame.samples = stat_data.aggregateStats[item_frame].samples;
+        //console.log(build_frame);
+        $scope.item_builds.push(build_frame);
+        idx++;
       }
-
-      // Count most popular items per frame
-      var build_frame = {};
-      //build_frame.builds = [];
-      var unsorted_item_count = {};
-
-      for (item_build in stat_data.itemBuilds[item_frame]) {
-        var split_build = item_build.split(':');
-        split_build.pop();
-
-        for (var i=0; i<split_build.length; i++) {
-          var item_id = (split_build[i]%10000).toString();
-          //var quantity = Math.floor(split_build[i]/10000);
-
-          var including_subitems = [];
-          including_subitems.push(item_id);
-          var item_subitems = $scope.itemlist_json[item_id].from;
-          for (subitem_idx in item_subitems) {
-            including_subitems.push(item_subitems[subitem_idx]);
-          }
-
-          for (item_idx in including_subitems) {
-            var curr_item_id =  including_subitems[item_idx];
-            if (unsorted_item_count[curr_item_id]) {
-              unsorted_item_count[curr_item_id] += stat_data.itemBuilds[item_frame][item_build];
-            } else {
-              unsorted_item_count[curr_item_id] = stat_data.itemBuilds[item_frame][item_build];
-            }
-          }
-        }
-      }
-
-      var sorted_array = Object.keys(unsorted_item_count).sort(function(a,b){return unsorted_item_count[b]-unsorted_item_count[a]});
-      var sorted_items = [];
-
-      build_frame.significant_purchases = [];
-      var subitem_history = [];
-      for (item in sorted_array) {
-        var this_item_id = sorted_array[item];
-        var this_item_count = unsorted_item_count[this_item_id];
-        var popularity = 100*(this_item_count/frame_samples);
-
-        // Detailed sort stats
-        //sorted_items.push({id: sorted_array[item], popularity: popularity});
-
-        if (popularity > 50 &&
-            item_purchase_history.indexOf(this_item_id) < 0) {
-          // Record subitems of each parent item
-          build_frame.significant_purchases.push({ id: this_item_id, popularity: Math.floor(popularity) });
-
-          var from_items = $scope.itemlist_json[this_item_id].from;
-          for (subitem in from_items) {
-            if (subitem_history.indexOf(from_items[subitem]) < 0) {
-              subitem_history.push(from_items[subitem]);
-            }
-          }
-
-          item_purchase_history.push(this_item_id);
-
-          if (item_frame > 1 &&
-              $scope.core_build.length < 6 &&
-              !$scope.itemlist_json[this_item_id].into) {
-            $scope.core_build.push(this_item_id);
-          }
-        }
-        
-        if (popularity <= 50) {
-          break;
-        }
-      }
-
-      // Remove subitem if parent item is in this frame
-      for (var i=0; i<build_frame.significant_purchases.length; i++) {
-        if (subitem_history.indexOf(build_frame.significant_purchases[i].id) > -1) {
-          build_frame.significant_purchases.splice(i,1);
-          i--;
-        }
-      }
-
-      build_frame.item_count = sorted_items;
-
-/*
-      for (item_build in stat_data.itemBuilds[item_frame]) {
-        var split_build = item_build.split(':');
-        split_build.pop();
-
-        var this_build_frame_build = {};
-        this_build_frame_build.items = {};
-
-        for (var i=0; i<split_build.length; i++) {
-          var item_id = (split_build[i]%10000).toString();
-          var quantity = Math.floor(split_build[i]/10000);
-          this_build_frame_build.items[item_id] = quantity;
-        }
-
-        this_build_frame_build.count = stat_data.itemBuilds[item_frame][item_build];
-        build_frame.builds.push(this_build_frame_build);
-      }*/
-
-      build_frame.samples = stat_data.aggregateStats[item_frame].samples;
-      //console.log(build_frame);
-      $scope.item_builds.push(build_frame);
-      idx++;
     }
   }
 
@@ -736,7 +813,6 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
   $scope.search.championId = {};
   $scope.search.tier = {};
   $scope.search.position = {};
-  $scope.search.victory = true;
 
   $scope.alert_loading = false;
   $scope.alert_error = false;
@@ -813,7 +889,6 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
       $scope.search.championId.selected = $scope.champion_array[$scope.random_champ_idx];
       $scope.search.tier.selected = $scope.tiers[$scope.random_tier_idx];
       $scope.search.position.selected = $scope.positions[$scope.random_lane_idx];
-      $scope.search.victory = 'both';
       $scope.submit();
       SetRandoms($scope);
     }
@@ -840,19 +915,17 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
     var championId = $scope.search.championId.selected.id;
     var tier = $scope.search.tier.selected.id;
     var position = $scope.search.position.selected;
-    var victory = $scope.search.victory;
 
     $scope.alert_loading = true;
 
     $http.get('/stat_collections?championId='+championId+
               '&tier='+tier+
-              '&position='+position+
-              '&victory='+victory)
+              '&position='+position)
       .then(function(res){
-        $scope.victory_response = res.data;
-        parseStatCollection( $scope.victory_response );
+        //$scope.previous_stats = $scope.current_stats;
+        $scope.current_stats = res.data;
+        $scope.parseStatCollection( 'all' );
         $scope.alert_loading = false;
-        //$scope.displayed = 'Victory';
       }, function(res){
         $scope.alert_error = true;
         $scope.alert_loading = false;
@@ -860,20 +933,10 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
         if (res.status == 404) {
           $scope.alert_error_message = 'Sorry, no champion data for that search.'
         } else {
-          $scope.alert_error_message = res.data;
+          $scope.alert_error_message = 'Status Code '+res.status+': '+res.data;
         }
         // 404 / Error Handling
       });
-    /*
-    $http.get('/stat_collections?championId='+championId+
-              '&tier='+tier+
-              '&position='+position+
-              '&victory=false')
-      .then(function(res){
-        $scope.defeat_response = res.data;
-      }, function(res){
-        // 404 / Error Handling
-      });*/
   };
 
   /*

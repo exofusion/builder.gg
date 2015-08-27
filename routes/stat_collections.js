@@ -4,8 +4,12 @@ var router = express.Router();
 var models = require('../scripts/models');
 var StatCollection = models.StatCollection;
 
+/*
 function CombineStats(victory_stats, defeat_stats) {
     var combined_stats = {};
+    combined_stats.victories = victory_stats.samples;
+    combined_stats.defeats = defeat_stats.samples;
+
     combined_stats.samples = victory_stats.samples + defeat_stats.samples;
     combined_stats.role = victory_stats.role;
     combined_stats.lane = victory_stats.lane;
@@ -46,6 +50,7 @@ function CombineStats(victory_stats, defeat_stats) {
 
     return combined_stats;
 }
+*/
 
 router.get('/', function(req, res, next) {
     var combine_games = false;
@@ -61,7 +66,6 @@ router.get('/', function(req, res, next) {
         }
 
         if (req.query.position) {
-            console.log(req.query.position);
             switch(req.query.position) {
                 case 'Top':
                     search_options.lane = 'TOP';
@@ -84,55 +88,40 @@ router.get('/', function(req, res, next) {
             search_options.patch = req.query.patch;
         }*/
 
-        if (req.query.victory) {
-            if (req.query.victory == 'both') {
-                search_options.victory = true;
-                combine_games = true;
-            } else {
-                search_options.victory = (req.query.victory == "true") ? true : false;
-            }
-        }
+        search_options.victory = true;
 
-        StatCollection.findOne(search_options, function(error, stat_collection) {
+        // First try to find a victory
+        StatCollection.findOne(search_options, function(error, victory_stat_collection) {
             if (error) {
                  console.log(error);
-            }
-
-            if (combine_games) {
+            } else {
                 // If we find a stat_collection, populate search options with it
-                if (stat_collection) {
+                if (victory_stat_collection) {
                     search_options = {};
-                    search_options.patch = stat_collection.patch;
-                    search_options.championId = stat_collection.championId;
-                    search_options.tier = stat_collection.tier;
-                    search_options.lane = stat_collection.lane;
-                    search_options.role = stat_collection.role;
+                    search_options.patch = victory_stat_collection.patch;
+                    search_options.championId = victory_stat_collection.championId;
+                    search_options.tier = victory_stat_collection.tier;
+                    search_options.lane = victory_stat_collection.lane;
+                    search_options.role = victory_stat_collection.role;
                 }
                 search_options.victory = false;
 
                 // Search for defeats now
-                StatCollection.findOne(search_options, function(error, stat_collection_defeat) {
+                StatCollection.findOne(search_options, function(error, defeat_stat_collection) {
                     if (error) {
                          console.log(error);
-                    } else if (stat_collection && stat_collection_defeat) {
-                        res.send(CombineStats(stat_collection, stat_collection_defeat));
-                    } else if (stat_collection_defeat) {
-                        // No victories, but we found a defeat
-                        res.send(stat_collection_defeat);
-                    } else if (stat_collection) {
-                        // No defeats found, just return victories
-                        res.send(stat_collection);
-                    } else {
+                    } else if (!victory_stat_collection && !defeat_stat_collection) {
                         // Didn't find victories or defeats for search terms
                         res.status(404).end();
+                    } else {
+                        var response_stat_collection = {};
+                        response_stat_collection.victories = victory_stat_collection;
+                        response_stat_collection.defeats = defeat_stat_collection;
+                        res.send(response_stat_collection);
                     }
-                });
-            } else if (stat_collection) {
-                res.send(stat_collection);
-            } else {
-                res.status(404).end();
+                }).lean();
             }
-        }).sort({samples: -1});
+        }).lean().sort({samples: -1});
     } else {
         res.status(404).end();
     }

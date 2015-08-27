@@ -46,23 +46,6 @@ html
 
       .row
         .col-md-3
-        .col-md-2#victorySelect
-          label(class='radio-inline')
-            input(type='radio'
-                  ng-model='search.victory'
-                  value='true'
-                  ng-checked='true')
-            span Victory
-          label(class='radio-inline')
-            input(type='radio'
-                  ng-model='search.victory'
-                  value='false')
-            span Defeat
-          label(class='radio-inline')
-            input(type='radio'
-                  ng-model='search.victory'
-                  value='both')
-            span Both
         .col-md-2#searchSubmit
           div(class='btn btn-default' ng-show='!alert_loading' ng-click='submit()') Summon
           div(class='btn btn-default disabled' ng-show='alert_loading') <img id='loading_icon' src='/images/loading.svg'>
@@ -77,7 +60,10 @@ html
     #kdaTitleContainer
       div(class="alert alert-success" ng-show="alert_current_match")
         {{alert_current_match_message}}
-      div(class='btn btn-default' ng-show='previous_stats' ng-click='loadPrevious()') Load Previous
+      //div(class='btn btn-default' ng-show='previous_stats' ng-click='loadPrevious()') Load Previous
+      div(class='btn btn-default' ng-disabled='!current_stats.victories' ng-click='parseStatCollection("victories")') Display Victories
+      div(class='btn btn-default' ng-disabled='!current_stats.defeats' ng-click='parseStatCollection("defeats")') Display Defeats
+      div(class='btn btn-default' ng-disabled='!current_stats' ng-click='parseStatCollection("all")') Display All Games
 
     #startEndBuilds.genericContainer
       table(width="100%")
