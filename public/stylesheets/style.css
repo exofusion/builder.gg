@@ -310,11 +310,6 @@ a {
   /*&box-shadow: 0px 0px 50px rgba(200,45,45,0.5);*/
 }
 
-.ui-select-choices {
-  margin-left: -75px;
-  width: 250px !important;
-}
-
 .ui-select-match .caret {
   display: none;
 }
@@ -324,6 +319,15 @@ a {
   overflow: hidden;
   text-overflow: hidden;
   padding-right: 5px;
+}
+
+.ui-select-match-text {
+  font-weight: bold;
+}
+
+.buildItem .ui-select-choices {
+  margin-left: -75px;
+  width: 250px !important;
 }
 
 .buildItem .ui-select-choices-row img {

@@ -873,6 +873,18 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
     return GetItemImage($scope, item_id);
   }
 
+  $scope.removeHiddenPoints = function() {
+    if ($scope.hiddenPointBuffer != undefined) {
+      var dataset = $scope.hiddenPointBuffer;
+      for (var i=0; i<=kda_timeline_length; i++) {
+        if ($scope.kda_chart.datasets[dataset].points[i].hidden_value != null) {
+          $scope.kda_chart.datasets[dataset].points[i].value = null;
+        }
+      }
+      delete $scope.hiddenPointBuffer;
+    }
+  }
+
   $scope.toggleVisibility = function(dataset) {
     var already_hidden;
 
@@ -882,6 +894,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
     } else {
       already_hidden = false;
       $scope.kda_chart.datasets[dataset].hidden = true;
+      $scope.hiddenPointBuffer = dataset;
     }
 
     for (var i=0; i<=kda_timeline_length; i++) {
@@ -890,8 +903,9 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
         delete $scope.kda_chart.datasets[dataset].points[i].hidden_value;
       } else {
         $scope.kda_chart.datasets[dataset].points[i].hidden_value = $scope.kda_chart.datasets[dataset].points[i].value;
-        $scope.kda_chart.datasets[dataset].points[i].value = null;
-        $scope.kda_chart.datasets[dataset].points[i].y = $scope.kda_chart.datasets[dataset].points[0].y;
+        if ($scope.kda_chart.datasets[dataset].points[i].value != null) {
+          $scope.kda_chart.datasets[dataset].points[i].value = -3.5;
+        }
       }
     }
 
@@ -984,6 +998,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
     scaleFontSize: 18,
     scaleFontColor: "#DDDDDD",
     pointHitDetectionRadius : 30,
+    onAnimationComplete: function(){ $scope.removeHiddenPoints() },
     legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li class=\"legendItem\" ng-class=\"{grayed: kda_chart.datasets[<%=i%>].hidden}\" ng-click=\"toggleVisibility(<%=i%>)\"><span style=\"background-color:<%=datasets[i].strokeColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
   };
 
