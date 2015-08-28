@@ -87,15 +87,14 @@ a {
   position: absolute;
   color: #FFFFFF;
   transform: rotate(270deg);
-  margin-top: 225px;
-  margin-left: -45px;
+  margin-top: 200px;
+  margin-left: -70px;
   font-size: 18px;
 }
 
 #statDistributionChartContainer {
-  display: block;
-  width: 60%;
-  margin: 0 auto;
+  padding-left: 20px;
+  width: 98%;
 }
 
 #victorySelect {
@@ -104,11 +103,6 @@ a {
 
 #alertContainer {
   margin-bottom: 20px;
-}
-
-#kdaTitleContainer {
-  min-height: 50px !important;
-  margin-bottom: 20px !important;
 }
 
 .alert {
@@ -133,16 +127,15 @@ a {
   background-color: rgba(255,150,150,0.3) !important;
 }
 
+#kdaTitleContainer {
+  min-height: 50px !important;
+  margin-bottom: 20px !important;
+}
+
 #kdaChartContainer {
-  width: 50%;
-  margin-top: 10px;
-  margin-left: auto;
-  margin-right: auto;
-  text-align: center;
 }
 
 #kdaChart {
-  padding: 20px;
   display: inline;
 }
 

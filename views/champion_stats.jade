@@ -54,8 +54,11 @@ html
       div(class="alert alert-danger" ng-show="alert_error")
         <strong>Error:</strong> {{alert_error_message}}
 
-    #kdaChartContainer.genericContainer
-      canvas(id='kdaChart')
+    .row
+      .col-md-3
+      .col-md-6.genericContainer
+        #kdaChartContainer
+          canvas(id='kdaChart')
 
     #kdaTitleContainer
       div(class="alert alert-success" ng-show="alert_current_match")

@@ -9,14 +9,16 @@ html
   body(ng-app='coreApp', ng-controller='statDistributionCtrl', class='ng-cloak')
     include ./navigation.jade
 
-    #siteHeader.col-md-8
-      h1 item.builder.gg
-      #headerSubText
-
-    .col-md-2
-    .col-md-6.genericContainer#statDistributionChartContainer
-      #statDistributionChartYAxis Effective Gold
-      canvas(id='statDistributionChart')
+    .row
+      #siteHeader.col-md-8
+        h1 item.builder.gg
+        #headerSubText
+    .row
+      .col-md-3
+      .col-md-6.genericContainer
+        #statDistributionChartContainer
+          #statDistributionChartYAxis Effective Gold
+          canvas(id='statDistributionChart')
 
     #itemSelectionContainer.col-md-12
       .col-md-2
