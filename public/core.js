@@ -593,7 +593,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
 
   $scope.getItemBuilderLink = function() {
     var parameter = {};
-    parameter.name = $scope.current_champion + ' ' + $scope.current_lane
+    parameter.name = $scope.current_champion.name + ' ' + $scope.current_lane
     parameter.blocks = [];
     parameter.champId = $scope.current_champion.id;
 
@@ -618,6 +618,8 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
   }
 
   $scope.parseStatCollection = function(stats_to_parse) {
+    SetRandoms($scope);
+
     var stat_data = null;
     delete $scope.item_builder_link;
 
@@ -672,10 +674,11 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
       $scope.alert_current_match = true;
 
       for (var i=0; i<=kda_timeline_length; i++) {
-         $scope.kda_data.labels[i] = (i*5+'′ (0)');
+         //$scope.kda_data.labels[i] = (i*5+'′ (0)');
          $scope.kda_chart.datasets[0].points[i].value = 0;
          $scope.kda_chart.datasets[1].points[i].value = 0;
          $scope.kda_chart.datasets[2].points[i].value = 0;
+         $scope.kda_chart.datasets[3].points[i].value = 0;
       }
 
 
@@ -694,10 +697,11 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
           if (i <= kda_last_minute) {
             // This causes data to reset before tweening to next values, dig into ChartJS to see where it's
             // verifying the labels are the same
-            $scope.kda_data.labels[label_index] = i+'′ ('+stat_data.aggregateStats[i].samples+')';
+            //$scope.kda_data.labels[label_index] = i+'′ ('+stat_data.aggregateStats[i].samples+')';
             $scope.kda_chart.datasets[0].points[label_index].value = (killTally/frame_samples).toFixed(2);
             $scope.kda_chart.datasets[1].points[label_index].value = (deathTally/frame_samples).toFixed(2);
             $scope.kda_chart.datasets[2].points[label_index].value = (assistTally/frame_samples).toFixed(2);
+            $scope.kda_chart.datasets[3].points[label_index].value = frame_samples;
 
             killTally = 0;
             deathTally = 0;
@@ -874,7 +878,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
   // KDA Chart
   $scope.kda_labels = [];
   for (var i=0; i<=kda_timeline_length; i++) {
-      $scope.kda_labels.push(i*5+'′ (0)');
+      $scope.kda_labels.push(i*5+':00');
   }
 
   var kda_datasets =  [{
@@ -905,6 +909,16 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
                           pointStrokeColor: "#fff",
                           pointHighlightFill: "#fff",
                           pointHighlightStroke: "rgba(151,187,205,1)",
+                          data: [ 0,0,0,0,0,0,0,0,0,0,0 ]
+                       },
+                       {
+                          label: "Samples",
+                          fillColor: "rgba(151,151,151,0)",
+                          strokeColor: "rgba(151,151,151,0.3)",
+                          pointColor: "rgba(151,151,151,0)",
+                          pointStrokeColor: "rgba(255,255,255,0)",
+                          pointHighlightFill: "rgba(255,255,255,0)",
+                          pointHighlightStroke: "rgba(151,151,151,0)",
                           data: [ 0,0,0,0,0,0,0,0,0,0,0 ]
                        }];
 
@@ -943,7 +957,6 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
       $scope.search.tier.selected = $scope.tiers[$scope.random_tier_idx];
       $scope.search.position.selected = $scope.positions[$scope.random_lane_idx];
       $scope.submit();
-      SetRandoms($scope);
     }
   }
 
@@ -988,7 +1001,8 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
         } else {
           $scope.alert_error_message = 'Status Code '+res.status+': '+res.data;
         }
-        // 404 / Error Handling
+
+        SetRandoms($scope);
       });
   };
 

@@ -84,9 +84,11 @@ html
                 button(class='btn btn-default'
                        ng-show='!item_builder_link && current_stats'
                        ng-click='getItemBuilderLink()') Get Item Builder Link
+                button(class='btn btn-default'
+                       ng-show='item_builder_link') View Link
                 a(href='{{item_builder_link}}' target='_blank')
                   button(class='btn btn-default'
-                         ng-show='item_builder_link') Go To Item Builder
+                         ng-show='item_builder_link') Open Link
 
     #minuteBuilds.genericContainer
       table(width="100%")
