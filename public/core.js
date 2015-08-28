@@ -1,4 +1,4 @@
-var app = angular.module('coreApp', ['chart.js','ui.select','ngSanitize','ui.bootstrap']);
+var app = angular.module('coreApp', ['chart.js','ui.select','ngSanitize','ui.bootstrap','angular-bind-html-compile']);
 
 var ddragon_url = 'http://ddragon.leagueoflegends.com/cdn/5.16.1/';
 
@@ -577,7 +577,7 @@ function CombineStats(victory_stats, defeat_stats) {
   return combined_stats;
 }
 
-app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
+app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
   $scope.getNumber = function(num) {
     return new Array(num);   
   }
@@ -666,10 +666,18 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
 
       for (var i=0; i<=kda_timeline_length; i++) {
          //$scope.kda_data.labels[i] = (i*5+'′ (0)');
+         /*
          $scope.kda_chart.datasets[0].points[i].value = 0;
          $scope.kda_chart.datasets[1].points[i].value = 0;
          $scope.kda_chart.datasets[2].points[i].value = 0;
          $scope.kda_chart.datasets[3].points[i].value = 0;
+         $scope.kda_chart.datasets[4].points[i].value = 0;
+         */
+         $scope.kda_chart.datasets[0].points[i].value = null;
+         $scope.kda_chart.datasets[1].points[i].value = null;
+         $scope.kda_chart.datasets[2].points[i].value = null;
+         $scope.kda_chart.datasets[3].points[i].value = null;
+         $scope.kda_chart.datasets[4].points[i].value = null;
       }
 
 
@@ -686,18 +694,31 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
           var frame_samples = stat_data.aggregateStats[i].samples;
 
           if (i <= kda_last_minute) {
+            var kills = (killTally/frame_samples);
+            var deaths = (deathTally/frame_samples);
+            var assists = (assistTally/frame_samples);
+            var kda = ((kills+assists)/deaths);
             // This causes data to reset before tweening to next values, dig into ChartJS to see where it's
             // verifying the labels are the same
             //$scope.kda_data.labels[label_index] = i+'′ ('+stat_data.aggregateStats[i].samples+')';
-            $scope.kda_chart.datasets[0].points[label_index].value = (killTally/frame_samples).toFixed(2);
-            $scope.kda_chart.datasets[1].points[label_index].value = (deathTally/frame_samples).toFixed(2);
-            $scope.kda_chart.datasets[2].points[label_index].value = (assistTally/frame_samples).toFixed(2);
-            $scope.kda_chart.datasets[3].points[label_index].value = frame_samples;
+            $scope.kda_chart.datasets[0].points[label_index].value = kda ? kda.toFixed(2) : 0;
+            $scope.kda_chart.datasets[1].points[label_index].value = kills.toFixed(2);
+            $scope.kda_chart.datasets[2].points[label_index].value = deaths.toFixed(2);
+            $scope.kda_chart.datasets[3].points[label_index].value = assists.toFixed(2);
+            $scope.kda_chart.datasets[4].points[label_index].value = frame_samples;
 
             killTally = 0;
             deathTally = 0;
             assistTally = 0;
           }
+        }
+      }
+
+      // Rehide any datasets that have been toggled off
+      for (var i = 0; i < $scope.kda_chart.datasets.length; i++) {
+        if ($scope.kda_chart.datasets[i].hidden) {
+          delete $scope.kda_chart.datasets[i].hidden;
+          $scope.toggleVisibility(i);
         }
       }
 
@@ -852,6 +873,30 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
     return GetItemImage($scope, item_id);
   }
 
+  $scope.toggleVisibility = function(dataset) {
+    var already_hidden;
+
+    if ($scope.kda_chart.datasets[dataset].hidden != undefined) {
+      already_hidden = true;
+      delete $scope.kda_chart.datasets[dataset].hidden;
+    } else {
+      already_hidden = false;
+      $scope.kda_chart.datasets[dataset].hidden = true;
+    }
+
+    for (var i=0; i<=kda_timeline_length; i++) {
+      if (already_hidden) {
+        $scope.kda_chart.datasets[dataset].points[i].value = $scope.kda_chart.datasets[dataset].points[i].hidden_value;
+        delete $scope.kda_chart.datasets[dataset].points[i].hidden_value;
+      } else {
+        $scope.kda_chart.datasets[dataset].points[i].hidden_value = $scope.kda_chart.datasets[dataset].points[i].value;
+        $scope.kda_chart.datasets[dataset].points[i].value = null;
+      }
+    }
+
+    $scope.kda_chart.update();
+  }
+
   $scope.Math = Math;
 
   GetChampionJson($scope, $http, SetRandoms);
@@ -877,6 +922,16 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
   }
 
   var kda_datasets =  [{
+                          label: "KDA Ratio",
+                          fillColor: "rgba(255,255,70,0)",
+                          strokeColor: "rgba(255,255,70,0.5)",
+                          pointColor: "rgba(255,255,70,0.5)",
+                          pointStrokeColor: "rgba(0,0,0,0)",
+                          pointHighlightFill: "rgba(0,0,0,0)",
+                          pointHighlightStroke: "rgba(255,255,70,0.8)",
+                          data: [ 0,0,0,0,0,0,0,0,0,0,0 ]
+                       },
+                       {
                           label: "Kills",
                           fillColor: "rgba(70,200,70,0.05)",
                           strokeColor: "rgba(70,200,70,1)",
@@ -926,11 +981,13 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
     scaleStepWidth: 1,
     scaleStartValue: 0,
     scaleFontSize: 18,
-    scaleFontColor: "#DDDDDD"
+    scaleFontColor: "#DDDDDD",
+    legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li class=\"legendItem\" ng-class=\"{grayed: kda_chart.datasets[<%=i%>].hidden}\" ng-click=\"toggleVisibility(<%=i%>)\"><span style=\"background-color:<%=datasets[i].strokeColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
   };
 
   $scope.kda_ctx = document.getElementById("kdaChart").getContext("2d");
   $scope.kda_chart = new Chart($scope.kda_ctx).Line($scope.kda_data, $scope.kda_options);
+  $scope.kda_chart_legend = $sce.trustAsHtml($scope.kda_chart.generateLegend());
 
   $scope.tiers = [ { id: 1, name: 'Bronze',     image:'./images/tier_icons/bronze.png' },
                    { id: 2, name: 'Silver',     image:'./images/tier_icons/silver.png' },

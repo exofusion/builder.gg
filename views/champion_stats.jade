@@ -59,6 +59,7 @@ html
       .col-md-6.genericContainer
         #kdaChartContainer
           canvas(id='kdaChart')
+        div(bind-html-compile='kda_chart_legend')
 
     #kdaTitleContainer
       div(class="alert alert-success" ng-show="alert_current_match")

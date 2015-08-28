@@ -139,6 +139,15 @@ a {
   display: inline;
 }
 
+.legendItem {
+  cursor: pointer !important;
+  cursor: hand !important;
+}
+
+.grayed {
+  opacity: 0.4;
+}
+
 #startEndBuilds {
   margin: 25px;
   width: 50%;
