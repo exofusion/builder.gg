@@ -612,6 +612,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
 
   $scope.parseStatCollection = function(stats_to_parse) {
     var stat_data = null;
+    delete $scope.item_builder_link;
 
     switch (stats_to_parse) {
       case 'victories':
