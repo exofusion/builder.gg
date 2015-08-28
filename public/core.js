@@ -891,6 +891,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
       } else {
         $scope.kda_chart.datasets[dataset].points[i].hidden_value = $scope.kda_chart.datasets[dataset].points[i].value;
         $scope.kda_chart.datasets[dataset].points[i].value = null;
+        $scope.kda_chart.datasets[dataset].points[i].y = $scope.kda_chart.datasets[dataset].points[0].y;
       }
     }
 
@@ -982,6 +983,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
     scaleStartValue: 0,
     scaleFontSize: 18,
     scaleFontColor: "#DDDDDD",
+    pointHitDetectionRadius : 30,
     legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li class=\"legendItem\" ng-class=\"{grayed: kda_chart.datasets[<%=i%>].hidden}\" ng-click=\"toggleVisibility(<%=i%>)\"><span style=\"background-color:<%=datasets[i].strokeColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
   };
 
