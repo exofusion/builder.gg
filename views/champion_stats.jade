@@ -80,6 +80,13 @@ html
             td
               span(ng-repeat="item in core_build track by $index")
                 img(height="50px" width="50px" ng-src="{{getItemImage(item)}}")
+              div
+                button(class='btn btn-default'
+                       ng-show='!item_builder_link'
+                       ng-click='getItemBuilderLink()') Get Item Builder Link
+                a(href='{{item_builder_link}}')
+                  button(class='btn btn-default'
+                         ng-show='item_builder_link') Load Item Builder
 
     #minuteBuilds.genericContainer
       table(width="100%")

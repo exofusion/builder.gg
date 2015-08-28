@@ -81,7 +81,7 @@ html
             div(style="margin-left: 30px", class="item-selection-choice")
               div(ng-bind-html="item.name | highlight: $select.search")
               small {{item.cost}}g
-      .col-md-1
+      .col-md-1#saveButtons
         input(type='text'
               ng-model='build_name'
               class='form-control'
@@ -89,7 +89,7 @@ html
         button(class='btn btn-default'
                id='shareItemSetButton'
                ng-click='shareItemSet()'
-               ng-show='!currently_saving && !share_link') Share Item Set
+               ng-show='!currently_saving') Share Item Set
         input(type='text'
               ng-model='share_link'
               class='form-control'

@@ -201,13 +201,16 @@ a {
 #blockSelectionContainer .ui-select-container,
 #blockSelectionContainer input {
   margin-top: 12px;
+}
+
+#saveButtons input,
+#saveButtons button,
+#saveButtons div {
   margin-bottom: 12px;
+  width: 126px;
 }
 
 #shareItemSetButton {
-  width: 126px;
-  margin-top: 12px;
-  margin-bottom: 12px;
 }
 
 .block_item_img_container {

@@ -4,54 +4,6 @@ var router = express.Router();
 var models = require('../scripts/models');
 var StatCollection = models.StatCollection;
 
-/*
-function CombineStats(victory_stats, defeat_stats) {
-    var combined_stats = {};
-    combined_stats.victories = victory_stats.samples;
-    combined_stats.defeats = defeat_stats.samples;
-
-    combined_stats.samples = victory_stats.samples + defeat_stats.samples;
-    combined_stats.role = victory_stats.role;
-    combined_stats.lane = victory_stats.lane;
-    combined_stats.patch = victory_stats.patch;
-    combined_stats.tier = victory_stats.tier;
-    combined_stats.championId = victory_stats.championId;
-
-    // trinketBuilds
-
-    combined_stats.itemBuilds = victory_stats.itemBuilds;
-    for (frame in defeat_stats.itemBuilds) {
-        if (combined_stats.itemBuilds[frame]) {
-            for (build in defeat_stats.itemBuilds[frame]) {
-                if (combined_stats.itemBuilds[frame][build]) {
-                    combined_stats.itemBuilds[frame][build] += defeat_stats.itemBuilds[frame][build];
-                } else {
-                    combined_stats.itemBuilds[frame][build] = defeat_stats.itemBuilds[frame][build];
-                }
-            }
-        } else {
-            combined_stats.itemBuilds[frame] = defeat_stats.itemBuilds[frame];
-        }
-    }
-
-    // matchFrameData
-
-    combined_stats.aggregateStats = victory_stats.aggregateStats;
-    for (frame in defeat_stats.aggregateStats) {
-        if (combined_stats.aggregateStats[frame]) {
-            combined_stats.aggregateStats[frame].samples += defeat_stats.aggregateStats[frame].samples;
-            combined_stats.aggregateStats[frame].kills += defeat_stats.aggregateStats[frame].kills;
-            combined_stats.aggregateStats[frame].assists += defeat_stats.aggregateStats[frame].assists;
-            combined_stats.aggregateStats[frame].deaths += defeat_stats.aggregateStats[frame].deaths;
-        } else {
-            combined_stats.aggregateStats[frame] = defeat_stats.aggregateStats[frame];
-        }
-    }
-
-    return combined_stats;
-}
-*/
-
 router.get('/', function(req, res, next) {
     var combine_games = false;
     var search_options = {};

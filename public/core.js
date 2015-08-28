@@ -68,7 +68,7 @@ function GetItemImage(scope, item_id) {
   return ddragon_url+'img/item/'+scope.itemlist_json[item_id].image.full;
 }
 
-app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
+app.controller('statDistributionCtrl', function($scope, $http, $timeout, $location) {
   $scope.getNumber = function(num) {
     return new Array(num);   
   }
@@ -296,15 +296,15 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
     save_object.name = $scope.build_name;
     save_object.blocks = $scope.build_blocks;
     var parameter = JSON.stringify(save_object);
-      $http.post('/linkify', parameter).
-      success(function(data, status, headers, config) {
-          $scope.share_link = data;
-          $scope.currently_saving = false;
-        }).
-        error(function(data, status, headers, config) {
-          // Error saving item set
-          $scope.currently_saving = false;
-        });
+    $http.post('/linkify', parameter).
+    success(function(data, status, headers, config) {
+        $scope.share_link = data;
+        $scope.currently_saving = false;
+      }).
+      error(function(data, status, headers, config) {
+        // Error saving item set
+        $scope.currently_saving = false;
+      });
   }
 
   $scope.exportItemSet = function() {
@@ -502,10 +502,27 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout) {
   $scope.build_blocks = [];
   $scope.current_block = {};
   $scope.createNewBlock();
-  /*
-  $scope.build_data = [
-    [0, 10, 0, 30, 40, 50, 0, 70, 80, 90, 100]
-  ];*/
+
+  if ($location.search().b) {
+    $http.get('/linkify?b='+$location.search().b)
+      .then(function(res){
+        if (res.data) {
+          $scope.build_name = res.data.name;
+
+          if ($scope.build_blocks) {
+            $scope.build_blocks = res.data.blocks;
+            $scope.loadBlock($scope.build_blocks[0]);
+          }
+        }
+      }, function(res){
+        if (res.status == 404) {
+          $scope.alert_error_message = 'Sorry, no champion data for that search.'
+        } else {
+          $scope.alert_error_message = 'Status Code '+res.status+': '+res.data;
+        }
+        // 404 / Error Handling
+      });
+  }
 });
 
 function CombineStats(victory_stats, defeat_stats) {
@@ -568,9 +585,33 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
     return new Array(num);   
   }
 
+  $scope.getItemBuilderLink = function() {
+    var parameter = {};
+    parameter.name = $scope.current_champion + ' ' + $scope.current_lane
+    parameter.blocks = [];
+
+    var core_block = {};
+    core_block.name = 'Core Build';
+    core_block.items = [];
+    for (var i=0; i<$scope.core_build.length; i++) {
+      core_block.items.push(parseInt($scope.core_build[i]));
+    }
+    parameter.blocks.push(core_block);
+    $scope.currently_saving = true;
+
+    $http.post('/linkify', parameter).
+      success(function(data, status, headers, config) {
+          $scope.item_builder_link = 'http://item.builder.gg/#?b='+data;
+          $scope.currently_saving = false;
+        }).
+        error(function(data, status, headers, config) {
+          // Error saving item set
+          $scope.currently_saving = false;
+        });
+  }
+
   $scope.parseStatCollection = function(stats_to_parse) {
     var stat_data = null;
-
 
     switch (stats_to_parse) {
       case 'victories':

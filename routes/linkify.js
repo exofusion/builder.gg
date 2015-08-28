@@ -6,7 +6,15 @@ var models = require('../scripts/models');
 var ItemSetEntry = models.ItemSetEntry;
 
 router.get('/', function(req, res, next) {
-
+    ItemSetEntry.findOne({ _id: req.query.b }, function(error, ise) {
+        if (error) {
+            console.log(error);
+        } else if (ise) {
+            res.send(ise.data);
+        } else {
+            res.status(404).end();
+        }
+    });
 });
 
 router.post('/', function(req, res, next) {
@@ -15,7 +23,7 @@ router.post('/', function(req, res, next) {
     var itemSetEntry = new ItemSetEntry();
     itemSetEntry._id = hashed_json;
     itemSetEntry.data = req.body;
-    itemSetEntry.date = new Date();
+    itemSetEntry.date_added = new Date();
     itemSetEntry.save(function(error){
         if (error) {
             console.log(error);
