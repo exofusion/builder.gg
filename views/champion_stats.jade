@@ -82,7 +82,7 @@ html
                 img(height="50px" width="50px" ng-src="{{getItemImage(item)}}")
               div
                 button(class='btn btn-default'
-                       ng-show='!item_builder_link'
+                       ng-show='!item_builder_link && current_stats'
                        ng-click='getItemBuilderLink()') Get Item Builder Link
                 a(href='{{item_builder_link}}' target='_blank')
                   button(class='btn btn-default'
