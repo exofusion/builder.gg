@@ -595,6 +595,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
     var parameter = {};
     parameter.name = $scope.current_champion + ' ' + $scope.current_lane
     parameter.blocks = [];
+    parameter.champId = $scope.current_champion.id;
 
     var core_block = {};
     core_block.name = 'Core Build';
@@ -654,14 +655,14 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
       //$scope.kda_chart.addData([[], [], []], '');
 
       var champObject = $.grep($scope.champion_array, function(e){ return e.id == stat_data.championId; })[0];
-      $scope.current_champion = champObject.name;
+      $scope.current_champion = champObject;
       $scope.current_tier = stat_data.tier;
       $scope.current_role = stat_data.role;
       $scope.current_lane = stat_data.lane;
       $scope.current_patch = stat_data.patch;
       $scope.current_winrate = (100*(victories/total_games)).toFixed(1);
 
-      $scope.alert_current_match_message = $scope.current_champion + ' - ' +
+      $scope.alert_current_match_message = $scope.current_champion.name + ' - ' +
                                            $scope.tiers[$scope.current_tier-1].name + ' - ' +
                                            $scope.current_victory + ' - ' +
                                            $scope.current_winrate + '% winrate - ' +
