@@ -1,4 +1,4 @@
-var app = angular.module('coreApp', ['chart.js','ui.select','ngSanitize']);
+var app = angular.module('coreApp', ['chart.js','ui.select','ngSanitize','ui.bootstrap']);
 
 var ddragon_url = 'http://ddragon.leagueoflegends.com/cdn/5.16.1/';
 
@@ -32,7 +32,7 @@ function SetRandoms($scope) {
   $scope.random_lane = lanes[$scope.random_lane_idx];
 }
 
-function GetChampionJson($scope, $http) {
+function GetChampionJson($scope, $http, callback) {
   $http.get('/static-json/champion.json')
     .then(function(res){
       $scope.champion_array = [];
@@ -44,11 +44,13 @@ function GetChampionJson($scope, $http) {
         $scope.champion_array.push(champ_json);
       }
 
-      SetRandoms($scope);
+      if (callback) {
+        callback($scope);
+      }
     });
 }
 
-function GetItemlistJson($scope, $http) {
+function GetItemlistJson($scope, $http, callback) {
   $http.get('/static-json/itemlist.json')
   .then(function(res){
     $scope.itemlist_array = [];
@@ -62,7 +64,9 @@ function GetItemlistJson($scope, $http) {
                                                      $scope.itemlist_json[item].plaintext ));
     }
 
-    $scope.loadBuild();
+    if (callback) {
+      callback($scope);
+    }
   });
 }
 
@@ -122,24 +126,6 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
 
   $scope.getStatFromCost = function(cost, index) {
     return Math.round(cost/$scope.stat_distribution_stat_bases[index]);
-  }
-
-  $scope.displayItemSearch = function(item_slot) {
-    var already_shown = ($scope.show_item_search && $scope.show_item_search[item_slot]) ? true : false;
-    $scope.show_item_search = [];
-
-
-    if (!already_shown) {
-      $scope.show_item_search[item_slot] = true;
-
-      // Highlight the search box so the user can begin entering input right away
-      var uiSelect = angular.element('#item'+item_slot+' .ui-select-container').controller('uiSelect');
-      $timeout(function() {
-        uiSelect.focusser[0].focus();
-        //uiSelect.open = true;
-        uiSelect.activate();
-      });
-    }
   }
 
   $scope.clearItem = function(item_slot) {
@@ -242,13 +228,14 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
                                                               this_item.plaintext);
 
     // Hide item selection box again
+    /*
     $timeout(function() {
       var uiSelect = angular.element('#item'+item_slot+' .ui-select-container').controller('uiSelect');
       uiSelect.focusser[0].blur();
       $scope.show_item_search = [];
       //uiSelect.open = true;
       //uiSelect.activate();
-    });
+    });*/
 
     // Fill bars with icon
     /*
@@ -368,6 +355,10 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
     saveAs(blob, filename+".json");
   }
 
+  $scope.itemPopover = {
+    templateUrl: 'itemPopoverTemplate.html'
+  };
+
   $scope.Math = Math;
 
   $scope.build_item = [];
@@ -387,7 +378,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
   $scope.actual_cost = [0, 0, 0, 0, 0, 0];
 
   //GetChampionJson($scope, $http);
-  GetItemlistJson($scope, $http);
+  GetItemlistJson($scope, $http, $scope.loadBuild);
 
   $scope.build_item_image = [];
 
@@ -863,8 +854,12 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout) {
 
   $scope.Math = Math;
 
-  GetChampionJson($scope, $http);
+  GetChampionJson($scope, $http, SetRandoms);
   GetItemlistJson($scope, $http);
+
+  $scope.itemPopover = {
+    templateUrl: 'itemPopoverTemplate.html'
+  };
 
   $scope.search = {};
   $scope.search.championId = {};

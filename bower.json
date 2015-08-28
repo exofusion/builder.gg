@@ -19,6 +19,7 @@
     "angular-ui-select": "~0.12.1",
     "angular-sanitize": "~1.4.4",
     "bootstrap": "~3.3.5",
-    "file-saver.js": "~1.20150507.2"
+    "file-saver.js": "~1.20150507.2",
+    "angular-bootstrap": "~0.13.3"
   }
 }

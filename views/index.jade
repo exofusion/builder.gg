@@ -68,16 +68,25 @@ html
                ng-click='loadBlock(last_block)'
                ng-show='!currently_renaming') Last Block
 
+      include ./item_popover_template
+
       div(ng-repeat='n in build_item track by $index', class="buildItem col-md-1", id="item{{$index}}")
-        a(ng-click="displayItemSearch($index)")
-          img(class="item_display_img" ng-src="{{build_item_image[$index]}}")
-        button(class="btn btn-default btn-sm clear_button" ng-show="build_item[{{$index}}].selected" ng-click="clearItem($index)") Clear
+        button(class="btn btn-default btn-sm clear_button" ng-show="build_item[{{$index}}].selected" ng-click="clearItem($index)") X
+        .itemDisplayImgContainer
+          img(class="item_display_img"
+              popover-template="itemPopover.templateUrl"
+              popover-trigger="mouseenter"
+              popover-title="{{itemPopover.item.name}} - {{itemPopover.item.gold.total}}g"
+              popover-animation="false"
+              ng-mouseover="itemPopover.item = itemlist_json[build_item[$index].selected.id]"
+              popover-append-to-body="true"
+              ng-show="build_item[$index].selected"
+              ng-src="{{build_item_image[$index]}}")
         ui-select(ng-model="build_item[$index].selected"
                   theme="bootstrap"
                   ng-disabled="disabled"
-                  ng-change="itemChange($index,build_item[$index].selected.id)"
-                  ng-show="show_item_search[$index]")
-          ui-select-match(placeholder="Enter an item name") {{$select.selected.name}}
+                  ng-change="itemChange($index,build_item[$index].selected.id)")
+          ui-select-match(placeholder="Enter item") {{$select.selected.name}}
           ui-select-choices(repeat="item in itemlist_array | orderBy:'-cost' | filter: $select.search")
             img(style="position: absolute; margin: 0px -18px; height: 40px; width: 40px;" ng-src="{{item.image}}")
             div(style="margin-left: 30px", class="item-selection-choice")

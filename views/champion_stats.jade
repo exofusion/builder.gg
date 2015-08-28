@@ -68,6 +68,8 @@ html
       div(class='btn btn-default' ng-disabled='!current_stats.defeats' ng-click='parseStatCollection("defeats")') Display Defeats
       div(class='btn btn-default' ng-disabled='!current_stats' ng-click='parseStatCollection("all")') Display All Games
 
+    include ./item_popover_template
+
     #startEndBuilds.genericContainer
       table(width="100%")
         thead
@@ -78,11 +80,27 @@ html
           tr
             td
               span(ng-repeat="item in start_build.items track by $index")
-                img(height="50px" width="50px" ng-src="{{getItemImage(item)}}")
+                img(popover-template="itemPopover.templateUrl"
+                    popover-trigger="mouseenter"
+                    popover-title="{{itemPopover.item.name}} - {{itemPopover.item.gold.total}}g"
+                    popover-animation="false"
+                    ng-mouseover="itemPopover.item = itemlist_json[item]"
+                    popover-append-to-body="true"
+                    height="50px"
+                    width="50px"
+                    ng-src="{{getItemImage(item)}}")
               div {{Math.floor(100*(start_build.count/item_builds[0].samples))}}%
             td
               span(ng-repeat="item in core_build track by $index")
-                img(height="50px" width="50px" ng-src="{{getItemImage(item)}}")
+                img(popover-template="itemPopover.templateUrl"
+                    popover-trigger="mouseenter"
+                    popover-title="{{itemPopover.item.name}} - {{itemPopover.item.gold.total}}g"
+                    popover-animation="false"
+                    ng-mouseover="itemPopover.item = itemlist_json[item]"
+                    popover-append-to-body="true"
+                    height="50px"
+                    width="50px"
+                    ng-src="{{getItemImage(item)}}")
               div
                 button(class='btn btn-default'
                        ng-show='!item_builder_link && current_stats'
@@ -104,7 +122,15 @@ html
           tr
             td(ng-repeat="frame in item_builds track by $index" ng-if="$index > 0 && $index < 11")
               span(ng-repeat="item in frame.significant_purchases")
-                img(height="50px" width="50px" ng-src="{{getItemImage(item.id)}}")
+                img(popover-template="itemPopover.templateUrl"
+                    popover-trigger="mouseenter"
+                    popover-title="{{itemPopover.item.name}} - {{itemPopover.item.gold.total}}g"
+                    popover-animation="false"
+                    ng-mouseover="itemPopover.item = itemlist_json[item.id]"
+                    popover-append-to-body="true"
+                    height="50px"
+                    width="50px"
+                    ng-src="{{getItemImage(item.id)}}")
                 div {{item.popularity}}%
           tr
             td(ng-repeat="frame in item_builds track by $index" ng-if="$index > 0 && $index < 11")
