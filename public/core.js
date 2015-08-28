@@ -61,6 +61,8 @@ function GetItemlistJson($scope, $http) {
                                                      ddragon_url+'img/item/'+$scope.itemlist_json[item].image.full,
                                                      $scope.itemlist_json[item].plaintext ));
     }
+
+    $scope.loadBuild();
   });
 }
 
@@ -69,6 +71,31 @@ function GetItemImage(scope, item_id) {
 }
 
 app.controller('statDistributionCtrl', function($scope, $http, $timeout, $location) {
+  $scope.loadBuild = function() {
+    if ($location.search().b) {
+      $http.get('/linkify?b='+$location.search().b)
+        .then(function(res){
+          if (res.data) {
+            $scope.build_name = res.data.name;
+
+            if ($scope.build_blocks) {
+              $scope.build_blocks = res.data.blocks;
+
+              // wait for itemlist to load?
+              $scope.loadBlock($scope.build_blocks[0]);
+            }
+          }
+        }, function(res){
+          if (res.status == 404) {
+            $scope.alert_error_message = 'Sorry, no champion data for that search.'
+          } else {
+            $scope.alert_error_message = 'Status Code '+res.status+': '+res.data;
+          }
+          // 404 / Error Handling
+        });
+  }
+  }
+
   $scope.getNumber = function(num) {
     return new Array(num);   
   }
@@ -502,27 +529,6 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
   $scope.build_blocks = [];
   $scope.current_block = {};
   $scope.createNewBlock();
-
-  if ($location.search().b) {
-    $http.get('/linkify?b='+$location.search().b)
-      .then(function(res){
-        if (res.data) {
-          $scope.build_name = res.data.name;
-
-          if ($scope.build_blocks) {
-            $scope.build_blocks = res.data.blocks;
-            $scope.loadBlock($scope.build_blocks[0]);
-          }
-        }
-      }, function(res){
-        if (res.status == 404) {
-          $scope.alert_error_message = 'Sorry, no champion data for that search.'
-        } else {
-          $scope.alert_error_message = 'Status Code '+res.status+': '+res.data;
-        }
-        // 404 / Error Handling
-      });
-  }
 });
 
 function CombineStats(victory_stats, defeat_stats) {
