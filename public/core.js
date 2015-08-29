@@ -697,11 +697,11 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
             var kills = (killTally/frame_samples);
             var deaths = (deathTally/frame_samples);
             var assists = (assistTally/frame_samples);
-            var kda = ((kills+assists)/deaths);
+            var kda = ((kills+assists)/(deaths < 1 ? 1 : deaths)); // 0 deaths shouldn't skyrocket your KDA
             // This causes data to reset before tweening to next values, dig into ChartJS to see where it's
             // verifying the labels are the same
             //$scope.kda_data.labels[label_index] = i+'′ ('+stat_data.aggregateStats[i].samples+')';
-            $scope.kda_chart.datasets[0].points[label_index].value = kda ? kda.toFixed(2) : 0;
+            $scope.kda_chart.datasets[0].points[label_index].value = kda.toFixed(2);
             $scope.kda_chart.datasets[1].points[label_index].value = kills.toFixed(2);
             $scope.kda_chart.datasets[2].points[label_index].value = deaths.toFixed(2);
             $scope.kda_chart.datasets[3].points[label_index].value = assists.toFixed(2);
@@ -874,14 +874,17 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
   }
 
   $scope.removeHiddenPoints = function() {
-    if ($scope.hiddenPointBuffer != undefined) {
-      var dataset = $scope.hiddenPointBuffer;
-      for (var i=0; i<=kda_timeline_length; i++) {
-        if ($scope.kda_chart.datasets[dataset].points[i].hidden_value != null) {
-          $scope.kda_chart.datasets[dataset].points[i].value = null;
+    for (var i=0; i<$scope.hiddenPointBuffer.length; i++) {
+      var dataset = $scope.hiddenPointBuffer[i];
+      for (var j=0; j<=kda_timeline_length; j++) {
+        if ($scope.kda_chart.datasets[dataset].points[j].hidden_value != null) {
+          $scope.kda_chart.datasets[dataset].points[j].value = null;
         }
       }
-      delete $scope.hiddenPointBuffer;
+    }
+
+    if ($scope.hiddenPointBuffer.length > 0) {
+      $scope.hiddenPointBuffer = [];
     }
   }
 
@@ -894,7 +897,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
     } else {
       already_hidden = false;
       $scope.kda_chart.datasets[dataset].hidden = true;
-      $scope.hiddenPointBuffer = dataset;
+      $scope.hiddenPointBuffer.push(dataset);
     }
 
     for (var i=0; i<=kda_timeline_length; i++) {
@@ -911,6 +914,8 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
 
     $scope.kda_chart.update();
   }
+
+  $scope.hiddenPointBuffer = [];
 
   $scope.Math = Math;
 
@@ -936,49 +941,71 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
       $scope.kda_labels.push(i*5+':00');
   }
 
+  $scope.kda_ctx = document.getElementById("kdaChart").getContext("2d");
+
+  var ratio_gradient = $scope.kda_ctx.createLinearGradient(0, -100, 0, 400);
+  ratio_gradient.addColorStop(0, 'rgba(255,255,70,0.2)');
+  ratio_gradient.addColorStop(1, 'rgba(255,255,70,0)');
+
+  var kills_gradient = $scope.kda_ctx.createLinearGradient(0, -100, 0, 400);
+  kills_gradient.addColorStop(0, 'rgba(70,200,70,0.2');
+  kills_gradient.addColorStop(1, 'rgba(70,200,70,0)');
+
+  var deaths_gradient = $scope.kda_ctx.createLinearGradient(0, -100, 0, 400);
+  kills_gradient.addColorStop(0, 'rgba(247,70,74,0.2)');
+  kills_gradient.addColorStop(1, 'rgba(247,70,74,0)');
+
+  var assists_gradient = $scope.kda_ctx.createLinearGradient(0, -100, 0, 400);
+  assists_gradient.addColorStop(0, 'rgba(151,187,205,0.2');
+  assists_gradient.addColorStop(1, 'rgba(151,187,205,0)');
+
+  var samples_gradient = $scope.kda_ctx.createLinearGradient(0, -100, 0, 400);
+  assists_gradient.addColorStop(0, 'rgba(151,151,151,0.2)');
+  assists_gradient.addColorStop(1, 'rgba(151,151,151,0)');
+
   var kda_datasets =  [{
                           label: "KDA Ratio",
-                          fillColor: "rgba(255,255,70,0)",
+                          fillColor: ratio_gradient,
                           strokeColor: "rgba(255,255,70,0.5)",
                           pointColor: "rgba(255,255,70,0.5)",
-                          pointStrokeColor: "rgba(0,0,0,0)",
-                          pointHighlightFill: "rgba(0,0,0,0)",
-                          pointHighlightStroke: "rgba(255,255,70,0.8)",
+                          pointStrokeColor: "rgba(255,255,70,0.5)",
+                          pointHighlightFill: "rgba(255,255,70,1)",
+                          pointHighlightStroke: "rgba(255,255,70,1)",
                           data: [ 0,0,0,0,0,0,0,0,0,0,0 ]
                        },
                        {
                           label: "Kills",
-                          fillColor: "rgba(70,200,70,0.05)",
+                          fillColor: kills_gradient,
                           strokeColor: "rgba(70,200,70,1)",
-                          pointColor: "rgba(70,200,70,1)",
-                          pointStrokeColor: "#fff",
-                          pointHighlightFill: "#fff",
+                          pointColor: "rgba(70,200,70,0.5)",
+                          pointStrokeColor: "rgba(70,200,70,1)",
+                          pointHighlightFill: "rgba(70,200,70,1)",
                           pointHighlightStroke: "rgba(70,200,70,0.8)",
                           data: [ 0,0,0,0,0,0,0,0,0,0,0 ]
                        },
                        {
                           label: "Deaths",
-                          fillColor: "rgba(247,70,74,0.05)",
+                          fillColor: deaths_gradient,
                           strokeColor: "rgba(247,70,74,1)",
-                          pointColor: "rgba(247,70,74,1)",
-                          pointStrokeColor: "#fff",
-                          pointHighlightFill: "#fff",
+                          pointColor: "rgba(247,70,74,0.5)",
+                          pointStrokeColor: "rgba(247,70,74,1)",
+                          pointHighlightFill: "rgba(247,70,74,1)",
                           pointHighlightStroke: "rgba(247,70,74,1)",
                           data: [ 0,0,0,0,0,0,0,0,0,0,0 ]
                        },
                        {
                           label: "Assists",
-                          fillColor: "rgba(151,187,205,0.05)",
+                          fillColor: assists_gradient,
                           strokeColor: "rgba(151,187,205,1)",
-                          pointColor: "rgba(151,187,205,1)",
-                          pointStrokeColor: "#fff",
-                          pointHighlightFill: "#fff",
+                          pointColor: "rgba(151,187,205,0.5)",
+                          pointStrokeColor: "rgba(151,187,205,1)",
+                          pointHighlightFill: "rgba(151,187,205,1)",
                           pointHighlightStroke: "rgba(151,187,205,1)",
                           data: [ 0,0,0,0,0,0,0,0,0,0,0 ]
                        },
                        {
                           label: "Samples",
-                          fillColor: "rgba(151,151,151,0)",
+                          fillColor: samples_gradient,
                           strokeColor: "rgba(151,151,151,0.3)",
                           pointColor: "rgba(151,151,151,0)",
                           pointStrokeColor: "rgba(255,255,255,0)",
@@ -1002,7 +1029,6 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
     legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li class=\"legendItem\" ng-class=\"{grayed: kda_chart.datasets[<%=i%>].hidden}\" ng-click=\"toggleVisibility(<%=i%>)\"><span style=\"background-color:<%=datasets[i].strokeColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
   };
 
-  $scope.kda_ctx = document.getElementById("kdaChart").getContext("2d");
   $scope.kda_chart = new Chart($scope.kda_ctx).Line($scope.kda_data, $scope.kda_options);
   $scope.kda_chart_legend = $sce.trustAsHtml($scope.kda_chart.generateLegend());
 
