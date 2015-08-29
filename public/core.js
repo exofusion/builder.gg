@@ -613,13 +613,13 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
         });
   }
 
-  $scope.parseStatCollection = function(stats_to_parse) {
+  $scope.parseStatCollection = function(display_subset) {
     SetRandoms($scope);
 
     var stat_data = null;
     delete $scope.item_builder_link;
 
-    switch (stats_to_parse) {
+    switch (display_subset) {
       case 'victories':
         stat_data = $scope.current_stats.victories;
         $scope.current_victory = 'Victories';
@@ -659,6 +659,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
       $scope.current_lane = toTitleCase(stat_data.lane);
       $scope.current_patch = stat_data.patch;
       $scope.current_winrate = (100*(victories/total_games)).toFixed(1);
+      $scope.current_total_games = total_games;
 
       $scope.current_kda_deltas = [];
 
@@ -721,7 +722,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
       for (var i = 0; i < $scope.kda_chart.datasets.length; i++) {
         if ($scope.kda_chart.datasets[i].hidden) {
           delete $scope.kda_chart.datasets[i].hidden;
-          $scope.toggleVisibility(i);
+          $scope.toggleVisibility(i, true);
         }
       }
 
@@ -877,21 +878,18 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
   }
 
   $scope.removeHiddenPoints = function() {
-    for (var i=0; i<$scope.hiddenPointBuffer.length; i++) {
-      var dataset = $scope.hiddenPointBuffer[i];
+    if ($scope.hiddenPointBuffer.length > 0) {
+      var dataset = $scope.hiddenPointBuffer[0];
+      $scope.hiddenPointBuffer.shift();
       for (var j=0; j<=kda_timeline_length; j++) {
         if ($scope.kda_chart.datasets[dataset].points[j].hidden_value != null) {
           $scope.kda_chart.datasets[dataset].points[j].value = null;
         }
       }
     }
-
-    if ($scope.hiddenPointBuffer.length > 0) {
-      $scope.hiddenPointBuffer = [];
-    }
   }
 
-  $scope.toggleVisibility = function(dataset) {
+  $scope.toggleVisibility = function(dataset, instant) {
     var already_hidden;
 
     if ($scope.kda_chart.datasets[dataset].hidden != undefined) {
@@ -910,7 +908,12 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
       } else {
         $scope.kda_chart.datasets[dataset].points[i].hidden_value = $scope.kda_chart.datasets[dataset].points[i].value;
         if ($scope.kda_chart.datasets[dataset].points[i].value != null) {
-          $scope.kda_chart.datasets[dataset].points[i].value = -3.5;
+          // Should we animate fading the dataset out?
+          if (instant) {
+            $scope.kda_chart.datasets[dataset].points[i].value = null;
+          } else {
+            $scope.kda_chart.datasets[dataset].points[i].value = -3.5;
+          }
         }
       }
     }
@@ -1049,6 +1052,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
       $scope.search.championId.selected = $scope.champion_array[$scope.random_champ_idx];
       $scope.search.tier.selected = $scope.tiers[$scope.random_tier_idx];
       $scope.search.position.selected = $scope.positions[$scope.random_lane_idx];
+      $scope.display_subset = 'all';
       $scope.submit();
     }
   }
@@ -1083,7 +1087,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
       .then(function(res){
         //$scope.previous_stats = $scope.current_stats;
         $scope.current_stats = res.data;
-        $scope.parseStatCollection( 'all' );
+        $scope.parseStatCollection($scope.display_subset);
         $scope.alert_loading = false;
       }, function(res){
         $scope.alert_error = true;

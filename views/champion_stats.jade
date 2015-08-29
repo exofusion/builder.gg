@@ -71,8 +71,8 @@ html
             .kdaTitleValue {{current_lane}}
             .kdaTitleKey LANE
           .kdaTitleKeyValueContainer(ng-show="current_stats")
-            .kdaTitleValue {{current_winrate}}%
-            .kdaTitleKey WINRATE
+            .kdaTitleValue {{current_winrate}}% ({{current_total_games}})
+            .kdaTitleKey WINRATE (# MATCHES)
           .kdaTitleKeyValueContainer(ng-show="current_stats")
             .kdaTitleValue {{current_patch}}
             .kdaTitleKey PATCH
@@ -82,9 +82,25 @@ html
 
     #kdaVictoryDefeat
       //div(class='btn btn-default' ng-show='previous_stats' ng-click='loadPrevious()') Load Previous
-      div(class='btn btn-default' ng-disabled='!current_stats.victories' ng-click='parseStatCollection("victories")') Display Victories
-      div(class='btn btn-default' ng-disabled='!current_stats.defeats' ng-click='parseStatCollection("defeats")') Display Defeats
-      div(class='btn btn-default' ng-disabled='!current_stats' ng-click='parseStatCollection("all")') Display All Games
+      div(class="btn-group")
+        //label(class='btn btn-default' ng-disabled='!current_stats.victories' btn-radio="'Victories'" ng-click='parseStatCollection("victories")')
+
+      .btn-group
+        label(class="btn btn-default"
+                     ng-disabled="!current_stats.victories"
+                     ng-model="display_subset"
+                     ng-click="parseStatCollection('victories')"
+                     btn-radio="'victories'") Victories
+        label(class="btn btn-default"
+                     ng-disabled='!current_stats'
+                     ng-model="display_subset"
+                     ng-click="parseStatCollection('all')"
+                     btn-radio="'all'") All Games
+        label(class="btn btn-default"
+                     ng-disabled="!current_stats.defeats"
+                     ng-model="display_subset"
+                     ng-click="parseStatCollection('defeats')"
+                     btn-radio="'defeats'") Defeats
 
     include ./item_popover_template
 
