@@ -127,9 +127,32 @@ a {
   background-color: rgba(255,150,150,0.3) !important;
 }
 
-#kdaTitleContainer {
+#kdaVictoryDefeat {
   min-height: 50px !important;
   margin-bottom: 20px !important;
+}
+
+#kdaTitleContainer {
+  margin-top: 5px;
+  margin-bottom: 10px;
+  min-height: 50px;
+  width: 100%;
+  display: flex;
+}
+
+.kdaTitleKeyValueContainer {
+  display: inline-block;
+  margin: 0 auto;
+}
+
+.kdaTitleValue {
+  font-family: 'Georgia';
+  font-weight: bold;
+  font-size: 26px;
+}
+
+.kdaTitleKey {
+  color: #999999;
 }
 
 #kdaChartContainer {
@@ -149,10 +172,32 @@ a {
 }
 
 #startEndBuilds {
+  padding: 10px;
   margin: 25px;
   width: 50%;
   margin-left: auto;
   margin-right: auto;
+}
+
+#startEndBuilds th {
+  font-family: 'Georgia';
+  text-align: center;
+  padding-bottom: 10px;
+  width: 50%;
+}
+
+#itemBuilderContainer {
+  margin-top: 10px;
+}
+
+#itemBuilderContainer input {
+  display: inline-block;
+  width: 25%;
+  margin-left: 5px;
+}
+
+#itemBuilderContainer a {
+  display: inline-block;
 }
 
 .popover {
@@ -174,6 +219,7 @@ a {
 }
 
 #minuteBuilds {
+  padding: 10px;
   margin: 50px;
   width: 50%;
   margin-left: auto;
@@ -182,6 +228,17 @@ a {
 
 #minuteBuilds table {
   table-layout: fixed;
+}
+
+#minuteBuilds th {
+  font-family: 'Georgia';
+  font-size: 20px;
+  text-align: center;
+  padding-bottom: 5px;
+}
+
+#minuteBuilds #itemRow td {
+  padding-top: 20px;
 }
 
 #statSearchContainer {

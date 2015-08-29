@@ -57,13 +57,30 @@ html
     .row
       .col-md-3
       .col-md-6.genericContainer
+        #kdaTitleContainer
+          .kdaTitleKeyValueContainer(ng-show="current_stats")
+            .kdaTitleValue {{current_champion.name}}
+            .kdaTitleKey CHAMPION
+          .kdaTitleKeyValueContainer(ng-show="current_stats")
+            .kdaTitleValue {{tiers[current_tier-1].name}}
+            .kdaTitleKey TIER
+          .kdaTitleKeyValueContainer(ng-show="current_stats")
+            .kdaTitleValue {{current_role}}
+            .kdaTitleKey ROLE
+          .kdaTitleKeyValueContainer(ng-show="current_stats")
+            .kdaTitleValue {{current_lane}}
+            .kdaTitleKey LANE
+          .kdaTitleKeyValueContainer(ng-show="current_stats")
+            .kdaTitleValue {{current_winrate}}%
+            .kdaTitleKey WINRATE
+          .kdaTitleKeyValueContainer(ng-show="current_stats")
+            .kdaTitleValue {{current_patch}}
+            .kdaTitleKey PATCH
         #kdaChartContainer
           canvas(id='kdaChart')
         div(bind-html-compile='kda_chart_legend')
 
-    #kdaTitleContainer
-      div(class="alert alert-success" ng-show="alert_current_match")
-        {{alert_current_match_message}}
+    #kdaVictoryDefeat
       //div(class='btn btn-default' ng-show='previous_stats' ng-click='loadPrevious()') Load Previous
       div(class='btn btn-default' ng-disabled='!current_stats.victories' ng-click='parseStatCollection("victories")') Display Victories
       div(class='btn btn-default' ng-disabled='!current_stats.defeats' ng-click='parseStatCollection("defeats")') Display Defeats
@@ -75,11 +92,11 @@ html
       table(width="100%")
         thead
           tr
-            td(width="50%") Start Build
-            td(width="50%") Core Build
+            th Start Build
+            th Core Build
         tbody
           tr
-            td
+            td(valign="top")
               span(ng-repeat="item in start_build.items track by $index")
                 img(popover-template="itemPopover.templateUrl"
                     popover-trigger="mouseenter"
@@ -91,7 +108,7 @@ html
                     width="50px"
                     ng-src="{{getItemImage(item)}}")
               div {{Math.floor(100*(start_build.count/item_builds[0].samples))}}%
-            td
+            td(valign="top")
               span(ng-repeat="item in core_build track by $index")
                 img(popover-template="itemPopover.templateUrl"
                     popover-trigger="mouseenter"
@@ -102,26 +119,37 @@ html
                     height="50px"
                     width="50px"
                     ng-src="{{getItemImage(item)}}")
-              div
+              #itemBuilderContainer
                 button(class='btn btn-default'
                        ng-show='!item_builder_link && current_stats'
                        ng-click='getItemBuilderLink()') Get Item Builder Link
-                button(class='btn btn-default'
-                       ng-show='item_builder_link') View Link
                 a(href='{{item_builder_link}}' target='_blank')
                   button(class='btn btn-default'
                          ng-show='item_builder_link') Open Link
+                input(class='form-control'
+                      type='text'
+                      ng-show='item_builder_link'
+                      ng-model='item_builder_link_textbox')
 
     #minuteBuilds.genericContainer
       table(width="100%")
         thead
           tr
-            td(ng-repeat="n in getNumber(10) track by $index")
+            th
+            th(ng-repeat="n in getNumber(10) track by $index")
               div {{5+($index*5)}}:00
-              div ({{item_builds[$index+1].samples ? item_builds[$index+1].samples : 0}})
         tbody
           tr
-            td(ng-repeat="frame in item_builds track by $index" ng-if="$index > 0 && $index < 11")
+            td Δ KDA
+            td(ng-repeat="n in getNumber(10) track by $index")
+              span {{item_builds[$index+1].samples ? current_kda_deltas[$index+1].toFixed(2) : ''}}
+          tr
+            td # Samples
+            td(ng-repeat="n in getNumber(10) track by $index")
+              span [{{item_builds[$index+1].samples ? item_builds[$index+1].samples : 0}}]
+          tr#itemRow
+            td
+            td(valign="top" ng-repeat="frame in item_builds track by $index" ng-if="$index > 0 && $index < 11")
               span(ng-repeat="item in frame.significant_purchases")
                 img(popover-template="itemPopover.templateUrl"
                     popover-trigger="mouseenter"

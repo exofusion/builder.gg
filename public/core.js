@@ -74,6 +74,10 @@ function GetItemImage(scope, item_id) {
   return ddragon_url+'img/item/'+scope.itemlist_json[item_id].image.full;
 }
 
+function toTitleCase(str) {
+    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+}
+
 app.controller('statDistributionCtrl', function($scope, $http, $timeout, $location) {
   $scope.loadBuild = function() {
     if ($location.search().b) {
@@ -600,6 +604,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
     $http.post('/linkify', parameter).
       success(function(data, status, headers, config) {
           $scope.item_builder_link = 'http://item.builder.gg/#?b='+data;
+          $scope.item_builder_link_textbox = $scope.item_builder_link;
           $scope.currently_saving = false;
         }).
         error(function(data, status, headers, config) {
@@ -650,19 +655,12 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
       var champObject = $.grep($scope.champion_array, function(e){ return e.id == stat_data.championId; })[0];
       $scope.current_champion = champObject;
       $scope.current_tier = stat_data.tier;
-      $scope.current_role = stat_data.role;
-      $scope.current_lane = stat_data.lane;
+      $scope.current_role = toTitleCase(stat_data.role.replace('_',' '));
+      $scope.current_lane = toTitleCase(stat_data.lane);
       $scope.current_patch = stat_data.patch;
       $scope.current_winrate = (100*(victories/total_games)).toFixed(1);
 
-      $scope.alert_current_match_message = $scope.current_champion.name + ' - ' +
-                                           $scope.tiers[$scope.current_tier-1].name + ' - ' +
-                                           $scope.current_victory + ' - ' +
-                                           $scope.current_winrate + '% winrate - ' +
-                                           $scope.current_role + ' - ' +
-                                           $scope.current_lane + ' - ' +
-                                           'Patch: ' + $scope.current_patch;
-      $scope.alert_current_match = true;
+      $scope.current_kda_deltas = [];
 
       for (var i=0; i<=kda_timeline_length; i++) {
          //$scope.kda_data.labels[i] = (i*5+'′ (0)');
@@ -684,7 +682,8 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
       var killTally = 0;
       var deathTally = 0;
       var assistTally = 0
-      
+      var lastKDA = 0;
+
       for (var i = 0; i<stat_data.aggregateStats.length; i++) {
         killTally += stat_data.aggregateStats[i].kills;
         deathTally += stat_data.aggregateStats[i].deaths;
@@ -701,12 +700,16 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
             // This causes data to reset before tweening to next values, dig into ChartJS to see where it's
             // verifying the labels are the same
             //$scope.kda_data.labels[label_index] = i+'′ ('+stat_data.aggregateStats[i].samples+')';
+            
+            $scope.current_kda_deltas.push(kda.toFixed(2)-lastKDA);
+
             $scope.kda_chart.datasets[0].points[label_index].value = kda.toFixed(2);
             $scope.kda_chart.datasets[1].points[label_index].value = kills.toFixed(2);
             $scope.kda_chart.datasets[2].points[label_index].value = deaths.toFixed(2);
             $scope.kda_chart.datasets[3].points[label_index].value = assists.toFixed(2);
             $scope.kda_chart.datasets[4].points[label_index].value = frame_samples;
 
+            lastKDA = kda.toFixed(2);
             killTally = 0;
             deathTally = 0;
             assistTally = 0;
@@ -933,7 +936,6 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
 
   $scope.alert_loading = false;
   $scope.alert_error = false;
-  $scope.alert_current_match = false;
 
   // KDA Chart
   $scope.kda_labels = [];
@@ -943,25 +945,21 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
 
   $scope.kda_ctx = document.getElementById("kdaChart").getContext("2d");
 
-  var ratio_gradient = $scope.kda_ctx.createLinearGradient(0, -100, 0, 400);
-  ratio_gradient.addColorStop(0, 'rgba(255,255,70,0.2)');
+  var ratio_gradient = $scope.kda_ctx.createLinearGradient(0, -75, 0, 400);
+  ratio_gradient.addColorStop(0, 'rgba(255,255,70,0.1)');
   ratio_gradient.addColorStop(1, 'rgba(255,255,70,0)');
 
-  var kills_gradient = $scope.kda_ctx.createLinearGradient(0, -100, 0, 400);
+  var kills_gradient = $scope.kda_ctx.createLinearGradient(0, -75, 0, 400);
   kills_gradient.addColorStop(0, 'rgba(70,200,70,0.2');
   kills_gradient.addColorStop(1, 'rgba(70,200,70,0)');
 
-  var deaths_gradient = $scope.kda_ctx.createLinearGradient(0, -100, 0, 400);
-  kills_gradient.addColorStop(0, 'rgba(247,70,74,0.2)');
-  kills_gradient.addColorStop(1, 'rgba(247,70,74,0)');
+  var deaths_gradient = $scope.kda_ctx.createLinearGradient(0, -75, 0, 400);
+  deaths_gradient.addColorStop(0, 'rgba(247,70,74,0.2)');
+  deaths_gradient.addColorStop(1, 'rgba(247,70,74,0)');
 
-  var assists_gradient = $scope.kda_ctx.createLinearGradient(0, -100, 0, 400);
-  assists_gradient.addColorStop(0, 'rgba(151,187,205,0.2');
+  var assists_gradient = $scope.kda_ctx.createLinearGradient(0, -75, 0, 400);
+  assists_gradient.addColorStop(0, 'rgba(151,187,205,0.1)');
   assists_gradient.addColorStop(1, 'rgba(151,187,205,0)');
-
-  var samples_gradient = $scope.kda_ctx.createLinearGradient(0, -100, 0, 400);
-  assists_gradient.addColorStop(0, 'rgba(151,151,151,0.2)');
-  assists_gradient.addColorStop(1, 'rgba(151,151,151,0)');
 
   var kda_datasets =  [{
                           label: "KDA Ratio",
@@ -1004,8 +1002,8 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
                           data: [ 0,0,0,0,0,0,0,0,0,0,0 ]
                        },
                        {
-                          label: "Samples",
-                          fillColor: samples_gradient,
+                          label: "Sample Size",
+                          fillColor: "rgba(0,0,0,0)",
                           strokeColor: "rgba(151,151,151,0.3)",
                           pointColor: "rgba(151,151,151,0)",
                           pointStrokeColor: "rgba(255,255,255,0)",
