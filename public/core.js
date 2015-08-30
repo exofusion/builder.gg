@@ -398,7 +398,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
     }
 
     var content = JSON.stringify(item_set);
-    var filename = 'testfilename';
+    var filename = $scope.item_set_name;
     var blob = new Blob([content], {type: "text/plain;charset=utf-8"});
     saveAs(blob, filename+".json");
   }
