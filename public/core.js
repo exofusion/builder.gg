@@ -1,4 +1,4 @@
-var app = angular.module('coreApp', ['chart.js','ui.select','ngSanitize','ui.bootstrap','angular-bind-html-compile']);
+var app = angular.module('coreApp', ['chart.js','ui.select','ngSanitize','ui.bootstrap','angular-bind-html-compile','popoverToggle']);
 
 var ddragon_url = 'http://ddragon.leagueoflegends.com/cdn/5.16.1/';
 
@@ -128,9 +128,32 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
                                  items: blockItems });
       }
       $scope.processItemset(newItemset);
+      $scope.$digest();
     }
 
     reader.readAsText(element.files[0]);
+  }
+
+  $scope.loadRandomItems = function() {
+    var randomItemset = {};
+    randomItemset.name = 'Random Item Set';
+    randomItemset.blocks = [];
+    var block_items = [];
+
+    for (var i=0; i<BLOCK_SIZE; i++) {
+      var random_item = $scope.itemlist_array[Math.round(Math.random()*($scope.itemlist_array.length-1))];
+
+      if (!random_item.into) {
+        block_items.push(random_item.id);
+      } else {
+        i--;
+      }
+    }
+
+    randomItemset.blocks.push({ name: 'Random',
+                                items: block_items });
+
+    $scope.processItemset(randomItemset);
   }
 
   // Save loaded itemset to the local scope variables and load the first block
@@ -142,8 +165,6 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
 
       $scope.loadBlock($scope.build_blocks[0]);
     }
-
-    $scope.$digest();
   }
 
   // Simple function so that we iterate over a set number in angular
@@ -407,6 +428,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
     templateUrl: 'itemPopoverTemplate.html'
   };
 
+  $scope.show_help = false;
   $scope.Math = Math;
 
   $scope.build_item = [];

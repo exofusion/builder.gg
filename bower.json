@@ -16,6 +16,7 @@
     "angular-bind-html-compile": "~1.1.0",
     "angular-bootstrap": "~0.13.3",
     "angular-chart.js": "~0.7.3",
+    "angular-popover-toggle": "~0.0.10",
     "angular-sanitize": "~1.4.4",
     "angular-ui-select": "~0.12.1",
     "bootstrap": "~3.3.5",

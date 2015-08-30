@@ -15,7 +15,13 @@ html
         #headerSubText
     .row
       .col-md-3
-        .genericContainer#saveButtons
+        .genericContainer#saveButtons(popover-title="Item Set Saving"
+                                      popover-html="'<li><strong>Upload Item Set</strong>: Select an item set JSON file from the League of Legends directory or an item set downloaded from builder.gg <li><strong>Share Item Set</strong>: Generate a shareable link for this item set <li><strong>Download Item Set</strong>: Download a copy of this item set. To load in game, save the JSON file to:<br> C:/Riot Games/League of Legends/Config/Global/Recommended'"
+                                      popover-toggle="show_help"
+                                      popover-append-to-body="true")
+          div
+            button(class='btn btn-default'
+                   ng-click='loadRandomItems()') Load Random Items
           div
             label(class="btn btn-default" for="file-selector") Upload Item Set
                 input(type='file'
@@ -38,10 +44,15 @@ html
             button(class='btn btn-default'
                    ng-click='exportItemSet()') Download Item Set
       .col-md-6.genericContainer
-        .dropzone(file-dropzone="[image/png, image/jpeg, image/gif]"
-                  file="image" file-name="imageFileName" data-max-file-size="3")
-        #statDistributionChartContainer
-          #statDistributionChartTitleContainer
+        #statDistributionChartContainer(popover-title="Stat Distribution Chart"
+                                        popover-html="'The item stat distribution chart gives a general idea of how much of an item&#39;s cost goes to each stat. The \"Effective Gold\" is calculated by using a baseline item, and applying the baseline stat cost to the item in question. <a href=\"http://leagueoflegends.wikia.com/wiki/Gold_efficiency\" target=\"_blank\">More Info </a>'"
+                                        popover-toggle="show_help"
+                                        popover-append-to-body="true")
+          #statDistributionChartTitleContainer(popover-title="Item Set Title"
+                                               popover-html="'If you would like to rename this item set, simply click on the title and type in the new name'"
+                                               popover-placement="bottom"
+                                               popover-toggle="show_help"
+                                               popover-append-to-body="true")
             .chartTitleKeyValueContainer
               .chartTitleValue {{getTotalCost()}}
               .chartTitleKey TOTAL COST
@@ -66,7 +77,10 @@ html
           canvas(id='statDistributionChart')
 
       .col-md-3
-        .genericContainer#statDistributionTableLegend
+        .genericContainer#statDistributionTableLegend(popover-title="Icon Legend"
+                                                      popover-html="'The icon legend lets you know which stat each icon represents'"
+                                                      popover-toggle="show_help"
+                                                      popover-append-to-body="true")
           ul(class='list-unstyled')
             li(ng-repeat='key in stat_distribution_label_keys track by $index')
               .legendKey {{stat_distribution_label_keys[$index]}}
@@ -74,7 +88,10 @@ html
 
     #itemSelectionContainer.col-md-12
       .col-md-3
-        #blockSelectionContainer.genericContainer
+        #blockSelectionContainer.genericContainer(popover-title="Block Management"
+                                                  popover-html="'Here you can manage each block in your itemset'"
+                                                  popover-toggle="show_help"
+                                                  popover-append-to-body="true")
           button(class='btn btn-default btn-xs'
                  ng-click='createNewBlock()'
                  ng-disabled='currently_renaming_block') New Block
@@ -126,7 +143,14 @@ html
 
       include ./item_popover_template
 
-      div(ng-repeat='n in build_item track by $index', class="buildItem col-md-1", id="item{{$index}}")
+      div(style='margin-left:160px;'
+          popover-title="Item Selection"
+          popover-html="'Here you can add or remove items from the current block, simply enter part of the item name and choose it from the select box'"
+          popover-toggle="show_help"
+          popover-append-to-body="true")
+      div(ng-repeat='n in build_item track by $index'
+          class="buildItem col-md-1"
+          id="item{{$index}}")
         button(class="btn btn-default btn-sm clear_button" ng-show="build_item[{{$index}}].selected" ng-click="clearItem($index)") X
         .itemDisplayImgContainer
           img(class="item_display_img"
@@ -153,7 +177,11 @@ html
 
     .col-md-1
     .col-md-10.genericContainer#statDistributionTable
-      table(class='table')
+      table(class='table'
+            popover-title="Stat Distribution Table"
+            popover-html="'ERRRRRRRRRM'"
+            popover-toggle="show_help"
+            popover-append-to-body="true")
         thead
           tr
             td
