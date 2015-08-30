@@ -173,7 +173,7 @@ html
             td
               strong {{getTotalEfficiency()}}%
             td(ng-repeat='val in stat_distribution_label_keys track by $index')
-              strong {{getTotalStat($index)}}
+              strong {{getTotalStat($index) > 0 ? getTotalStat($index) : ''}}
           tr(ng-repeat='n in stat_distribution_data.datasets track by $index'
              ng-show='build_item[$index].selected'
              id='stat_table_item{{$index}}')
