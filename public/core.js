@@ -110,15 +110,40 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
     }
   }
 
+  $scope.uploadItemset = function(element) {
+    var reader = new FileReader();
+
+    reader.onload = function(e) {
+      var itemsetJson = JSON.parse(reader.result);
+      var newItemset = {};
+      newItemset.name = itemsetJson.title;
+      newItemset.blocks = [];
+
+      for (block in itemsetJson.blocks) {
+        var blockItems = [];
+        for (item in itemsetJson.blocks[block].items) {
+          blockItems.push(itemsetJson.blocks[block].items[item].id);
+        }
+        newItemset.blocks.push({ name: itemsetJson.blocks[block].type,
+                                 items: blockItems });
+      }
+      $scope.processItemset(newItemset);
+    }
+
+    reader.readAsText(element.files[0]);
+  }
+
   // Save loaded itemset to the local scope variables and load the first block
   $scope.processItemset = function(data) {
     $scope.item_set_name = data.name;
 
-    if ($scope.build_blocks) {
+    if (data.blocks) {
       $scope.build_blocks = data.blocks;
 
       $scope.loadBlock($scope.build_blocks[0]);
     }
+
+    $scope.$digest();
   }
 
   // Simple function so that we iterate over a set number in angular
@@ -314,12 +339,14 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
       $scope.this_block = block;
       $scope.last_block = temp;
 
-      for(var i=0; i<BLOCK_SIZE; i++) {
-        if (block.items[i] != undefined &&
-            block.items[i] > 0) {
-          $scope.itemChange(i, block.items[i])
-        } else {
-          $scope.clearItem(i)
+      if (block.items) {
+        for(var i=0; i<BLOCK_SIZE; i++) {
+          if (block.items[i] != undefined &&
+              block.items[i] > 0) {
+            $scope.itemChange(i, block.items[i])
+          } else {
+            $scope.clearItem(i)
+          }
         }
       }
     }

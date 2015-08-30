@@ -16,17 +16,27 @@ html
     .row
       .col-md-3
         .genericContainer#saveButtons
-          button(class='btn btn-default'
-                 id='shareItemSetButton'
-                 ng-click='shareItemSet()'
-                 ng-show='!currently_saving') Share Item Set
-          div(class='btn btn-default disabled' id='shareItemSetButton' ng-show='currently_saving') <img id='loading_icon' src='/images/loading.svg'>
-          button(class='btn btn-default'
-                 ng-click='exportItemSet()') Export Item Set
-          input(type='text'
-                ng-model='share_link'
-                class='form-control'
-                ng-show='share_link')
+          div
+            label(class="btn btn-default" for="file-selector") Upload Item Set
+                input(type='file'
+                      id='file-selector'
+                      onchange='angular.element(this).scope().uploadItemset(this)'
+                      style='display:none')
+          div
+            button(class='btn btn-default'
+                   id='shareItemSetButton'
+                   ng-click='shareItemSet()'
+                   ng-show='!currently_saving') Share Item Set
+            div(class='btn btn-default disabled' id='shareItemSetButton' ng-show='currently_saving') <img id='loading_icon' src='/images/loading.svg'>
+            div
+              input(type='text'
+                    ng-model='share_link'
+                    class='form-control'
+                    ng-show='share_link')
+
+          div
+            button(class='btn btn-default'
+                   ng-click='exportItemSet()') Download Item Set
       .col-md-6.genericContainer
         .dropzone(file-dropzone="[image/png, image/jpeg, image/gif]"
                   file="image" file-name="imageFileName" data-max-file-size="3")

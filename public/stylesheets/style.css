@@ -25,6 +25,26 @@ a {
   color: #00B7FF;
 }
 
+.btn-file {
+    position: relative;
+    overflow: hidden;
+}
+.btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    outline: none;
+    background: white;
+    cursor: inherit;
+    display: block;
+}
+
 .noselect {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -252,7 +272,7 @@ a {
 
 #itemBuilderContainer input {
   display: inline-block;
-  width: 25%;
+  width: 50%;
   margin-left: 5px;
 }
 
@@ -352,19 +372,23 @@ a {
 
 #saveButtons {
   width: 90%;
+  margin-top: 70%;
   margin-left: 20px;
-  margin-top: 93%;
   padding: 10px;
 }
 
+#saveButtons .btn {
+  margin-bottom: 10px;
+}
+
 #saveButtons input {
-  width: 75%;
-  margin: 15px auto;
+  width: 100%;
+  margin: 0 auto;
+  margin-bottom: 10px;
 }
 
 #saveButtons button,
 #saveButtons div {
-  margin: 0 30px;
 }
 
 #shareItemSetButton {
