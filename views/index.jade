@@ -14,59 +14,56 @@ html
         h1 item.builder.gg
         #headerSubText
     .row
-      .col-md-3
+      .col-md-1
+      .col-md-2
+        .genericContainer#statDistributionTableLegend
+          ul(class='list-unstyled')
+            li(ng-repeat='key in stat_distribution_label_keys track by $index')
+              .legendKey {{stat_distribution_label_keys[$index]}}
+              .legendValue {{stat_distribution_label_values[$index]}}
+
       .col-md-6.genericContainer
         #statDistributionChartContainer
+          #statDistributionChartTitleContainer
+            .chartTitleKeyValueContainer
+              .chartTitleValue {{getTotalCost()}}
+              .chartTitleKey TOTAL COST
+            #statDistributionChartTitle(ng-mouseover='show_itemset_edit=true' ng-mouseout='show_itemset_edit=false'
+                                        ng-click='currently_renaming_itemset ? null : currently_renaming_itemset = true')
+              span(ng-show='!currently_renaming_itemset') {{item_set_name}}
+              span(class='glyphicon glyphicon-pencil'
+                   style='position:absolute; margin-top: 30px; margin-left: 10px; font-size: 70%;'
+                   ng-show='show_itemset_edit && !currently_renaming_itemset')
+              div(ng-show='currently_renaming_itemset')
+                form(ng-submit='currently_renaming_itemset=!currently_renaming_itemset')
+                  input(type='text'
+                        ng-model='item_set_name'
+                        class='form-control'
+                        placeholder='Item Set Name'
+                        style='width: 50%; display: inline-block;')
+                  input(type='submit' class='btn btn-default' value='Apply' style='margin-left: 10px; display: inline-block; margin-top: 2px;')
+            .chartTitleKeyValueContainer
+              .chartTitleValue {{getTotalEfficiency()}}%
+              .chartTitleKey GOLD EFFICIENCY
           #statDistributionChartYAxis Effective Gold
           canvas(id='statDistributionChart')
 
+      .col-md-3
+        #saveButtons
+          button(class='btn btn-default'
+                 id='shareItemSetButton'
+                 ng-click='shareItemSet()'
+                 ng-show='!currently_saving') Share Item Set
+          div(class='btn btn-default disabled' id='shareItemSetButton' ng-show='currently_saving') <img id='loading_icon' src='/images/loading.svg'>
+          button(class='btn btn-default'
+                 ng-click='exportItemSet()') Export Item Set
+          input(type='text'
+                ng-model='share_link'
+                class='form-control'
+                ng-show='share_link')
+
     #itemSelectionContainer.col-md-12
-      .col-md-2
-      #blockSelectionContainer.col-md-2
-        button(class='btn btn-default btn-xs'
-               ng-click='createNewBlock()'
-               ng-disabled='currently_renaming') New
-        button(class='btn btn-default btn-xs'
-               ng-click='copyNewBlock()'
-               ng-disabled='currently_renaming') Copy
-        button(class='btn btn-default btn-xs'
-               ng-click='startRenaming()'
-               ng-disabled='currently_renaming') Rename
-        button(class='btn btn-default btn-xs'
-               ng-disabled='currently_renaming'
-               ng-click='deleteBlock(current_block.selected)') Delete
-
-        input(ng-show='currently_renaming'
-              id='rename-input-box'
-              ng-model='new_block_name'
-              class='form-control')
-        button(class='btn btn-default btn-xs'
-               ng-click='renameBlock(current_block.selected,new_block_name)'
-               ng-show='currently_renaming') Apply
-        button(class='btn btn-default btn-xs'
-               ng-click='currently_renaming=false'
-               ng-show='currently_renaming') Cancel
-
-        ui-select(ng-model="current_block.selected"
-                  theme="bootstrap" ng-disabled="disabled"
-                  class="block-select"
-                  search-enabled="false"
-                  ng-init='current_block.selected=build_blocks[0]'
-                  on-select='loadBlock(current_block.selected,$index)'
-                  ng-show='!currently_renaming')
-          ui-select-match(placeholder="Select a block")
-            {{$select.selected.name}}
-          ui-select-choices(repeat="block in build_blocks track by $index")
-            span(class='block_choice_name'
-                 ng-bind-html="block.name")
-            span(class='block_item_img_container')
-              span(ng-repeat="item in block.items track by $index")
-                img(class='block_item_img' ng-src="{{getItemImage(item)}}")
-
-
-        button(class='btn btn-default btn-xs'
-               ng-click='loadBlock(last_block)'
-               ng-show='!currently_renaming') Last Block
+      .col-md-3
 
       include ./item_popover_template
 
@@ -92,52 +89,82 @@ html
             div(style="margin-left: 30px", class="item-selection-choice")
               div(ng-bind-html="item.name | highlight: $select.search")
               small {{item.cost}}g
-      .col-md-1#saveButtons
-        input(type='text'
-              ng-model='build_name'
-              class='form-control'
-              placeholder='Build Name')
-        button(class='btn btn-default'
-               id='shareItemSetButton'
-               ng-click='shareItemSet()'
-               ng-show='!currently_saving') Share Item Set
-        input(type='text'
-              ng-model='share_link'
-              class='form-control'
-              ng-show='share_link')
-        div(class='btn btn-default disabled' id='shareItemSetButton' ng-show='currently_saving') <img id='loading_icon' src='/images/loading.svg'>
-        button(class='btn btn-default'
-               ng-click='exportItemSet()') Export Item Set
+      .col-md-3
+        #blockSelectionContainer
+          button(class='btn btn-default btn-xs'
+                 ng-click='createNewBlock()'
+                 ng-disabled='currently_renaming_block') New Block
+          button(class='btn btn-default btn-xs'
+                 ng-click='copyNewBlock()'
+                 ng-disabled='currently_renaming_block') Copy Block
+          button(class='btn btn-default btn-xs'
+                 ng-click='startRenamingBlock()'
+                 ng-disabled='currently_renaming_block') Rename Block
+          button(class='btn btn-default btn-xs'
+                 ng-disabled='currently_renaming_block'
+                 ng-click='deleteBlock(current_block.selected)') Delete Block
 
-    #statDistributionTable
-      .col-md-1
-      .col-md-10.genericContainer
-        table(class='table')
-          thead
-            tr
-              td
-              td Cost
-              td Efficiency
-              td(ng-repeat='stat in stat_distribution_label_map') {{stat}}
-          tbody
-            tr
-              td 
-                strong Total
-              td
-                strong {{getTotalCost()}}
-              td
-                strong {{Math.round(100*(getTotalEffectiveGold()/getTotalCost()))}}%
-              td(ng-repeat='val in stat_distribution_label_map track by $index')
-                strong {{getTotalStat($index)}}
-            tr(ng-repeat='n in stat_distribution_data.datasets track by $index'
-               ng-show='build_item[$index].selected'
-               id='stat_table_item{{$index}}')
-              td {{n.label}}
-              td {{actual_cost[$index]}}
-              td {{Math.round(100*(effective_gold[$index]/actual_cost[$index]))}}%
-              td(ng-repeat='val in n.data track by $index')
-                {{stat_tally[$parent.$index][$index] > 0 ? stat_tally[$parent.$index][$index] : ''}}
-      .col-md-1
+          input(ng-show='currently_renaming_block'
+                id='rename-input-box'
+                ng-model='new_block_name'
+                class='form-control')
+          button(class='btn btn-default btn-xs'
+                 ng-click='renameBlock(current_block.selected,new_block_name)'
+                 ng-show='currently_renaming_block') Apply
+          button(class='btn btn-default btn-xs'
+                 ng-click='currently_renaming_block=false'
+                 ng-show='currently_renaming_block') Cancel
+
+          #blockSelectionInput
+            ui-select(ng-model="current_block.selected"
+                      theme="bootstrap" ng-disabled="disabled"
+                      class="block-select"
+                      search-enabled="false"
+                      ng-init='current_block.selected=build_blocks[0]'
+                      on-select='loadBlock(current_block.selected,$index)'
+                      ng-show='!currently_renaming_block')
+              ui-select-match(placeholder="Select a block")
+                {{$select.selected.name}}
+              ui-select-choices(repeat="block in build_blocks track by $index")
+                span(class='block_choice_name'
+                     ng-bind-html="block.name")
+                span(class='block_item_img_container')
+                  span(ng-repeat="item in block.items track by $index")
+                    img(class='block_item_img' ng-src="{{getItemImage(item)}}")
+
+          button(class='btn btn-default btn-xs'
+                 ng-click='loadBlock(last_block)'
+                 ng-show='!currently_renaming_block && last_block') Last Block
+
+
+    .col-md-1
+    .col-md-10.genericContainer#statDistributionTable
+      table(class='table')
+        thead
+          tr
+            td
+            td Cost
+            td Efficiency
+            td(ng-repeat='stat in stat_distribution_label_keys' id="statDistributionTableIcons") {{stat}}
+        tbody
+          tr
+            td 
+              strong Total
+            td
+              strong {{getTotalCost()}}
+            td
+              strong {{getTotalEfficiency()}}%
+            td(ng-repeat='val in stat_distribution_label_keys track by $index')
+              strong {{getTotalStat($index)}}
+          tr(ng-repeat='n in stat_distribution_data.datasets track by $index'
+             ng-show='build_item[$index].selected'
+             id='stat_table_item{{$index}}')
+            td {{n.label}}
+            td {{actual_cost[$index]}}
+            td {{Math.round(100*(effective_gold[$index]/actual_cost[$index]))}}%
+            td(ng-repeat='val in n.data track by $index')
+              {{stat_tally[$parent.$index][$index] > 0 ? stat_tally[$parent.$index][$index] : ''}}
+    .col-md-1
 
     //-
       ** File drop handling **

@@ -8,6 +8,8 @@ var kda_timeline_length = kda_last_minute / kda_interval // 5 minute intervals u
 
 var qty_item_id_constant = 10000;
 
+var BOOTS_OF_SPEED_ID = "1001";
+
 function ItemlistEntry(id, name, cost, image, plaintext) {
   this.id = id;
   this.name = name;
@@ -84,7 +86,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
       $http.get('/linkify?b='+$location.search().b)
         .then(function(res){
           if (res.data) {
-            $scope.build_name = res.data.name;
+            $scope.item_set_name = res.data.name;
 
             if ($scope.build_blocks) {
               $scope.build_blocks = res.data.blocks;
@@ -114,10 +116,15 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
     });
   }
 
-  $scope.getTotalEffectiveGold = function() {
+  $scope.getEffectiveGold = function() {
     return $scope.effective_gold.reduce(function(prevValue, curValue){
       return prevValue + curValue;
     });
+  }
+
+  $scope.getTotalEfficiency = function() {
+    var efficiency = Math.round(100*($scope.getEffectiveGold()/$scope.getTotalCost()));
+    return efficiency ? efficiency : 0;
   }
 
   $scope.getTotalStat = function(index) {
@@ -161,6 +168,8 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
     datasets[item_slot].label = this_item.name;
 
     this_stat_tally[0] =  this_item.stats.FlatPhysicalDamageMod    ? this_item.stats.FlatPhysicalDamageMod       : 0;
+    this_stat_tally[1] = 0;
+    this_stat_tally[2] = 0;
     this_stat_tally[3] =  this_item.stats.PercentAttackSpeedMod    ? this_item.stats.PercentAttackSpeedMod*100   : 0;
     this_stat_tally[4] =  this_item.stats.FlatCritChanceMod        ? this_item.stats.FlatCritChanceMod*100       : 0;
     this_stat_tally[5] =  this_item.stats.FlatSpellBlockMod        ? this_item.stats.FlatSpellBlockMod           : 0;
@@ -170,6 +179,9 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
     this_stat_tally[9] =  this_item.stats.FlatMovementSpeedMod     ? this_item.stats.FlatMovementSpeedMod        : 0;
     this_stat_tally[10] = this_item.stats.PercentMovementSpeedMod  ? this_item.stats.PercentMovementSpeedMod*100 : 0;
     this_stat_tally[11] = this_item.stats.FlatMPPoolMod            ? this_item.stats.FlatMPPoolMod               : 0;
+    this_stat_tally[12] = 0;
+    this_stat_tally[13] = 0;
+    this_stat_tally[14] = 0;
     this_stat_tally[15] = this_item.stats.FlatMagicDamageMod       ? this_item.stats.FlatMagicDamageMod          : 0;
 
     var sanitizedDescription = $scope.itemlist_json[item_id].sanitizedDescription;
@@ -201,7 +213,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
 
     // Get "Effective Gold" stat
     var total_effective_gold = 0;
-    for (var i=0; i<$scope.stat_distribution_label_map.length; i++)
+    for (var i=0; i<$scope.stat_distribution_label_keys.length; i++)
     {
       $scope.stat_distribution_data.datasets[item_slot].data[i] = Math.floor(this_stat_tally[i]*
                                                                              $scope.stat_distribution_stat_bases[i]);
@@ -253,7 +265,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
   }
 
   $scope.createNewBlock = function() {
-    $scope.build_blocks.push({name: 'New Block', items: []});
+    $scope.build_blocks.push({name: 'Untitled', items: []});
     var bb_length = $scope.build_blocks.length;
     $scope.loadBlock($scope.build_blocks[bb_length-1]);
   }
@@ -264,8 +276,12 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
     $scope.loadBlock($scope.build_blocks[bb_length-1]);
   }
 
-  $scope.startRenaming = function() {
-    $scope.currently_renaming = true;
+  $scope.renameItemSet = function() {
+    $scope.currently_renaming_itemset = false;
+  }
+
+  $scope.startRenamingBlock = function() {
+    $scope.currently_renaming_block = true;
     $scope.new_block_name = $scope.current_block.selected.name;
 
     $timeout(function(){
@@ -274,8 +290,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
   }
 
   $scope.renameBlock = function(block, new_name) {
-    block.name = new_name;
-    $scope.currently_renaming = false;
+    $scope.currently_renaming_block = false;
   }
 
   $scope.deleteBlock = function(block) {
@@ -311,12 +326,12 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
   $scope.shareItemSet = function() {
     $scope.currently_saving = true;
     var save_object = {};
-    save_object.name = $scope.build_name;
+    save_object.name = $scope.item_set_name;
     save_object.blocks = $scope.build_blocks;
     var parameter = JSON.stringify(save_object);
     $http.post('/linkify', parameter).
     success(function(data, status, headers, config) {
-        $scope.share_link = data;
+        $scope.share_link = 'http://item.builder.gg/?#b='+data;
         $scope.currently_saving = false;
       }).
       error(function(data, status, headers, config) {
@@ -376,7 +391,10 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
   //$scope.build_blocks[0] = {name: 'Default', items: []};
   //$scope.this_block = $scope.build_blocks[0];
 
-  $scope.currently_renaming = false;
+  $scope.currently_renaming_block = false;
+  $scope.currently_renaming_itemset = false;
+
+  $scope.item_set_name = 'Untitled Item Set';
 
   $scope.effective_gold = [0, 0, 0, 0, 0, 0];
   $scope.actual_cost = [0, 0, 0, 0, 0, 0];
@@ -387,24 +405,41 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
   $scope.build_item_image = [];
 
   // Stat Distribution Chart Setup
-  $scope.stat_distribution_label_map = [ "AD",
-                                         "ArP",
-                                         "LS%",
-                                         "AS%",
-                                         "CrC%",
-                                         "MR",
-                                         "HP",
-                                         "HRe%",
-                                         "Ar",
-                                         "MS",
-                                         "MS%",
-                                         "Ma",
-                                         "MRe%",
-                                         "CDR%",
-                                         //"% Spellvamp",
-                                         "MP",
-                                         "AP" ];
-  $scope.stat_distribution_labels = $scope.stat_distribution_label_map.slice();
+
+  $scope.stat_distribution_label_values = ["Attack Damage",
+                                           "Armor Penetration",
+                                           "Lifesteal %",
+                                           "Attack Speed %",
+                                           "Critical Chance %",
+                                           "Magic Resistance",
+                                           "Health Points",
+                                           "Health Regeneration %",
+                                           "Armor",
+                                           "Movespeed",
+                                           "Movespeed %",
+                                           "Mana",
+                                           "Mana Regeneration %",
+                                           "Cooldown Reduction %",
+                                           "Magic Penetration",
+                                           "Ability Power" ];
+
+  $scope.stat_distribution_label_keys = ["\uf056",
+                                         "\uf127",
+                                         "\uf0ec",
+                                         "\uf151",
+                                         "\uf25e",
+                                         "\uf070",
+                                         "\uf004",
+                                         "\uf0f0",
+                                         "\uf132",
+                                         "\uf101",
+                                         "\uf101%",
+                                         "\uf219",
+                                         "\uf0d0",
+                                         "\uf017",
+                                         "\uf0c4",
+                                         "\uf06e" ];
+  $scope.stat_distribution_labels = $scope.stat_distribution_label_keys.slice();
   $scope.stat_distribution_stat_bases = [ 36.00, // AD
                                           12.00, // Armor Pen
                                           55,    // % Lifesteal
@@ -427,7 +462,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
   $scope.stat_tally = [];
   for(var i=0; i<6; i++) {
     $scope.stat_tally[i] = [];
-    for (var j=0; j<$scope.stat_distribution_label_map.length; j++) {
+    for (var j=0; j<$scope.stat_distribution_label_keys.length; j++) {
       $scope.stat_tally[i][j] = 0;
     }
   }
@@ -509,14 +544,22 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
                          }];
 
   $scope.stat_distribution_options = { animationEasing: "easeOutElastic",
-                                       scaleFontSize: 14,
+                                       scaleFontSize: 18,
                                        scaleFontColor: "#DDDDDD",
                                        scaleGridLineColor : "rgba(255,255,255,.15)",
                                        scaleShowVerticalLines: false,
-                                       responsive: true };
+                                       responsive: true,
+                                       scaleFontFamily: 'FontAwesome',
+                                       tooltipTitleFontFamily: 'FontAwesome',
+                                       /*
+                                       scaleOverride: true,
+                                       scaleSteps: 9,
+                                       scaleStepWidth: 2000,
+                                       scaleStartValue: 0*/ };
 
   $scope.stat_distribution_data = { labels: $scope.stat_distribution_labels,
-                                    datasets: stat_distribution_datasets };
+                                    datasets: stat_distribution_datasets,
+                                    pointLabelFontFamily: 'FontAwesome' };
 
   $scope.stat_distribution_ctx = document.getElementById("statDistributionChart").getContext("2d");
   $scope.stat_distribution_chart = new Chart($scope.stat_distribution_ctx).StackedBar($scope.stat_distribution_data, $scope.stat_distribution_options);
@@ -588,7 +631,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
 
   $scope.getItemBuilderLink = function() {
     var parameter = {};
-    parameter.name = $scope.current_champion.name + ' ' + $scope.current_lane
+    parameter.name = $scope.current_champion.name + ' ' + $scope.current_lane;
     parameter.blocks = [];
     parameter.champId = $scope.current_champion.id;
 
@@ -664,14 +707,6 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
       $scope.current_kda_deltas = [];
 
       for (var i=0; i<=kda_timeline_length; i++) {
-         //$scope.kda_data.labels[i] = (i*5+'′ (0)');
-         /*
-         $scope.kda_chart.datasets[0].points[i].value = 0;
-         $scope.kda_chart.datasets[1].points[i].value = 0;
-         $scope.kda_chart.datasets[2].points[i].value = 0;
-         $scope.kda_chart.datasets[3].points[i].value = 0;
-         $scope.kda_chart.datasets[4].points[i].value = 0;
-         */
          $scope.kda_chart.datasets[0].points[i].value = null;
          $scope.kda_chart.datasets[1].points[i].value = null;
          $scope.kda_chart.datasets[2].points[i].value = null;
@@ -728,10 +763,12 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
 
       $scope.kda_chart.update();
 
+      // *** Item Processing ***
       $scope.item_builds = [];
       $scope.core_build = [];
       var idx = 0;
       var item_purchase_history = [];
+      var boots_added = false;
       for (item_frame in stat_data.itemBuilds) {
         var frame_samples = stat_data.aggregateStats[idx*kda_interval].samples;
         // If item_frame > 50, break
@@ -813,9 +850,8 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
 
           if (popularity > 50 &&
               item_purchase_history.indexOf(this_item_id) < 0) {
-            // Record subitems of each parent item
-            build_frame.significant_purchases.push({ id: this_item_id, popularity: Math.floor(popularity) });
 
+            // Record subitems of each parent item
             var from_items = $scope.itemlist_json[this_item_id].from;
             for (subitem in from_items) {
               if (subitem_history.indexOf(from_items[subitem]) < 0) {
@@ -823,12 +859,55 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
               }
             }
 
+            build_frame.significant_purchases.push({ id: this_item_id, popularity: Math.floor(popularity) });
             item_purchase_history.push(this_item_id);
 
-            if (item_frame > 1 &&
-                $scope.core_build.length < 6 &&
-                !$scope.itemlist_json[this_item_id].into) {
-              $scope.core_build.push(this_item_id);
+            if (item_frame > 1) {
+              var add_item = false;
+              var upgrade_existing = -1;
+
+              if (!$scope.itemlist_json[this_item_id].into) {
+                for (from_item in from_items) {
+                  var from_item_idx = $scope.core_build.indexOf(from_items[from_item]);
+                  if (from_item_idx > -1) {
+                    upgrade_existing = from_item_idx;
+                  }
+                }
+
+                add_item = true;
+              }
+
+              if (from_items && from_items.indexOf(BOOTS_OF_SPEED_ID) > -1 && !boots_added) {
+                add_item = true;
+              }
+
+              // Handle boot / jungle item enchants
+
+              if (upgrade_existing > -1) {
+                  $scope.core_build[upgrade_existing] = this_item_id;
+              } else if (add_item && $scope.core_build.length < 6) {
+                // check if from items are boots
+                var is_boots = false;
+                for (f_i in from_items) {
+                  if ($scope.itemlist_json[from_items[f_i]].tags &&
+                      $scope.itemlist_json[from_items[f_i]].tags.indexOf('Boots') > -1) {
+                    is_boots = true;
+                    break;
+                  }
+                }
+
+                if (is_boots) {
+                  if (boots_added) {
+                    // Boots already added, don't add another pair
+                    continue;
+                  } else {
+                    // First boots to be added, make sure to record
+                    boots_added = true;
+                  }
+                }
+
+                $scope.core_build.push(this_item_id);
+              }
             }
           }
           
@@ -936,6 +1015,8 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
   $scope.search.championId = {};
   $scope.search.tier = {};
   $scope.search.position = {};
+
+  $scope.display_subset = 'all';
 
   $scope.alert_loading = false;
   $scope.alert_error = false;

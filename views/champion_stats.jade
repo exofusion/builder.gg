@@ -58,24 +58,24 @@ html
       .col-md-3
       .col-md-6.genericContainer
         #kdaTitleContainer
-          .kdaTitleKeyValueContainer(ng-show="current_stats")
-            .kdaTitleValue {{current_champion.name}}
-            .kdaTitleKey CHAMPION
-          .kdaTitleKeyValueContainer(ng-show="current_stats")
-            .kdaTitleValue {{tiers[current_tier-1].name}}
-            .kdaTitleKey TIER
-          .kdaTitleKeyValueContainer(ng-show="current_stats")
-            .kdaTitleValue {{current_role}}
-            .kdaTitleKey ROLE
-          .kdaTitleKeyValueContainer(ng-show="current_stats")
-            .kdaTitleValue {{current_lane}}
-            .kdaTitleKey LANE
-          .kdaTitleKeyValueContainer(ng-show="current_stats")
-            .kdaTitleValue {{current_winrate}}% ({{current_total_games}})
-            .kdaTitleKey WINRATE (# MATCHES)
-          .kdaTitleKeyValueContainer(ng-show="current_stats")
-            .kdaTitleValue {{current_patch}}
-            .kdaTitleKey PATCH
+          .chartTitleKeyValueContainer(ng-show="current_stats")
+            .chartTitleValue {{current_champion.name}}
+            .chartTitleKey CHAMPION
+          .chartTitleKeyValueContainer(ng-show="current_stats")
+            .chartTitleValue {{tiers[current_tier-1].name}}
+            .chartTitleKey TIER
+          .chartTitleKeyValueContainer(ng-show="current_stats")
+            .chartTitleValue {{current_role}}
+            .chartTitleKey ROLE
+          .chartTitleKeyValueContainer(ng-show="current_stats")
+            .chartTitleValue {{current_lane}}
+            .chartTitleKey LANE
+          .chartTitleKeyValueContainer(ng-show="current_stats")
+            .chartTitleValue {{current_winrate}}% ({{current_total_games}})
+            .chartTitleKey WINRATE (# MATCHES)
+          .chartTitleKeyValueContainer(ng-show="current_stats")
+            .chartTitleValue {{current_patch}}
+            .chartTitleKey PATCH
         #kdaChartContainer
           canvas(id='kdaChart')
         div(bind-html-compile='kda_chart_legend')

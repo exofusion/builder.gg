@@ -13,15 +13,16 @@
     "tests"
   ],
   "dependencies": {
-    "angular-chart.js": "~0.7.3",
-    "Chart.StackedBar.js": "~1.0.3",
-    "jquery": "~2.1.4",
-    "angular-ui-select": "~0.12.1",
-    "angular-sanitize": "~1.4.4",
-    "bootstrap": "~3.3.5",
-    "file-saver.js": "~1.20150507.2",
+    "angular-bind-html-compile": "~1.1.0",
     "angular-bootstrap": "~0.13.3",
-    "angular-bind-html-compile": "~1.1.0"
+    "angular-chart.js": "~0.7.3",
+    "angular-sanitize": "~1.4.4",
+    "angular-ui-select": "~0.12.1",
+    "bootstrap": "~3.3.5",
+    "Chart.StackedBar.js": "~1.0.3",
+    "file-saver.js": "~1.20150507.2",
+    "font-awesome": "~4.4.0",
+    "jquery": "~2.1.4"
   },
   "resolutions": {
     "angular": "1.x"

@@ -80,7 +80,41 @@ a {
   padding-top: 20px;
 }
 
+.chartTitleKeyValueContainer {
+  display: inline-block;
+  margin: 0 auto;
+}
+
+.chartTitleValue {
+  font-family: 'Georgia';
+  font-weight: bold;
+  font-size: 26px;
+}
+
+.chartTitleKey {
+  font-family: 'Candara';
+  color: #999999;
+}
+
 #statDistributionChart {
+}
+
+#statDistributionChartTitleContainer {
+  margin: 0 auto;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  min-height: 40px;
+  width: 100%;
+  display: flex;
+}
+
+#statDistributionChartTitle {
+  text-align: center;
+  font-family: 'Georgia';
+  font-weight: bold;
+  margin-top: 10px;
+  font-size: 26px;
+  width: 50%;
 }
 
 #statDistributionChartYAxis {
@@ -94,7 +128,42 @@ a {
 
 #statDistributionChartContainer {
   padding-left: 20px;
+  padding-top: 10px;
+  padding-bottom: 10px;
   width: 98%;
+}
+
+#statDistributionTable {
+  margin-bottom: 50px;
+}
+
+#statDistributionTableLegend {
+  text-align: left;
+  padding: 10px;
+  margin-top: 90px;
+  width: 250px;
+}
+
+#statDistributionTableLegend li {
+  margin-bottom: 7px;
+}
+
+.legendKey {
+  font-family: 'FontAwesome';
+  display: inline-block;
+  width: 40px;
+  font-size: 22px;
+}
+
+.legendValue {
+  display: inline-block;
+  font-size: 16px;
+  padding-top: 5px;
+}
+
+#statDistributionTableIcons {
+  font-family: 'FontAwesome';
+  font-size: 18px;
 }
 
 #victorySelect {
@@ -144,22 +213,6 @@ a {
   min-height: 50px;
   width: 100%;
   display: flex;
-}
-
-.kdaTitleKeyValueContainer {
-  display: inline-block;
-  margin: 0 auto;
-}
-
-.kdaTitleValue {
-  font-family: 'Georgia';
-  font-weight: bold;
-  font-size: 26px;
-}
-
-.kdaTitleKey {
-  font-family: 'Candara';
-  color: #999999;
 }
 
 #kdaChartContainer {
@@ -280,14 +333,26 @@ a {
 
 #blockSelectionContainer .ui-select-container,
 #blockSelectionContainer input {
+  margin: 0 auto;
   margin-top: 12px;
+  width: 75%;
 }
 
-#saveButtons input,
+#blockSelectionInput {
+  height: 45px;
+}
+
+#saveButtons {
+}
+
+#saveButtons input {
+  width: 75%;
+  margin: 15px auto;
+}
+
 #saveButtons button,
 #saveButtons div {
-  margin-bottom: 12px;
-  width: 126px;
+  margin: 0 45px;
 }
 
 #shareItemSetButton {
@@ -316,15 +381,15 @@ a {
 .buildItem {
   display: inline-block;
   padding: 0 20px;
-  width: 125px;
-  height: 200px;
+  padding-bottom: 20px;
+  /*width: 125px;*/
+  /*height: 200px;*/
   vertical-align: top;
   text-align: center;
 }
 
 .itemDisplayImgContainer {
-  margin-left: -8px;
-  margin-right: auto;
+  margin: 0 auto;
   margin-bottom: 10px;
   z-index: 5;
   background-color: rgba(0,0,0,0);
@@ -369,7 +434,6 @@ a {
 
 .buildItem .ui-select-container {
   text-align: left;
-  margin: 0 -7px;
   z-index: 10;
   /*&box-shadow: 0px 0px 50px rgba(200,45,45,0.5);*/
 }
@@ -390,7 +454,7 @@ a {
 }
 
 .buildItem .ui-select-choices {
-  margin-left: -75px;
+  margin-left: -60px;
   width: 250px !important;
 }
 
