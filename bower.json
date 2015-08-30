@@ -20,7 +20,6 @@
     "angular-ui-select": "~0.12.1",
     "bootstrap": "~3.3.5",
     "Chart.StackedBar.js": "~1.0.3",
-    "file-saver.js": "~1.20150507.2",
     "font-awesome": "~4.4.0",
     "jquery": "~2.1.4"
   },
