@@ -8,8 +8,10 @@ var kda_timeline_length = kda_last_minute / kda_interval // 5 minute intervals u
 
 var qty_item_id_constant = 10000;
 
+var BLOCK_SIZE = 6;
 var BOOTS_OF_SPEED_ID = "1001";
 
+// Lightweight item object created from the full Itemlist JSON
 function ItemlistEntry(id, name, cost, image, plaintext) {
   this.id = id;
   this.name = name;
@@ -19,6 +21,7 @@ function ItemlistEntry(id, name, cost, image, plaintext) {
   return this;
 }
 
+// Calculates random search terms, used underneath title of "champion" page
 function SetRandoms($scope) {
   $scope.random_champ_idx = Math.round(Math.random()*($scope.champion_array.length-1));
   $scope.random_tier_idx = Math.round(Math.random()*($scope.tiers.length-1));
@@ -34,11 +37,15 @@ function SetRandoms($scope) {
   $scope.random_lane = lanes[$scope.random_lane_idx];
 }
 
+// Retrieves champion JSON file
 function GetChampionJson($scope, $http, callback) {
   $http.get('/static-json/champion.json')
     .then(function(res){
+      // Create a champion_array since it's easier for ui-select to digest
       $scope.champion_array = [];
       $scope.champion_json = res.data.data;
+
+      // Sort the champion keys in alphabetical order
       var sorted_champions = Object.keys($scope.champion_json).sort(function(a,b){return $scope.champion_json[a].name.localeCompare($scope.champion_json[b].name);});
       for (champ in sorted_champions) {
         var champ_json = $scope.champion_json[sorted_champions[champ]];
@@ -46,19 +53,23 @@ function GetChampionJson($scope, $http, callback) {
         $scope.champion_array.push(champ_json);
       }
 
+      // Trigger callback if we were passed one
       if (callback) {
         callback($scope);
       }
     });
 }
 
+// Retrieves itemlist JSON file
 function GetItemlistJson($scope, $http, callback) {
   $http.get('/static-json/itemlist.json')
   .then(function(res){
+    // Create itemlist_array since it's easier for ui-select to digest
     $scope.itemlist_array = [];
     $scope.item = {};
     $scope.itemlist_json = res.data.data;
     for (item in $scope.itemlist_json) {
+      // Use ItemlistEntry to slim down the original JSON object
       $scope.itemlist_array.push( new ItemlistEntry( $scope.itemlist_json[item].id,
                                                      $scope.itemlist_json[item].name,
                                                      $scope.itemlist_json[item].gold.total,
@@ -66,12 +77,14 @@ function GetItemlistJson($scope, $http, callback) {
                                                      $scope.itemlist_json[item].plaintext ));
     }
 
+    // Trigger callback if we were passed one
     if (callback) {
       callback($scope);
     }
   });
 }
 
+// Attaches the data dragon URL to an item ID
 function GetItemImage(scope, item_id) {
   return ddragon_url+'img/item/'+scope.itemlist_json[item_id].image.full;
 }
@@ -80,53 +93,60 @@ function toTitleCase(str) {
     return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
 }
 
+// Main controller for the item page
 app.controller('statDistributionCtrl', function($scope, $http, $timeout, $location) {
-  $scope.loadBuild = function() {
+  $scope.loadItemset = function() {
+    // Check for the build MD5 hash in the URL parameters (e.g. /#?b=XXX)
     if ($location.search().b) {
       $http.get('/linkify?b='+$location.search().b)
         .then(function(res){
           if (res.data) {
-            $scope.item_set_name = res.data.name;
-
-            if ($scope.build_blocks) {
-              $scope.build_blocks = res.data.blocks;
-
-              // wait for itemlist to load?
-              $scope.loadBlock($scope.build_blocks[0]);
-            }
+            // If we get data returned, pass it along to the itemset processor
+            $scope.processItemset(res.data)
           }
         }, function(res){
-          if (res.status == 404) {
-            $scope.alert_error_message = 'Sorry, no champion data for that search.'
-          } else {
-            $scope.alert_error_message = 'Status Code '+res.status+': '+res.data;
-          }
           // 404 / Error Handling
         });
-  }
+    }
   }
 
+  // Save loaded itemset to the local scope variables and load the first block
+  $scope.processItemset = function(data) {
+    $scope.item_set_name = data.name;
+
+    if ($scope.build_blocks) {
+      $scope.build_blocks = data.blocks;
+
+      $scope.loadBlock($scope.build_blocks[0]);
+    }
+  }
+
+  // Simple function so that we iterate over a set number in angular
   $scope.getNumber = function(num) {
     return new Array(num);   
   }
 
+  // Get the total cost of each item currently selected
   $scope.getTotalCost = function() {
     return $scope.actual_cost.reduce(function(prevValue, curValue){
       return prevValue + curValue;
     });
   }
 
+  // Get the total effective gold of each item currently selected
   $scope.getEffectiveGold = function() {
     return $scope.effective_gold.reduce(function(prevValue, curValue){
       return prevValue + curValue;
     });
   }
 
+  // Get the total % efficiency using the cost and effective gold
   $scope.getTotalEfficiency = function() {
     var efficiency = Math.round(100*($scope.getEffectiveGold()/$scope.getTotalCost()));
     return efficiency ? efficiency : 0;
   }
 
+  // Get the total stat value for the block
   $scope.getTotalStat = function(index) {
     var stat_total = 0;
     for (var i=0; i<$scope.stat_tally.length; i++) {
@@ -135,9 +155,10 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
     return stat_total;
   }
 
+  /*
   $scope.getStatFromCost = function(cost, index) {
     return Math.round(cost/$scope.stat_distribution_stat_bases[index]);
-  }
+  }*/
 
   $scope.clearItem = function(item_slot) {
     var datasets = $scope.stat_distribution_data.datasets;
@@ -220,16 +241,6 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
       total_effective_gold += $scope.stat_distribution_data.datasets[item_slot].data[i];
     }
 
-/*
-    // Update labels with stat amount
-    for (var i=0; i<11; i++) {
-      var total_stat = 0;
-      for (var j=0; j<datasets.length; j++)
-        total_stat += (datasets[j].data[i] / $scope.stat_distribution_stat_bases[i]);
-      
-      $scope.stat_distribution_data.labels[i] = $scope.stat_distribution_label_map[i]+' ('+total_stat+')';
-    }*/
-
     $scope.actual_cost[item_slot] = this_item.gold.total;
     $scope.effective_gold[item_slot] = total_effective_gold;
 
@@ -242,16 +253,6 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
                                                               this_item.gold.total,
                                                               $scope.getItemImage(this_item.id),
                                                               this_item.plaintext);
-
-    // Hide item selection box again
-    /*
-    $timeout(function() {
-      var uiSelect = angular.element('#item'+item_slot+' .ui-select-container').controller('uiSelect');
-      uiSelect.focusser[0].blur();
-      $scope.show_item_search = [];
-      //uiSelect.open = true;
-      //uiSelect.activate();
-    });*/
 
     // Fill bars with icon
     /*
@@ -313,7 +314,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
       $scope.this_block = block;
       $scope.last_block = temp;
 
-      for(var i=0; i<6; i++) { // Magic number...
+      for(var i=0; i<BLOCK_SIZE; i++) {
         if (block.items[i] != undefined &&
             block.items[i] > 0) {
           $scope.itemChange(i, block.items[i])
@@ -343,7 +344,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
 
   $scope.exportItemSet = function() {
     var item_set = {};
-    item_set.title = "Item Set Title";
+    item_set.title = $scope.item_set_name;
     item_set.type = "custom";
     item_set.map = "any";
     item_set.mode = "any";
@@ -382,31 +383,24 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
   $scope.Math = Math;
 
   $scope.build_item = [];
-  $scope.build_item[0] = {};
-  $scope.build_item[1] = {};
-  $scope.build_item[2] = {};
-  $scope.build_item[3] = {};
-  $scope.build_item[4] = {};
-  $scope.build_item[5] = {};
 
-  //$scope.build_blocks[0] = {name: 'Default', items: []};
-  //$scope.this_block = $scope.build_blocks[0];
+  for (var i=0; i<BLOCK_SIZE; i++) {
+    $scope.build_item[i] = {};
+  }
 
   $scope.currently_renaming_block = false;
   $scope.currently_renaming_itemset = false;
 
   $scope.item_set_name = 'Untitled Item Set';
 
-  $scope.effective_gold = [0, 0, 0, 0, 0, 0];
-  $scope.actual_cost = [0, 0, 0, 0, 0, 0];
+  $scope.effective_gold = new Array(BLOCK_SIZE);
+  $scope.actual_cost = new Array(BLOCK_SIZE);
 
-  //GetChampionJson($scope, $http);
-  GetItemlistJson($scope, $http, $scope.loadBuild);
+  GetItemlistJson($scope, $http, $scope.loadItemset);
 
   $scope.build_item_image = [];
 
   // Stat Distribution Chart Setup
-
   $scope.stat_distribution_label_values = ["Attack Damage",
                                            "Armor Penetration",
                                            "Lifesteal %",
@@ -441,6 +435,8 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
                                          "\uf0c4", // Magic Penetration
                                          "\uf06e" ]; // Ability Power
   $scope.stat_distribution_labels = $scope.stat_distribution_label_keys.slice();
+
+  // Stat bases are calculated according to here: http://leagueoflegends.wikia.com/wiki/Gold_efficiency
   $scope.stat_distribution_stat_bases = [ 36.00, // AD
                                           12.00, // Armor Pen
                                           55,    // % Lifesteal
@@ -455,34 +451,18 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
                                           2.00,  // Mana
                                           7.20,  // % Base Mana Regen
                                           31.67, // CDR
-                                          //27.50, // % Spellvamp
                                           34.33, // Magic Pen
                                           21.75  // AP
                                         ];
 
   $scope.stat_tally = [];
-  for(var i=0; i<6; i++) {
+  for(var i=0; i<BLOCK_SIZE; i++) {
     $scope.stat_tally[i] = [];
     for (var j=0; j<$scope.stat_distribution_label_keys.length; j++) {
       $scope.stat_tally[i][j] = 0;
     }
   }
 
-
-/*
-  $scope.stat_distribution_label_map = ["HP", "Mana", "Armor", "MR", "AD", "AP", "Health Regen", "Mana Regen", "Crit Chance", "AS", "MS"];
-  $scope.stat_distribution_stat_bases = [ 2.67,
-                                          2.00,
-                                          20.00,
-                                          20.00,
-                                          36.00,
-                                          21.75,
-                                          3.60,
-                                          7.20,
-                                          50.00,
-                                          30.00,
-                                          13.00 ];
-*/
   var stat_distribution_datasets =  [{
                             label: "N/A",
                             fillColor: "rgba(200,45,45,0.5)",
@@ -734,9 +714,6 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
             var deaths = (deathTally/frame_samples);
             var assists = (assistTally/frame_samples);
             var kda = ((kills+assists)/(deaths < 1 ? 1 : deaths)); // 0 deaths shouldn't skyrocket your KDA
-            // This causes data to reset before tweening to next values, dig into ChartJS to see where it's
-            // verifying the labels are the same
-            //$scope.kda_data.labels[label_index] = i+'′ ('+stat_data.aggregateStats[i].samples+')';
             
             $scope.current_kda_deltas.push(kda.toFixed(2)-lastKDA);
 
@@ -772,8 +749,6 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
       var boots_added = false;
       for (item_frame in stat_data.itemBuilds) {
         var frame_samples = stat_data.aggregateStats[idx*kda_interval].samples;
-        // If item_frame > 50, break
-        // Handle end game builds somehow
 
         // Fetch most popular Starting Build
         if (item_frame == 1) {
@@ -807,7 +782,6 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
 
         // Count most popular items per frame
         var build_frame = {};
-        //build_frame.builds = [];
         var unsorted_item_count = {};
 
         for (item_build in stat_data.itemBuilds[item_frame]) {
@@ -882,11 +856,9 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
                 add_item = true;
               }
 
-              // Handle boot / jungle item enchants
-
               if (upgrade_existing > -1) {
                   $scope.core_build[upgrade_existing] = this_item_id;
-              } else if (add_item && $scope.core_build.length < 6) {
+              } else if (add_item && $scope.core_build.length < BLOCK_SIZE) {
                 // check if from items are boots
                 var is_boots = false;
                 for (f_i in from_items) {
@@ -927,26 +899,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
 
         build_frame.item_count = sorted_items;
 
-  /*
-        for (item_build in stat_data.itemBuilds[item_frame]) {
-          var split_build = item_build.split(':');
-          split_build.pop();
-
-          var this_build_frame_build = {};
-          this_build_frame_build.items = {};
-
-          for (var i=0; i<split_build.length; i++) {
-            var item_id = (split_build[i]%10000).toString();
-            var quantity = Math.floor(split_build[i]/10000);
-            this_build_frame_build.items[item_id] = quantity;
-          }
-
-          this_build_frame_build.count = stat_data.itemBuilds[item_frame][item_build];
-          build_frame.builds.push(this_build_frame_build);
-        }*/
-
         build_frame.samples = stat_data.aggregateStats[item_frame].samples;
-        //console.log(build_frame);
         $scope.item_builds.push(build_frame);
         idx++;
       }
@@ -988,7 +941,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
       } else {
         $scope.kda_chart.datasets[dataset].points[i].hidden_value = $scope.kda_chart.datasets[dataset].points[i].value;
         if ($scope.kda_chart.datasets[dataset].points[i].value != null) {
-          // Should we animate fading the dataset out?
+          // If instant, do not animate
           if (instant) {
             $scope.kda_chart.datasets[dataset].points[i].value = null;
           } else {
@@ -1184,18 +1137,4 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
         SetRandoms($scope);
       });
   };
-
-  /*
-  $scope.kda_click = function () {
-    if ($scope.displayed) {
-      if ($scope.displayed == 'Victory' && $scope.defeat_response) {
-        parseStatCollection( $scope.defeat_response );
-        $scope.displayed = 'Defeat';
-      } else if ($scope.displayed == 'Defeat' && $scope.victory_response) {
-        parseStatCollection ( $scope.victory_response );
-        $scope.displayed = 'Victory';
-      }
-    };
-  };
-  */
 });

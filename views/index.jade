@@ -14,15 +14,22 @@ html
         h1 item.builder.gg
         #headerSubText
     .row
-      .col-md-1
-      .col-md-2
-        .genericContainer#statDistributionTableLegend
-          ul(class='list-unstyled')
-            li(ng-repeat='key in stat_distribution_label_keys track by $index')
-              .legendValue {{stat_distribution_label_values[$index]}}
-              .legendKey {{stat_distribution_label_keys[$index]}}
-
+      .col-md-3
+        .genericContainer#saveButtons
+          button(class='btn btn-default'
+                 id='shareItemSetButton'
+                 ng-click='shareItemSet()'
+                 ng-show='!currently_saving') Share Item Set
+          div(class='btn btn-default disabled' id='shareItemSetButton' ng-show='currently_saving') <img id='loading_icon' src='/images/loading.svg'>
+          button(class='btn btn-default'
+                 ng-click='exportItemSet()') Export Item Set
+          input(type='text'
+                ng-model='share_link'
+                class='form-control'
+                ng-show='share_link')
       .col-md-6.genericContainer
+        .dropzone(file-dropzone="[image/png, image/jpeg, image/gif]"
+                  file="image" file-name="imageFileName" data-max-file-size="3")
         #statDistributionChartContainer
           #statDistributionChartTitleContainer
             .chartTitleKeyValueContainer
@@ -49,22 +56,15 @@ html
           canvas(id='statDistributionChart')
 
       .col-md-3
-        .genericContainer#saveButtons
-          button(class='btn btn-default'
-                 id='shareItemSetButton'
-                 ng-click='shareItemSet()'
-                 ng-show='!currently_saving') Share Item Set
-          div(class='btn btn-default disabled' id='shareItemSetButton' ng-show='currently_saving') <img id='loading_icon' src='/images/loading.svg'>
-          button(class='btn btn-default'
-                 ng-click='exportItemSet()') Export Item Set
-          input(type='text'
-                ng-model='share_link'
-                class='form-control'
-                ng-show='share_link')
+        .genericContainer#statDistributionTableLegend
+          ul(class='list-unstyled')
+            li(ng-repeat='key in stat_distribution_label_keys track by $index')
+              .legendValue {{stat_distribution_label_values[$index]}}
+              .legendKey {{stat_distribution_label_keys[$index]}}
 
     #itemSelectionContainer.col-md-12
       .col-md-3
-        #blockSelectionContainer
+        #blockSelectionContainer.genericContainer
           button(class='btn btn-default btn-xs'
                  ng-click='createNewBlock()'
                  ng-disabled='currently_renaming_block') New Block
