@@ -138,7 +138,7 @@ a {
 }
 
 #statDistributionTableLegend {
-  text-align: left;
+  text-align: right;
   padding: 10px;
   margin-top: 90px;
   width: 250px;
@@ -150,6 +150,7 @@ a {
 
 .legendKey {
   font-family: 'FontAwesome';
+  text-align: center;
   display: inline-block;
   width: 40px;
   font-size: 22px;

@@ -290,6 +290,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
   }
 
   $scope.renameBlock = function(block, new_name) {
+    block.name = new_name;
     $scope.currently_renaming_block = false;
   }
 
@@ -423,22 +424,22 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
                                            "Magic Penetration",
                                            "Ability Power" ];
 
-  $scope.stat_distribution_label_keys = ["\uf05b",
-                                         "\uf127",
-                                         "\uf0ec",
-                                         "\uf04e",
-                                         "\uf25e",
-                                         "\uf070",
-                                         "\uf004",
-                                         "\uf0f0",
-                                         "\uf132",
-                                         "\uf101",
-                                         "\uf101%",
-                                         "\uf219",
-                                         "\uf0d0",
-                                         "\uf017",
-                                         "\uf0c4",
-                                         "\uf06e" ];
+  $scope.stat_distribution_label_keys = ["\uf05b", // AD
+                                         "\uf127", // ArPen
+                                         "\uf0ec", // Lifesteal
+                                         "\uf151", // AS
+                                         "\uf0e7", // Crit Chance
+                                         "\uf070", // MR
+                                         "\uf004", // HP
+                                         "\uf0fa", // HP%
+                                         "\uf132", // Armor
+                                         "\uf101", // Movespeed
+                                         "\uf101%", // Movespeed %
+                                         "\uf219", // Mana
+                                         "\uf0d0", // Mana Regeneration %
+                                         "\uf017", // Cooldown Reduction %
+                                         "\uf0c4", // Magic Penetration
+                                         "\uf06e" ]; // Ability Power
   $scope.stat_distribution_labels = $scope.stat_distribution_label_keys.slice();
   $scope.stat_distribution_stat_bases = [ 36.00, // AD
                                           12.00, // Armor Pen
