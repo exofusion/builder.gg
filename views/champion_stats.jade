@@ -156,12 +156,13 @@ html
               div {{5+($index*5)}}:00
         tbody
           tr
-            td Δ KDA
-            td(ng-repeat="n in getNumber(10) track by $index")
-              span {{item_builds[$index+1].samples ? current_kda_deltas[$index+1].toFixed(2) : ''}}
+            td(class='minuteBuildsSubtext') Δ KDA
+            td(class='minuteBuildsSubtext' ng-repeat="n in getNumber(10) track by $index")
+              span
+                strong {{item_builds[$index+1].samples ? current_kda_deltas[$index+1].toFixed(2) : ''}}
           tr
-            td # Samples
-            td(ng-repeat="n in getNumber(10) track by $index")
+            td(class='minuteBuildsSubtext') # Samples
+            td(class='minuteBuildsSubtext' ng-repeat="n in getNumber(10) track by $index")
               span [{{item_builds[$index+1].samples ? item_builds[$index+1].samples : 0}}]
           tr#itemRow
             td

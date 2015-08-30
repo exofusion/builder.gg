@@ -286,6 +286,10 @@ a {
   margin-right: auto;
 }
 
+.minuteBuildsSubtext {
+  font-family: 'Calibri';
+}
+
 #minuteBuilds table {
   table-layout: fixed;
 }
@@ -343,6 +347,7 @@ a {
 }
 
 #saveButtons {
+  padding: 10px;
 }
 
 #saveButtons input {
@@ -352,10 +357,11 @@ a {
 
 #saveButtons button,
 #saveButtons div {
-  margin: 0 45px;
+  margin: 0 30px;
 }
 
 #shareItemSetButton {
+  width: 125px;
 }
 
 .block_item_img_container {

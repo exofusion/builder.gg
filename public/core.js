@@ -423,10 +423,10 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
                                            "Magic Penetration",
                                            "Ability Power" ];
 
-  $scope.stat_distribution_label_keys = ["\uf056",
+  $scope.stat_distribution_label_keys = ["\uf05b",
                                          "\uf127",
                                          "\uf0ec",
-                                         "\uf151",
+                                         "\uf04e",
                                          "\uf25e",
                                          "\uf070",
                                          "\uf004",
