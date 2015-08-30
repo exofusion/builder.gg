@@ -333,7 +333,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
     var parameter = JSON.stringify(save_object);
     $http.post('/linkify', parameter).
     success(function(data, status, headers, config) {
-        $scope.share_link = 'http://item.builder.gg/?#b='+data;
+        $scope.share_link = 'http://item.builder.gg/#?b='+data;
         $scope.currently_saving = false;
       }).
       error(function(data, status, headers, config) {
