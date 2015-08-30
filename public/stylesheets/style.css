@@ -158,7 +158,7 @@ a {
 }
 
 #statDistributionTableLegend {
-  text-align: right;
+  text-align: left;
   padding: 10px;
   width: 250px;
 }

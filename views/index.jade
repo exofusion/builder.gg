@@ -69,8 +69,8 @@ html
         .genericContainer#statDistributionTableLegend
           ul(class='list-unstyled')
             li(ng-repeat='key in stat_distribution_label_keys track by $index')
-              .legendValue {{stat_distribution_label_values[$index]}}
               .legendKey {{stat_distribution_label_keys[$index]}}
+              .legendValue {{stat_distribution_label_values[$index]}}
 
     #itemSelectionContainer.col-md-12
       .col-md-3
