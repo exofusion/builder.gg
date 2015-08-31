@@ -10,7 +10,10 @@ html
 
     #siteHeader.col-md-8
       h1 champion.builder.gg
-      #headerSubText
+      #headerSubText(popover-title="Random Search"
+                      popover-html="'Click here to search for random aggregate stats'"
+                      popover-toggle="show_help"
+                      popover-append-to-body="true")
         #randomSelect(class='noselect' ng-click='randomSearch()') How does {{random_tier}} build {{random_lane}} {{random_champion}}?
 
     #statSearchContainer
@@ -46,7 +49,11 @@ html
 
       .row
         .col-md-5
-        .col-md-2#searchSubmit
+        .col-md-2#searchSubmit(popover-title="Stat Search"
+                              popover-placement="bottom"
+                              popover-html="'Find aggregate KDA stats for the selected search terms'"
+                              popover-toggle="show_help"
+                              popover-append-to-body="true")
           div(class='btn btn-default' ng-show='!alert_loading' ng-click='submit()') Summon
           div(class='btn btn-default disabled' ng-show='alert_loading') <img id='loading_icon' src='/images/loading.svg'>
   
@@ -78,14 +85,22 @@ html
             .chartTitleKey PATCH
         #kdaChartContainer
           canvas(id='kdaChart')
-        div(bind-html-compile='kda_chart_legend')
+        div(bind-html-compile='kda_chart_legend'
+            popover-title="Toggle Datasets"
+            popover-html="'Click on a dataset here in the legend to hide it from the chart'"
+            popover-toggle="show_help"
+            popover-append-to-body="true")
 
     #kdaVictoryDefeat
       //div(class='btn btn-default' ng-show='previous_stats' ng-click='loadPrevious()') Load Previous
       div(class="btn-group")
         //label(class='btn btn-default' ng-disabled='!current_stats.victories' btn-radio="'Victories'" ng-click='parseStatCollection("victories")')
 
-      .btn-group
+      .btn-group(popover-title="Game Subset"
+                  popover-placement="bottom"
+                  popover-html="'Toggle which games to show for the selected search terms: only victories, only defeats, or both'"
+                  popover-toggle="show_help"
+                  popover-append-to-body="true")
         label(class="btn btn-default"
                      ng-disabled="!current_stats.victories"
                      ng-model="display_subset"
@@ -108,7 +123,12 @@ html
       table(width="100%")
         thead
           tr
-            th Start Build
+            th
+              span(popover-title="Starting Build"
+                popover-placement="left"
+                popover-html="'The most common start build and the percentage of games it appears in'"
+                popover-toggle="show_help"
+                popover-append-to-body="true") Start Build
             th Core Build
         tbody
           tr
@@ -135,7 +155,11 @@ html
                     height="50px"
                     width="50px"
                     ng-src="{{getItemImage(item)}}")
-              #itemBuilderContainer
+              #itemBuilderContainer(popover-title="Item Builder Link"
+                                    popover-placement="bottom"
+                                    popover-html="'Get a link to load this build in item.builder.gg'"
+                                    popover-toggle="show_help"
+                                    popover-append-to-body="true")
                 button(class='btn btn-default'
                        ng-show='!item_builder_link && current_stats'
                        ng-click='getItemBuilderLink()') Get Item Builder Link
@@ -148,7 +172,12 @@ html
                       ng-model='item_builder_link_textbox')
 
     #minuteBuilds.genericContainer
-      table(width="100%")
+      table(width="100%"
+            popover-title="Minute Table"
+            popover-placement="left"
+            popover-html="'<strong>Δ KDA</strong>: This value holds the change in KDA ratio ((K+A) / D) between this minute interval and the last<br><strong># Samples</strong>: The number of match samples recorded for this minute interval<br><strong>Items</strong>: This row shows items that are in the inventory of >50% players at this minute interval'"
+            popover-toggle="show_help"
+            popover-append-to-body="true")
         thead
           tr
             th

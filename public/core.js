@@ -1005,6 +1005,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
 
   $scope.hiddenPointBuffer = [];
 
+  $scope.show_help = false;
   $scope.Math = Math;
 
   GetChampionJson($scope, $http, SetRandoms);
