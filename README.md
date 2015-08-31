@@ -22,11 +22,19 @@ This application gives statistical data on item builds up-to-date with the curre
 
 This application provides a detailed breakdown for item sets, and tools to share and use the set in game.  Here you can create item sets from scratch, use a core build brought in from champion.builder.gg, or even load up an item set created in the League of Legends client.
 
-* Upload Item Set: To load a League of Legends item set, simply click the *Upload Item Set* button, and browse to the item set JSON file (Usually C:\Riot Games\League of Legends\Config\Global\Recommended).  This will import the item set name along with all item blocks associated with this set.
+#### Saving Item Sets
 
-* Share Item Set: This generates a shareable link so you can send this build to friends.  What happens behind the scenes is that the local item set object stored in memory is converted to a JSON string and sent off as a POST request to the *linkify* script.  This script first gets an MD5 hash for the object string and uses that as an identifier index.  If the MD5 string already exists in the database then we simply return the MD5 string back to the requester without inserting anything since it's already available in the database.  Otherwise, we save the JSON object string along with the MD5 hash as the unique ID.  When a user loads a link, the linkifier looks up the MD5 hash in the database and returns the associated JSON object so the frontend can populate the item set.
+* **Upload Item Set**: To load a League of Legends item set, simply click the *Upload Item Set* button, and browse to the item set JSON file (Usually C:\Riot Games\League of Legends\Config\Global\Recommended).  This will import the item set name along with all item blocks associated with this set.
 
-* Download Item Set: When this button is pressed, a custom item set is generated locally and downloaded to the user's computer.  This item set is created according to Riot's Item Set API, and will be loaded in game if placed in the correct directory (e.g. C:/Riot Games/League of Legends/Config/Global/Recommended)
+* **Share Item Set**: This generates a shareable link so you can send this build to friends.  What happens behind the scenes is that the local item set object stored in memory is converted to a JSON string and sent off as a POST request to the *linkify* script.  This script first gets an MD5 hash for the object string and uses that as an identifier index.  If the MD5 string already exists in the database then we simply return the MD5 string back to the requester without inserting anything since it's already available in the database.  Otherwise, we save the JSON object string along with the MD5 hash as the unique ID.  When a user loads a link, the linkifier looks up the MD5 hash in the database and returns the associated JSON object so the frontend can populate the item set.
+
+* **Download Item Set**: When this button is pressed, a custom item set is generated locally and downloaded to the user's computer.  This item set is created according to Riot's Item Set API, and will be loaded in game if placed in the correct directory (e.g. C:/Riot Games/League of Legends/Config/Global/Recommended)
+
+#### Managing Blocks
+Each item set is divided up into item blocks.  A block is a grouped item build which is represented in a section of the store when loaded in game.  An example set of blocks could be "Starting Items", "Mid Game", and "Late Game".  Each of these blocks would contain suitable items for that stage of the game.  Blocks can be created, duplicated, renamed, or deleted.
+
+#### Item Selection
+By clicking on the input text box underneath each item image, a search can be performed to add an item to the slot.  Changes to item slots are automatically saved to the block.  To clear an item from the slot, click the X in the top right hand corner.
 
 ## Technology Stack
 
