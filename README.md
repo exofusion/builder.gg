@@ -36,6 +36,12 @@ Each item set is divided up into item blocks.  A block is a grouped item build w
 #### Item Selection
 By clicking on the input text box underneath each item image, a search can be performed to add an item to the slot.  Changes to item slots are automatically saved to the block.  To clear an item from the slot, click the X in the top right hand corner.
 
+### Stat Distribution Chart
+This chart is intended to give a rough idea of where gold is being spent in each stat.  The way this is calculated relies on finding a base cost for each stat (more outlined here: http://leagueoflegends.wikia.com/wiki/Gold_efficiency) and multiplying the base cost by how much of that stat the item contains.  For example: Ruby Crystal gives 150 health for 400 gold, using this we can calculate the base cost for health at roughly 2.67g for every 1 health point.  So if we look at an item such as Phage which gives 200 health, we can calculate the *effective* gold for health at 2.67g * 200 = 534g.  This is the basis of calculating item gold efficiency, which simply adds up the effective gold for each stat and compares it to the item's actual cost.
+
+### Stat Distribution Table
+In this table, a detailed breakdown is displayed for each item, along with the full block build as well.  Here we can quickly get a real stat value for the build, and see what items contribute which stats.  If an item has a passive, active, or aura then the gold efficiency will have an asterisk next to it to signify that the effect is not being factored into the gold efficiency equation and is actually valued somewhat higher.
+
 ## Technology Stack
 
 #### API Processor
