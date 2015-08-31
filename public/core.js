@@ -624,6 +624,8 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
                                        responsive: true,
                                        scaleFontFamily: 'FontAwesome',
                                        tooltipTitleFontFamily: 'FontAwesome',
+                                       tooltipTemplate: "<%= datasetLabel %>: <%= value %>g",
+                                       multiTooltipTemplate: "<%= datasetLabel %>: <%= value %>g"
                                        /*
                                        scaleOverride: true,
                                        scaleSteps: 9,
