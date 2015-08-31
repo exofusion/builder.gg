@@ -8,7 +8,7 @@ http://builder.gg
 
 builder.gg was created as an entry into Riot's Summer API Challenge.  It's intended to be a tool for garnering insights about item efficiency and impact on League of Legends games.  There are essentially two parts to builder.gg that synergize together: champion.builder.gg and item.builder.gg
 
-On both sites, the **help!** link in the top left corner can be clicked to bring up descriptive tooltips about what each element contains.
+On either site, the **help!** link in the top left corner can be clicked to bring up descriptive tooltips about what each element contains.
 
 ### champion.builder.gg
 
@@ -20,7 +20,9 @@ This application gives statistical data on item builds up-to-date with the curre
 
 ### item.builder.gg
 
-This application provides a detailed breakdown for an item build, and tools to share and use the build in game.
+This application provides a detailed breakdown for item sets, and tools to share and use the set in game.  Here you can create item sets from scratch, use a core build brought in from champion.builder.gg, or even load up an item set created in the League of Legends client.
+
+* Upload Item Sets: To load a League of Legends item set, simply click the *Upload Item Set* button, and browse to the item set JSON file (Usually C:\Riot Games\League of Legends\Config\Global\Recommended).  This will import the item set name along with all item blocks associated with this set.
 
 ## Technology Stack
 
