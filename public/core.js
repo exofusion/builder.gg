@@ -422,11 +422,13 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
     for (var i=0; i<$scope.build_blocks.length; i++) {
       var block = {};
       block.type = $scope.build_blocks[i].name;
+      /*
       block.recMath = false;
       block.minSummonerLevel = -1;
       block.maxSummonerLevel = -1;
       block.showIfSummonerSpell = "";
       block.hideIfSummonerSpell = "";
+      */
       block.items = [];
 
       for (var j=0; j<$scope.build_blocks[i].items.length; j++) {
@@ -439,7 +441,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
 
     var content = JSON.stringify(item_set);
     var filename = $scope.item_set_name;
-    var blob = new Blob([content], {type: "text/plain;charset=utf-8"});
+    var blob = new Blob([content], {type: "text/plain;charset=ansi"});
     saveAs(blob, filename+".json");
   }
 
