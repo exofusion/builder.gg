@@ -18,6 +18,7 @@ html
         .genericContainer#saveButtons(popover-title="Item Set Saving"
                                       popover-html="'<li><strong>Upload Item Set</strong>: Select an item set JSON file from the League of Legends directory or an item set downloaded from builder.gg <li><strong>Share Item Set</strong>: Generate a shareable link for this item set <li><strong>Download Item Set</strong>: Download a copy of this item set. To load in game, save the JSON file to:<br> C:/Riot Games/League of Legends/Config/Global/Recommended'"
                                       popover-toggle="show_help"
+                                      popover-placement="right"
                                       popover-append-to-body="true")
           div
             button(class='btn btn-default'
@@ -43,53 +44,10 @@ html
           div
             button(class='btn btn-default'
                    ng-click='exportItemSet()') Download Item Set
-      .col-md-6.genericContainer
-        #statDistributionChartContainer(popover-title="Stat Distribution Chart"
-                                        popover-html="'The item stat distribution chart gives a general idea of how much of an item&#39;s cost goes to each stat. The \"Effective Gold\" is calculated by using a baseline item (e.g. Long Sword for AD), and applying the baseline stat cost to the item in question. <a href=\"http://leagueoflegends.wikia.com/wiki/Gold_efficiency\" target=\"_blank\">More Info </a>'"
-                                        popover-toggle="show_help"
-                                        popover-append-to-body="true")
-          #statDistributionChartTitleContainer(popover-title="Item Set Title"
-                                               popover-html="'If you would like to rename this item set, simply click on the title and type in the new name'"
-                                               popover-placement="bottom"
-                                               popover-toggle="show_help"
-                                               popover-append-to-body="true")
-            .chartTitleKeyValueContainer
-              .chartTitleValue {{getTotalCost()}}
-              .chartTitleKey TOTAL COST
-            #statDistributionChartTitle(ng-mouseover='show_itemset_edit=true' ng-mouseout='show_itemset_edit=false'
-                                        ng-click='currently_renaming_itemset ? null : currently_renaming_itemset = true')
-              span(ng-show='!currently_renaming_itemset') {{item_set_name}}
-              span(class='glyphicon glyphicon-pencil'
-                   style='position:absolute; margin-top: 30px; margin-left: 10px; font-size: 70%;'
-                   ng-show='show_itemset_edit && !currently_renaming_itemset')
-              div(ng-show='currently_renaming_itemset')
-                form(ng-submit='currently_renaming_itemset=!currently_renaming_itemset')
-                  input(type='text'
-                        ng-model='item_set_name'
-                        class='form-control'
-                        placeholder='Item Set Name'
-                        style='width: 50%; display: inline-block;')
-                  input(type='submit' class='btn btn-default' value='Apply' style='margin-left: 10px; display: inline-block; margin-top: 2px;')
-            .chartTitleKeyValueContainer
-              .chartTitleValue {{getTotalEfficiency()}}%
-              .chartTitleKey GOLD EFFICIENCY
-          #statDistributionChartYAxis Effective Gold
-          canvas(id='statDistributionChart')
 
-      .col-md-3
-        .genericContainer#statDistributionTableLegend(popover-title="Icon Legend"
-                                                      popover-html="'The icon legend lets you know which stat each icon represents'"
-                                                      popover-toggle="show_help"
-                                                      popover-append-to-body="true")
-          ul(class='list-unstyled')
-            li(ng-repeat='key in stat_distribution_label_keys track by $index')
-              .legendKey {{stat_distribution_label_keys[$index]}}
-              .legendValue {{stat_distribution_label_values[$index]}}
-
-    #itemSelectionContainer.col-md-12
-      .col-md-3
         #blockSelectionContainer.genericContainer(popover-title="Block Management"
                                                   popover-html="'Here you can manage each block in your itemset'"
+                                                  popover-placement="bottom"
                                                   popover-toggle="show_help"
                                                   popover-append-to-body="true")
           button(class='btn btn-default btn-xs'
@@ -140,6 +98,52 @@ html
           button(class='btn btn-default btn-xs'
                  ng-click='loadBlock(last_block)'
                  ng-show='!currently_renaming_block && last_block') Last Block
+      .col-md-6.genericContainer
+        #statDistributionChartContainer(popover-title="Stat Distribution Chart"
+                                        popover-html="'The item stat distribution chart gives a general idea of how much of an item&#39;s cost goes to each stat. The \"Effective Gold\" is calculated by using a baseline item (e.g. Long Sword for AD), and applying the baseline stat cost to the item in question. <a href=\"http://leagueoflegends.wikia.com/wiki/Gold_efficiency\" target=\"_blank\">More Info </a>'"
+                                        popover-toggle="show_help"
+                                        popover-append-to-body="true")
+          #statDistributionChartTitleContainer(popover-title="Item Set Title"
+                                               popover-html="'If you would like to rename this item set, simply click on the title and type in the new name'"
+                                               popover-placement="bottom"
+                                               popover-toggle="show_help"
+                                               popover-append-to-body="true")
+            .chartTitleKeyValueContainer
+              .chartTitleValue {{getTotalCost()}}
+              .chartTitleKey TOTAL COST
+            #statDistributionChartTitle(ng-mouseover='show_itemset_edit=true' ng-mouseout='show_itemset_edit=false'
+                                        ng-click='currently_renaming_itemset ? null : currently_renaming_itemset = true')
+              span(ng-show='!currently_renaming_itemset') {{item_set_name}}
+              span(class='glyphicon glyphicon-pencil'
+                   style='position:absolute; margin-top: 30px; margin-left: 10px; font-size: 70%;'
+                   ng-show='show_itemset_edit && !currently_renaming_itemset')
+              div(ng-show='currently_renaming_itemset')
+                form(ng-submit='currently_renaming_itemset=!currently_renaming_itemset')
+                  input(type='text'
+                        ng-model='item_set_name'
+                        class='form-control'
+                        placeholder='Item Set Name'
+                        style='width: 50%; display: inline-block;')
+                  input(type='submit' class='btn btn-default' value='Apply' style='margin-left: 10px; display: inline-block; margin-top: 2px;')
+            .chartTitleKeyValueContainer
+              .chartTitleValue {{getTotalEfficiency()}}%
+              .chartTitleKey GOLD EFFICIENCY
+          #statDistributionChartYAxis Effective Gold
+          canvas(id='statDistributionChart')
+
+      .col-md-3
+        .genericContainer#statDistributionTableLegend(popover-title="Icon Legend"
+                                                      popover-html="'The icon legend lets you know which stat each icon represents'"
+                                                      popover-toggle="show_help"
+                                                      popover-append-to-body="true")
+          ul(class='list-unstyled')
+            li(ng-repeat='key in stat_distribution_label_keys track by $index')
+              .legendKey {{stat_distribution_label_keys[$index]}}
+              .legendValue {{stat_distribution_label_values[$index]}}
+
+    #itemSelectionContainer.col-md-12
+      .col-md-3
+
 
       include ./item_popover_template
 

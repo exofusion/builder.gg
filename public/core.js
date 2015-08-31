@@ -227,7 +227,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
     return GetItemImage($scope, item_id);
   }
 
-  $scope.scrapeItemDescription = function(description, stat_tally) {
+  $scope.scrapeItemDescription = function(description, stat_tally, jungle_enchant) {
     var armorPenetration = description.indexOf("Armor Penetration");
     var lifeSteal = description.indexOf("Life Steal");
     var baseHealthRegen = description.indexOf("Base Health Regen");
@@ -253,6 +253,21 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
     if (magicPenetration > -1) {
       stat_tally[14] += parseInt(description.slice(magicPenetration-3, magicPenetration-1)) || 0;
     }
+
+
+    if (jungle_enchant) {
+      var attackDamage = description.indexOf("Attack Damage");
+      var attackSpeed = description.indexOf("Attack Speed");
+      var abilityPower = description.indexOf("Ability Power");
+      var mana = description.indexOf("Mana");
+      var health = description.indexOf("Health");
+
+      stat_tally[0] += parseInt(description.slice(attackDamage-3, attackDamage-1)) || 0;
+      stat_tally[3] += parseInt(description.slice(attackSpeed-4, attackSpeed-1).split('%')[0]) || 0;
+      stat_tally[6] += parseInt(description.slice(health-4, health-1)) || 0;
+      stat_tally[11] += parseInt(description.slice(mana-4, mana-1)) || 0;
+      stat_tally[15] += parseInt(description.slice(abilityPower-3, abilityPower-1)) || 0;
+    }
   }
 
   $scope.itemChange = function(item_slot, item_id) {
@@ -267,20 +282,25 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
 
     datasets[item_slot].label = this_item.name;
 
-    this_stat_tally[0] =  this_item.stats.FlatPhysicalDamageMod    ? this_item.stats.FlatPhysicalDamageMod       : 0;
-    this_stat_tally[3] =  this_item.stats.PercentAttackSpeedMod    ? this_item.stats.PercentAttackSpeedMod*100   : 0;
-    this_stat_tally[4] =  this_item.stats.FlatCritChanceMod        ? this_item.stats.FlatCritChanceMod*100       : 0;
-    this_stat_tally[5] =  this_item.stats.FlatSpellBlockMod        ? this_item.stats.FlatSpellBlockMod           : 0;
-    this_stat_tally[6] =  this_item.stats.FlatHPPoolMod            ? this_item.stats.FlatHPPoolMod               : 0;
-    this_stat_tally[7] =  this_item.stats.PercentHPRegenMod        ? this_item.stats.PercentHPRegenMod*100       : 0;
-    this_stat_tally[8] =  this_item.stats.FlatArmorMod             ? this_item.stats.FlatArmorMod                : 0;
-    this_stat_tally[9] =  this_item.stats.FlatMovementSpeedMod     ? this_item.stats.FlatMovementSpeedMod        : 0;
-    this_stat_tally[10] = this_item.stats.PercentMovementSpeedMod  ? this_item.stats.PercentMovementSpeedMod*100 : 0;
-    this_stat_tally[11] = this_item.stats.FlatMPPoolMod            ? this_item.stats.FlatMPPoolMod               : 0;
-    this_stat_tally[15] = this_item.stats.FlatMagicDamageMod       ? this_item.stats.FlatMagicDamageMod          : 0;
+    var enchantment = this_item.name.indexOf("Enchantment") > -1;
+    var jungle_enchant = (this_item.group == "JungleItems") && enchantment;
+
+    if (!jungle_enchant) {
+      this_stat_tally[0] =  this_item.stats.FlatPhysicalDamageMod    ? this_item.stats.FlatPhysicalDamageMod       : 0;
+      this_stat_tally[3] =  this_item.stats.PercentAttackSpeedMod    ? this_item.stats.PercentAttackSpeedMod*100   : 0;
+      this_stat_tally[4] =  this_item.stats.FlatCritChanceMod        ? this_item.stats.FlatCritChanceMod*100       : 0;
+      this_stat_tally[5] =  this_item.stats.FlatSpellBlockMod        ? this_item.stats.FlatSpellBlockMod           : 0;
+      this_stat_tally[6] =  this_item.stats.FlatHPPoolMod            ? this_item.stats.FlatHPPoolMod               : 0;
+      this_stat_tally[7] =  this_item.stats.PercentHPRegenMod        ? this_item.stats.PercentHPRegenMod*100       : 0;
+      this_stat_tally[8] =  this_item.stats.FlatArmorMod             ? this_item.stats.FlatArmorMod                : 0;
+      this_stat_tally[9] =  this_item.stats.FlatMovementSpeedMod     ? this_item.stats.FlatMovementSpeedMod        : 0;
+      this_stat_tally[10] = this_item.stats.PercentMovementSpeedMod  ? this_item.stats.PercentMovementSpeedMod*100 : 0;
+      this_stat_tally[11] = this_item.stats.FlatMPPoolMod            ? this_item.stats.FlatMPPoolMod               : 0;
+      this_stat_tally[15] = this_item.stats.FlatMagicDamageMod       ? this_item.stats.FlatMagicDamageMod          : 0;
+    }
 
     var sanitizedDescription = $scope.itemlist_json[item_id].sanitizedDescription;
-    $scope.scrapeItemDescription(sanitizedDescription, this_stat_tally);
+    $scope.scrapeItemDescription(sanitizedDescription, this_stat_tally, jungle_enchant);
 
     // Make a note when displaying the gold efficiency that this item has hidden value
     if (sanitizedDescription.indexOf("Passive") > -1 ||
@@ -291,9 +311,11 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
 
     // For enchantments, since the description changes we can't simply parse it for these special stats.  Instead,
     // we need to load the item it was built from and scrape that for any stat values as well.
-    if (this_item.name.indexOf("Enchantment") > -1) {
+    if (enchantment && !jungle_enchant) {
       var subItemId = $scope.itemlist_json[item_id].from[0];
       var subitemDescription = $scope.itemlist_json[subItemId].sanitizedDescription;
+
+      // check group.JungleItems
       $scope.scrapeItemDescription(subitemDescription, this_stat_tally);
     }
 
@@ -440,7 +462,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
     }
 
     var content = JSON.stringify(item_set);
-    var filename = $scope.item_set_name;
+    var filename = $scope.item_set_name.split(' ').join('_');
     var blob = new Blob([content], {type: "text/plain;charset=ansi"});
     saveAs(blob, filename+".json");
   }

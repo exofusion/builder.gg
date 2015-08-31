@@ -367,7 +367,10 @@ a {
 }
 
 #blockSelectionContainer {
+  margin-top: 20px;
   padding: 10px;
+  width: 90%;
+  margin-left: 20px;
 }
 
 #blockSelectionContainer button {
@@ -387,19 +390,18 @@ a {
 
 #saveButtons {
   width: 90%;
-  margin-top: 65%;
   margin-left: 20px;
-  padding: 10px;
+  margin-top: 5px;
+  padding: 5px;
 }
 
 #saveButtons .btn {
-  margin-bottom: 10px;
+  margin: 5px;
 }
 
 #saveButtons input {
-  width: 100%;
-  margin: 0 auto;
-  margin-bottom: 10px;
+  width: 90%;
+  margin: 5px auto;
 }
 
 #saveButtons button,
