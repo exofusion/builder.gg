@@ -8,7 +8,7 @@ http://builder.gg
 
 builder.gg was created as an entry into Riot's Summer API Challenge.  It's intended to be a tool for garnering insights about item efficiency and impact on League of Legends games.  There are essentially two parts to builder.gg that synergize together: champion.builder.gg and item.builder.gg
 
-On both sites, the "help!" link in the top left corner can be clicked to bring up descriptive tooltips about what each element contains.
+On both sites, the **help!** link in the top left corner can be clicked to bring up descriptive tooltips about what each element contains.
 
 ### champion.builder.gg
 
