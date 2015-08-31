@@ -126,7 +126,7 @@ html
             th
               span(popover-title="Starting Build"
                 popover-placement="left"
-                popover-html="'The most common start build and the percentage of games it appears in'"
+                popover-html="'The most common start build is listed here'"
                 popover-toggle="show_help"
                 popover-append-to-body="true") Start Build
             th Core Build
@@ -143,7 +143,7 @@ html
                     height="50px"
                     width="50px"
                     ng-src="{{getItemImage(item)}}")
-              div {{Math.floor(100*(start_build.count/item_builds[0].samples))}}%
+              //div {{Math.floor(100*(start_build.count/item_builds[0].samples))}}%
             td(valign="top")
               span(ng-repeat="item in core_build track by $index")
                 img(popover-template="itemPopover.templateUrl"
