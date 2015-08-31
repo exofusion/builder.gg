@@ -227,16 +227,47 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
     return GetItemImage($scope, item_id);
   }
 
+  $scope.scrapeItemDescription = function(description, stat_tally) {
+    var armorPenetration = description.indexOf("Armor Penetration");
+    var lifeSteal = description.indexOf("Life Steal");
+    var baseHealthRegen = description.indexOf("Base Health Regen");
+    var baseManaRegen = description.indexOf("Base Mana Regen");
+    var cooldownReduction = description.indexOf("Cooldown Reduction");
+    var magicPenetration = description.indexOf("Magic Penetration");
+
+    if (armorPenetration > -1) {
+      stat_tally[1] += parseInt(description.slice(armorPenetration-3, armorPenetration-1)) || 0;
+    }
+    if (lifeSteal > -1) {
+      stat_tally[2] += parseInt(description.slice(lifeSteal-4, lifeSteal).split('%')[0]) || 0;
+    }
+    if (baseHealthRegen > -1) {
+      stat_tally[7] += parseInt(description.slice(baseHealthRegen-5, baseHealthRegen).split('%')[0]) || 0;
+    }
+    if (baseManaRegen > -1) {
+      stat_tally[12] += parseInt(description.slice(baseManaRegen-5, baseManaRegen).split('%')[0]) || 0;
+    }
+    if (cooldownReduction > -1) {
+      stat_tally[13] += parseInt(description.slice(cooldownReduction-4, cooldownReduction).split('%')[0]) || 0;
+    }
+    if (magicPenetration > -1) {
+      stat_tally[14] += parseInt(description.slice(magicPenetration-3, magicPenetration-1)) || 0;
+    }
+  }
+
   $scope.itemChange = function(item_slot, item_id) {
     var this_item = $scope.itemlist_json[item_id];
     var datasets = $scope.stat_distribution_data.datasets;
     var this_stat_tally = $scope.stat_tally[item_slot];
 
+    // Reset stat tally for new item, the last index contains a boolean for passives
+    for (var i=0; i<$scope.stat_distribution_stat_bases.length+1; i++) {
+      this_stat_tally[i] = 0;
+    }
+
     datasets[item_slot].label = this_item.name;
 
     this_stat_tally[0] =  this_item.stats.FlatPhysicalDamageMod    ? this_item.stats.FlatPhysicalDamageMod       : 0;
-    this_stat_tally[1] = 0;
-    this_stat_tally[2] = 0;
     this_stat_tally[3] =  this_item.stats.PercentAttackSpeedMod    ? this_item.stats.PercentAttackSpeedMod*100   : 0;
     this_stat_tally[4] =  this_item.stats.FlatCritChanceMod        ? this_item.stats.FlatCritChanceMod*100       : 0;
     this_stat_tally[5] =  this_item.stats.FlatSpellBlockMod        ? this_item.stats.FlatSpellBlockMod           : 0;
@@ -246,36 +277,24 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
     this_stat_tally[9] =  this_item.stats.FlatMovementSpeedMod     ? this_item.stats.FlatMovementSpeedMod        : 0;
     this_stat_tally[10] = this_item.stats.PercentMovementSpeedMod  ? this_item.stats.PercentMovementSpeedMod*100 : 0;
     this_stat_tally[11] = this_item.stats.FlatMPPoolMod            ? this_item.stats.FlatMPPoolMod               : 0;
-    this_stat_tally[12] = 0;
-    this_stat_tally[13] = 0;
-    this_stat_tally[14] = 0;
     this_stat_tally[15] = this_item.stats.FlatMagicDamageMod       ? this_item.stats.FlatMagicDamageMod          : 0;
 
     var sanitizedDescription = $scope.itemlist_json[item_id].sanitizedDescription;
-    var armorPenetration = sanitizedDescription.indexOf("Armor Penetration");
-    var lifeSteal = sanitizedDescription.indexOf("Life Steal");
-    var baseHealthRegen = sanitizedDescription.indexOf("Base Health Regen");
-    var baseManaRegen = sanitizedDescription.indexOf("Base Mana Regen");
-    var cooldownReduction = sanitizedDescription.indexOf("Cooldown Reduction");
-    var magicPenetration = sanitizedDescription.indexOf("Magic Penetration");
+    $scope.scrapeItemDescription(sanitizedDescription, this_stat_tally);
 
-    if (armorPenetration > -1) {
-      this_stat_tally[1] = parseInt(sanitizedDescription.slice(armorPenetration-3, armorPenetration-1)) || 0;
+    // Make a note when displaying the gold efficiency that this item has hidden value
+    if (sanitizedDescription.indexOf("Passive") > -1 ||
+        sanitizedDescription.indexOf("Active") > -1 ||
+        sanitizedDescription.indexOf("Aura") > -1) {
+      this_stat_tally[16] = 1;
     }
-    if (lifeSteal > -1) {
-      this_stat_tally[2] = parseInt(sanitizedDescription.slice(lifeSteal-4, lifeSteal).split('%')[0]) || 0;
-    }
-    if (baseHealthRegen > -1) {
-      this_stat_tally[7] = parseInt(sanitizedDescription.slice(baseHealthRegen-5, baseHealthRegen).split('%')[0]) || 0;
-    }
-    if (baseManaRegen > -1) {
-      this_stat_tally[12] = parseInt(sanitizedDescription.slice(baseManaRegen-5, baseManaRegen).split('%')[0]) || 0;
-    }
-    if (cooldownReduction > -1) {
-      this_stat_tally[13] = parseInt(sanitizedDescription.slice(cooldownReduction-4, cooldownReduction).split('%')[0]) || 0;
-    }
-    if (magicPenetration > -1) {
-      this_stat_tally[14] = parseInt(sanitizedDescription.slice(magicPenetration-3, magicPenetration-1)) || 0;
+
+    // For enchantments, since the description changes we can't simply parse it for these special stats.  Instead,
+    // we need to load the item it was built from and scrape that for any stat values as well.
+    if (this_item.name.indexOf("Enchantment") > -1) {
+      var subItemId = $scope.itemlist_json[item_id].from[0];
+      var subitemDescription = $scope.itemlist_json[subItemId].sanitizedDescription;
+      $scope.scrapeItemDescription(subitemDescription, this_stat_tally);
     }
 
     // Get "Effective Gold" stat

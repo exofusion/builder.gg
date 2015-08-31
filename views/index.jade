@@ -45,7 +45,7 @@ html
                    ng-click='exportItemSet()') Download Item Set
       .col-md-6.genericContainer
         #statDistributionChartContainer(popover-title="Stat Distribution Chart"
-                                        popover-html="'The item stat distribution chart gives a general idea of how much of an item&#39;s cost goes to each stat. The \"Effective Gold\" is calculated by using a baseline item, and applying the baseline stat cost to the item in question. <a href=\"http://leagueoflegends.wikia.com/wiki/Gold_efficiency\" target=\"_blank\">More Info </a>'"
+                                        popover-html="'The item stat distribution chart gives a general idea of how much of an item&#39;s cost goes to each stat. The \"Effective Gold\" is calculated by using a baseline item (e.g. Long Sword for AD), and applying the baseline stat cost to the item in question. <a href=\"http://leagueoflegends.wikia.com/wiki/Gold_efficiency\" target=\"_blank\">More Info </a>'"
                                         popover-toggle="show_help"
                                         popover-append-to-body="true")
           #statDistributionChartTitleContainer(popover-title="Item Set Title"
@@ -143,9 +143,9 @@ html
 
       include ./item_popover_template
 
-      div(style='margin-left:160px;'
+      div(style='margin-left: 42%;'
           popover-title="Item Selection"
-          popover-html="'Here you can add or remove items from the current block, simply enter part of the item name and choose it from the select box'"
+          popover-html="'Here you can add or remove items from the current block. Simply enter part of the item name and choose it from the select box. Item changes to a block will be saved automatically'"
           popover-toggle="show_help"
           popover-append-to-body="true")
       div(ng-repeat='n in build_item track by $index'
@@ -166,7 +166,7 @@ html
                   theme="bootstrap"
                   ng-disabled="disabled"
                   ng-change="itemChange($index,build_item[$index].selected.id)")
-          ui-select-match(placeholder="Enter item") {{$select.selected.name}}
+          ui-select-match(placeholder="Type item") {{$select.selected.name}}
           ui-select-choices(repeat="item in itemlist_array | orderBy:'-cost' | filter: $select.search")
             img(style="position: absolute; margin: 0px -18px; height: 40px; width: 40px;" ng-src="{{item.image}}")
             div(style="margin-left: 30px", class="item-selection-choice")
@@ -179,7 +179,7 @@ html
     .col-md-10.genericContainer#statDistributionTable
       table(class='table'
             popover-title="Stat Distribution Table"
-            popover-html="'Here is a detailed breakdown of item cost and what specific stat values it provides'"
+            popover-html="'Here is a detailed breakdown of item cost and what specific stat values it provides. If the item efficiency percentage has an asterisk, that indicates the item has a passive, active, or aura that is not being factored into the value'"
             popover-toggle="show_help"
             popover-append-to-body="true")
         thead
@@ -207,7 +207,7 @@ html
              id='stat_table_item{{$index}}')
             td {{n.label}}
             td {{actual_cost[$index]}}
-            td {{Math.round(100*(effective_gold[$index]/actual_cost[$index]))}}%
+            td(ng-class="{passive: stat_tally[$index][stat_distribution_stat_bases.length]}") {{Math.round(100*(effective_gold[$index]/actual_cost[$index]))}}%
             td(ng-repeat='val in n.data track by $index')
               {{stat_tally[$parent.$index][$index] > 0 ? stat_tally[$parent.$index][$index] : ''}}
     .col-md-1
