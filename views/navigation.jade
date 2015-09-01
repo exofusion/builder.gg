@@ -5,5 +5,7 @@
     a(href='http://champion.builder.gg') champion.builder.gg
   h3
     a(href='https://github.com/Exofusion/builder.gg') about.builder.gg
-  h3
+  h3(ng-show='!show_help')
     a(href='#' ng-click='show_help = !show_help') help!
+  h3(ng-show='show_help')
+    a(href='#' ng-click='show_help = !show_help') hide help!
