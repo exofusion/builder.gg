@@ -461,7 +461,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
 
     var content = JSON.stringify(item_set);
     var filename = $scope.item_set_name.split(' ').join('_');
-    filename.replace(/[|&;$%@"<>()+,]/g, "");
+    filename = filename.replace(/[|&;$%@"<>()+,]/g, "");
     var blob = new Blob([content], {type: "text/plain;charset=ansi"});
     saveAs(blob, filename+".json");
   }
