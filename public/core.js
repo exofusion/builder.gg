@@ -452,8 +452,10 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
       block.items = [];
 
       for (var j=0; j<$scope.build_blocks[i].items.length; j++) {
-        block.items.push({ id: $scope.build_blocks[i].items[j].toString(),
-                           count: 1 });
+        if ($scope.build_blocks[i].items[j] != null) {
+          block.items.push({ id: $scope.build_blocks[i].items[j].toString(),
+                             count: 1 });
+        }
       }
 
       item_set.blocks.push(block);
