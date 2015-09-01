@@ -387,7 +387,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
   }
 
   $scope.deleteBlock = function(block) {
-    $scope.build_blocks.splice($scope.build_blocks.indexOf(block),1);
+    $scope.build_blocks.splice($scope.current_block,1);
     var bb_length = $scope.build_blocks.length;
 
     if ($scope.build_blocks.length > 0) {
@@ -461,6 +461,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
 
     var content = JSON.stringify(item_set);
     var filename = $scope.item_set_name.split(' ').join('_');
+    filename.replace(/[|&;$%@"<>()+,]/g, "");
     var blob = new Blob([content], {type: "text/plain;charset=ansi"});
     saveAs(blob, filename+".json");
   }
