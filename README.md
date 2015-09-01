@@ -80,6 +80,10 @@ Now that the technologies were decided upon, some helper scripts were created to
 * AngularJS
 * NodeJS
 
+##### Hosting
+* Heroku
+* MongoLab
+
 ##### Packages
 * bower
 * jQuery
