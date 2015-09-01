@@ -63,8 +63,7 @@ html
                  ng-disabled='currently_renaming_block'
                  ng-click='deleteBlock(current_block.selected)') Delete Block
 
-
-          form(ng-submit='renameBlock(current_block.selected,new_block_name)')
+          form(ng-submit='renameBlock(build_blocks[current_block],new_block_name)')
             input(ng-show='currently_renaming_block'
                   id='rename-input-box'
                   ng-model='new_block_name'
@@ -78,26 +77,17 @@ html
                    ng-click='currently_renaming_block=false'
                    ng-show='currently_renaming_block' value='Cancel')
 
-          #blockSelectionInput
-            ui-select(ng-model="current_block.selected"
-                      theme="bootstrap" ng-disabled="disabled"
-                      class="block-select"
-                      search-enabled="false"
-                      ng-init='current_block.selected=build_blocks[0]'
-                      on-select='loadBlock(current_block.selected,$index)'
-                      ng-show='!currently_renaming_block')
-              ui-select-match(placeholder="Select a block")
-                {{$select.selected.name}}
-              ui-select-choices(repeat="block in build_blocks track by $index")
-                span(class='block_choice_name'
-                     ng-bind-html="block.name")
-                span(class='block_item_img_container')
-                  span(ng-repeat="item in block.items track by $index")
-                    img(class='block_item_img' ng-src="{{getItemImage(item)}}")
+          .btn-group-vertical#blockSelection
+            label(class="btn btn-default"
+                  ng-repeat='block in build_blocks track by $index'
+                  ng-model="$parent.current_block"
+                  ng-click="loadBlock(build_blocks[$index])"
+                  btn-radio="{{$index}}")
+              span {{block.name}}
+              .block_item_img_container
+                span(ng-repeat="item in block.items track by $index")
+                  img(class='block_item_img' ng-show='item != null' ng-src="{{item_img_url+item+'.png'}}")
 
-          button(class='btn btn-default btn-xs'
-                 ng-click='loadBlock(last_block)'
-                 ng-show='!currently_renaming_block && last_block') Last Block
       .col-md-6.genericContainer
         #statDistributionChartContainer(popover-title="Stat Distribution Chart"
                                         popover-html="'The item stat distribution chart gives a general idea of how much of an item&#39;s cost goes to each stat. The \"Effective Gold\" is calculated by using a baseline item (e.g. Long Sword for AD), and applying the baseline stat cost to the item in question. <a href=\"http://leagueoflegends.wikia.com/wiki/Gold_efficiency\" target=\"_blank\">More Info </a>'"
@@ -155,7 +145,7 @@ html
       div(ng-repeat='n in build_item track by $index'
           class="buildItem col-md-1"
           id="item{{$index}}")
-        button(class="btn btn-default btn-sm clear_button" ng-show="build_item[{{$index}}].selected" ng-click="clearItem($index)") X
+        button(class="btn btn-default btn-sm clear_button" ng-show="build_item[{{$index}}].selected" ng-click="deleteItem($index)") X
         .itemDisplayImgContainer
           img(class="item_display_img"
               popover-template="itemPopover.templateUrl"

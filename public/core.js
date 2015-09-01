@@ -1,6 +1,7 @@
 var app = angular.module('coreApp', ['chart.js','ui.select','ngSanitize','ui.bootstrap','angular-bind-html-compile','popoverToggle']);
 
 var ddragon_url = 'http://ddragon.leagueoflegends.com/cdn/5.16.1/';
+var ddragon_item_img_url = ddragon_url+'img/item/';
 
 var kda_interval = 5;
 var kda_last_minute = 50;
@@ -73,7 +74,7 @@ function GetItemlistJson($scope, $http, callback) {
       $scope.itemlist_array.push( new ItemlistEntry( $scope.itemlist_json[item].id,
                                                      $scope.itemlist_json[item].name,
                                                      $scope.itemlist_json[item].gold.total,
-                                                     ddragon_url+'img/item/'+$scope.itemlist_json[item].image.full,
+                                                     ddragon_item_img_url+$scope.itemlist_json[item].id+'.png',
                                                      $scope.itemlist_json[item].plaintext ));
     }
 
@@ -82,11 +83,6 @@ function GetItemlistJson($scope, $http, callback) {
       callback($scope);
     }
   });
-}
-
-// Attaches the data dragon URL to an item ID
-function GetItemImage(scope, item_id) {
-  return ddragon_url+'img/item/'+scope.itemlist_json[item_id].image.full;
 }
 
 function toTitleCase(str) {
@@ -206,6 +202,12 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
     return Math.round(cost/$scope.stat_distribution_stat_bases[index]);
   }*/
 
+  $scope.deleteItem = function(item_slot) {
+    $scope.build_blocks[$scope.current_block].items[item_slot] = null;
+    $scope.build_item_image[item_slot] = '//:0';
+    $scope.clearItem(item_slot);
+  }
+
   $scope.clearItem = function(item_slot) {
     var datasets = $scope.stat_distribution_data.datasets;
     datasets[item_slot].label = "N/A";
@@ -217,15 +219,11 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
 
     $scope.effective_gold[item_slot] = 0;
     $scope.actual_cost[item_slot] = 0;
-    $scope.build_item_image[item_slot] = '//:0';
     $scope.stat_distribution_chart.update();
-    delete $scope.current_block.selected.items[item_slot];
     delete $scope.build_item[item_slot].selected;
   }
 
-  $scope.getItemImage = function(item_id) {
-    return GetItemImage($scope, item_id);
-  }
+  $scope.item_img_url = ddragon_item_img_url;
 
   $scope.scrapeItemDescription = function(description, stat_tally, jungle_enchant) {
     var armorPenetration = description.indexOf("Armor Penetration");
@@ -271,6 +269,11 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
   }
 
   $scope.itemChange = function(item_slot, item_id) {
+    $scope.build_blocks[$scope.current_block].items[item_slot] = item_id;
+    $scope.loadItem(item_slot, item_id);
+  }
+
+  $scope.loadItem = function(item_slot, item_id) {
     var this_item = $scope.itemlist_json[item_id];
     var datasets = $scope.stat_distribution_data.datasets;
     var this_stat_tally = $scope.stat_tally[item_slot];
@@ -332,13 +335,12 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
     $scope.effective_gold[item_slot] = total_effective_gold;
 
     $scope.stat_distribution_chart.update();
-    $scope.build_item_image[item_slot] = $scope.getItemImage(item_id);
+    $scope.build_item_image[item_slot] = $scope.item_img_url+item_id+'.png';
 
-    $scope.current_block.selected.items[item_slot] = item_id;
-    $scope.build_item[item_slot].selected = new ItemlistEntry(this_item.id,
+    $scope.build_item[item_slot].selected = new ItemlistEntry(item_id,
                                                               this_item.name,
                                                               this_item.gold.total,
-                                                              $scope.getItemImage(this_item.id),
+                                                              $scope.build_item_image[item_slot],
                                                               this_item.plaintext);
 
     // Fill bars with icon
@@ -356,12 +358,14 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
     $scope.build_blocks.push({name: 'Untitled', items: []});
     var bb_length = $scope.build_blocks.length;
     $scope.loadBlock($scope.build_blocks[bb_length-1]);
+    $scope.current_block = bb_length-1;
   }
 
   $scope.copyNewBlock = function() {
-    $scope.build_blocks.push(JSON.parse(JSON.stringify($scope.this_block)));
+    $scope.build_blocks.push(JSON.parse(JSON.stringify($scope.build_blocks[$scope.current_block])));
     var bb_length = $scope.build_blocks.length;
     $scope.loadBlock($scope.build_blocks[bb_length-1]);
+    $scope.current_block = bb_length-1;
   }
 
   $scope.renameItemSet = function() {
@@ -370,7 +374,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
 
   $scope.startRenamingBlock = function() {
     $scope.currently_renaming_block = true;
-    $scope.new_block_name = $scope.current_block.selected.name;
+    $scope.new_block_name = $scope.build_blocks[$scope.current_block].name;
 
     $timeout(function(){
       angular.element('#rename-input-box').select();
@@ -395,17 +399,11 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
 
   $scope.loadBlock = function(block) {
     if (block) {
-      $scope.current_block.selected = block;
-
-      var temp = $scope.this_block;
-      $scope.this_block = block;
-      $scope.last_block = temp;
-
       if (block.items) {
         for(var i=0; i<BLOCK_SIZE; i++) {
           if (block.items[i] != undefined &&
               block.items[i] > 0) {
-            $scope.itemChange(i, block.items[i])
+            $scope.loadItem(i, block.items[i])
           } else {
             $scope.clearItem(i)
           }
@@ -624,8 +622,6 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
                                        responsive: true,
                                        scaleFontFamily: 'FontAwesome',
                                        tooltipTitleFontFamily: 'FontAwesome',
-                                       tooltipTemplate: "<%= datasetLabel %>: <%= value %>g",
-                                       multiTooltipTemplate: "<%= datasetLabel %>: <%= value %>g"
                                        /*
                                        scaleOverride: true,
                                        scaleSteps: 9,
@@ -640,7 +636,7 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
   $scope.stat_distribution_chart = new Chart($scope.stat_distribution_ctx).StackedBar($scope.stat_distribution_data, $scope.stat_distribution_options);
 
   $scope.build_blocks = [];
-  $scope.current_block = {};
+  $scope.current_block = 0;
   $scope.createNewBlock();
 });
 
@@ -1000,10 +996,6 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
     }
   }
 
-  $scope.getItemImage = function(item_id) {
-    return GetItemImage($scope, item_id);
-  }
-
   $scope.removeHiddenPoints = function() {
     if ($scope.hiddenPointBuffer.length > 0) {
       var dataset = $scope.hiddenPointBuffer[0];
@@ -1048,6 +1040,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
     $scope.kda_chart.update();
   }
 
+  $scope.item_img_url = ddragon_item_img_url;
   $scope.hiddenPointBuffer = [];
 
   $scope.show_help = false;

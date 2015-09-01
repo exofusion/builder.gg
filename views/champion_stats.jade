@@ -142,7 +142,7 @@ html
                     popover-append-to-body="true"
                     height="50px"
                     width="50px"
-                    ng-src="{{getItemImage(item)}}")
+                    ng-src="{{item_img_url+item+'.png'}}")
               //div {{Math.floor(100*(start_build.count/item_builds[0].samples))}}%
             td(valign="top")
               span(ng-repeat="item in core_build track by $index")
@@ -154,7 +154,7 @@ html
                     popover-append-to-body="true"
                     height="50px"
                     width="50px"
-                    ng-src="{{getItemImage(item)}}")
+                    ng-src="{{item_img_url+item+'.png'}}")
               #itemBuilderContainer(popover-title="Item Builder Link"
                                     popover-placement="bottom"
                                     popover-html="'Get a link to load this build in item.builder.gg'"
@@ -206,7 +206,7 @@ html
                     height="50px"
                     width="50px"
                     style="margin-bottom: 10px;"
-                    ng-src="{{getItemImage(item.id)}}")
+                    ng-src="{{item_img_url+item.id+'.png'}}")
                 //div {{item.popularity}}%
           //
             tr
