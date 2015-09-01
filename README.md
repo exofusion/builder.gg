@@ -60,13 +60,13 @@ NodeJS was chosen for its speed and quick setup time, along with its ability to 
 In order to satisfy the scalability and speed requirements, MongoDB was chosen since the queries would be fairly simple and scalability is very important (an environment where NoSQL solutions thrive).  Mongoose was chosen for its ODM (Object Data Mapper) capabilities to solidify collection schemas and allow for easy representation on the front end.
 
 Now that the technologies were decided upon, some helper scripts were created to lay a foundation for the processor to perform its work:
-* **add_seed_summoner**: This script is only required when starting the system from scratch.  Because of how the Riot API is set up, there is no endpoint that easily gives recent matches.  The only way to fetch the most recent matches is to retrieve a large number of summoner's match histories, and then use those match ID's to pull the match data.  By adding these "seed" summoner's to the database, we give the system a jumping off point which will allow it to branch out to other summoner's by fetching summoner ID's available in their history.  Initially, one summoner from each rank tier (7 total) was used.
+* **add_seed_summoner**: This script is only required when starting the system from scratch.  Because of how the Riot API is set up, there is no endpoint that easily gives recent matches.  The only way to fetch the most recent matches is to retrieve a large number of summoner's match histories, and then use those match ID's to pull the match data.  By adding these "seed" summoners to the database, we give the system a jumping off point which will allow it to branch out to other summoners by fetching summoner ID's available in their history.  Initially, one summoner from each rank tier (7 total) was used.
 
-* **summoner_discovery**: The summoner discovery tool iterates through the **SeedSummoners** we have available, and scrapes their ranked league to find other summoners to add locally.  This uses the *league-v2.5* endpoint, and saves information about rank, division, wins, and losses for the initial seed summoner along with all other summoner's in the tier.  Having a large local summoner database will help in finding recent matches.
+* **summoner_discovery**: The summoner discovery tool iterates through the **SeedSummoners** we have available, and scrapes their ranked league to find other summoners to add locally.  This uses the *league-v2.5* endpoint, and saves information about rank, division, wins, and losses for the initial seed summoner along with all other summoners in the tier.  Having a large local summoner database will help in finding recent matches.
 
 * **add_match_queue**: Now that we have some summoner ID's, we can start fetching their match histories.  The match data returned from the *matchlist-v2.2* is minimal, but does contain match ID's and a timestamp.  Using this information, a *MatchQueueItem* is created for each match, so we can later look up the actual match data.  This *MatchQueueItem* contains the rank of the summoner whose history it came from, a timestamp, the queue (e.g. RANKED_SOLO_5x5), and of course the match ID.
 
-* **cache_match_data**: In this script, the *MatchQueueItems* are sorted by their timestamp (to try and get the most recent matches), and a call is made to the API to fetch the current match ID.  Each tier is fetched sequentially, to try our best to keep every rank as equally represented as possible.  The full JSON response is saved as a *MatchCacheItem*, indexed by the match ID.  Once data has been retrieved, the *MatchQueueItem* is marked as cached so it doesn't try to cache the same match multiple times.  Before moving onto the next entry, the participating summoner's are scraped out, and marked for refresh by **add_match_queue** to hopefully find more recent matches.
+* **cache_match_data**: In this script, the *MatchQueueItems* are sorted by their timestamp (to try and get the most recent matches), and a call is made to the API to fetch the current match ID.  Each tier is fetched sequentially, to try our best to keep every rank as equally represented as possible.  The full JSON response is saved as a *MatchCacheItem*, indexed by the match ID.  Once data has been retrieved, the *MatchQueueItem* is marked as cached so it doesn't try to cache the same match multiple times.  Before moving onto the next entry, the participating summoners are scraped out, and marked for refresh by **add_match_queue** to hopefully find more recent matches.
 
 * **item_build_processor**: This is where all of the statistical data is generated, this script runs through all available cached matches and saves relevant information about builds.  After selecting a match, timeline events are process for each champion, and a running inventory is kept that tracks the buying/selling/upgrading of items.  At specified intervals, the inventory is recorded as generated identifier which takes into account the item quantity along with the item ID and separated by semicolons.  To standardize the same same build but different slots, the items are also sorted by item ID.  For example, if a starting build contained 3 Health Potions and a Doran's Blade, the generated build identifier would be 11055:32003 = (1x)(DoransBladeID):(3x)(HealthPotionID).  By generating the identifier in this way, to retrieve the item quantity we simply divide by 10000 (only possible because all item ID's are 4 digits) and take the floor function.  If we are after the item's ID, we can do the modulus operator and 10000.  This generated identifier becomes the key in an object map, and the value is incremented by 1 to indicate this build was present.  By saving composite builds in this manor, theoretically this will allow for some more details analysis involving which items are often seen together, and which items cause a build divergence.
 
@@ -79,6 +79,10 @@ Now that the technologies were decided upon, some helper scripts were created to
 * ExpressJS
 * AngularJS
 * NodeJS
+
+##### Hosting
+* Heroku
+* MongoLab
 
 ##### Packages
 * bower
@@ -93,4 +97,4 @@ Now that the technologies were decided upon, some helper scripts were created to
 * file-saver
 * angular-popover-toggle
 
-## Future Improvements
+builder.gg isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing League of Legends. League of Legends and Riot Games are trademarks or registered trademarks of Riot Games, Inc. League of Legends © Riot Games, Inc.
