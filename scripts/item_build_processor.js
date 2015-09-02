@@ -454,8 +454,6 @@ function processStateHistory(json_data, state_history, tier, callback) {
                                 //      name: 'VersionError' }
                                 console.log(error);
                             }
-
-
                             
                             next_p();
                         });
@@ -537,7 +535,7 @@ function selectMatch() {
                         console.log(error);
                     } else {
                         if (!mp) {
-                            MatchCacheItem.findOne({ _id: mqi_entry._id, 'data.matchVersion': /^5.16/ }, function(error, mci) {
+                            MatchCacheItem.findOne({ _id: mqi_entry._id, 'data.matchVersion': /^5.17/ }, function(error, mci) {
                                 if (error) {
                                     console.log(error);
                                 } else if (mci) {

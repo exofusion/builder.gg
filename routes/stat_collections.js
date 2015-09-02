@@ -42,6 +42,9 @@ router.get('/', function(req, res, next) {
 
         search_options.victory = true;
 
+        // This could be changed to a simple find() without the 'victory' search option set, but we would
+        // lose capability of finding the most popular lane and would still need multiple find() queries anyway
+
         // First try to find a victory
         StatCollection.findOne(search_options, function(error, victory_stat_collection) {
             if (error) {

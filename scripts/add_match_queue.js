@@ -20,10 +20,10 @@ function addMatchQueueItem(json_data) {
     {
         var num_inserted = 0;
         var current_time = new Date();
-        var last_month;
-        last_month = current_time.setDate(current_time.getDate()-31);
+        //var cutoff_date = current_time.setDate(current_time.getDate()-31);
+        var cutoff_date = 1441190383000; // First game of 5.17 patch
         json_data.matches.forEach( function(match){
-            if (match.timestamp > last_month) {
+            if (match.timestamp > cutoff_date) {
                 MatchQueueItem.update({ _id: match.matchId },
                                       { _id: match.matchId,
                                         tier: current_summoner.tier,
