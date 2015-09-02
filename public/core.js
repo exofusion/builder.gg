@@ -511,6 +511,14 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
                                            "Magic Penetration",
                                            "Ability Power" ];
 
+  $scope.percent_suffix_indexes = [ 2,
+                                    3,
+                                    4,
+                                    7,
+                                    10,
+                                    12,
+                                    13 ];
+
   $scope.stat_distribution_label_keys = ["\uf05b", // AD
                                          "\uf127", // ArPen
                                          "\uf0ec", // Lifesteal

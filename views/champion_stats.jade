@@ -16,6 +16,9 @@ html
                       popover-append-to-body="true")
         #randomSelect(class='noselect' ng-click='randomSearch()') How does {{random_tier}} build {{random_lane}} {{random_champion}}?
 
+    .col-md1
+      #buildsAnalyzed 1,041,170 builds analyzed <br> Patch 5.16
+
     #statSearchContainer
       .row
         .col-md-3
@@ -128,7 +131,7 @@ html
                 popover-placement="left"
                 popover-html="'The most common start build is listed here.'"
                 popover-toggle="show_help"
-                popover-append-to-body="true") Start Build
+                popover-append-to-body="true") Most Common Start Build
             th Core Build
         tbody
           tr

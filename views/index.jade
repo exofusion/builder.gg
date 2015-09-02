@@ -12,7 +12,7 @@ html
     .row
       #siteHeader.col-md-8
         h1 item.builder.gg
-        #headerSubText
+        #headerSubText <a href="http://champion.builder.gg">Don't know what to build? Try champion.builder.gg!</a>
     .row
       .col-md-3
         .genericContainer#saveButtons(popover-title="Item Set Saving"
@@ -194,7 +194,7 @@ html
               strong {{getTotalCost()}}
             td
               strong {{getTotalEfficiency()}}%
-            td(ng-repeat='val in stat_distribution_label_keys track by $index')
+            td(ng-repeat='val in stat_distribution_label_keys track by $index' ng-class="{percentSuffix: getTotalStat($index) > 0 && percent_suffix_indexes.indexOf($index) > -1}")
               strong {{getTotalStat($index) > 0 ? getTotalStat($index) : ''}}
           tr(ng-repeat='n in stat_distribution_data.datasets track by $index'
              ng-show='build_item[$index].selected'
@@ -202,7 +202,7 @@ html
             td {{n.label}}
             td {{actual_cost[$index]}}
             td(ng-class="{passive: stat_tally[$index][stat_distribution_stat_bases.length]}") {{Math.round(100*(effective_gold[$index]/actual_cost[$index]))}}%
-            td(ng-repeat='val in n.data track by $index')
+            td(ng-repeat='val in n.data track by $index' ng-class="{percentSuffix: stat_tally[$parent.$index][$index] > 0 && percent_suffix_indexes.indexOf($index) > -1}")
               {{stat_tally[$parent.$index][$index] > 0 ? stat_tally[$parent.$index][$index] : ''}}
     .col-md-1
 

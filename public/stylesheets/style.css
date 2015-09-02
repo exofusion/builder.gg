@@ -34,6 +34,10 @@ a {
     content: "*";
 }
 
+.percentSuffix:after {
+  content: '%';
+}
+
 .btn-file {
     position: relative;
     overflow: hidden;
@@ -69,7 +73,8 @@ a {
   text-align: right;
 }
 
-#navigation a {
+#navigation a,
+#headerSubText a {
   color: #BBBBBB;
 }
 
@@ -88,6 +93,15 @@ a {
   font-size: 26px;
   padding-top: 10px;
   margin-bottom: 50px;
+  color: #cccccc;
+  font-family: 'LobsterTwo Italic';
+}
+
+#buildsAnalyzed {
+  text-align: right;
+  margin-right: 20px;
+  margin-top: 20px;
+  font-size: 26px;
   color: #cccccc;
   font-family: 'LobsterTwo Italic';
 }
@@ -305,6 +319,12 @@ a {
 .popover.top > .arrow:after {
   border-top-color: rgba(255,255,255,0.3) !important;
 }
+.popover.right > .arrow:after {
+  border-right-color: rgba(255,255,255,0.3) !important;
+}
+.popover.left > .arrow:after {
+  border-left-color: rgba(255,255,255,0.3) !important;
+}
 .popover.bottom > .arrow:after {
   border-bottom-color: rgba(255,255,255,0.3) !important;
 }
@@ -476,6 +496,10 @@ a {
   margin-top: -10px;
   margin-left: 30px;
   z-index: 1;
+}
+
+.ui-select-placeholder {
+  font-style: italic;
 }
 
 .ui-select-container input,
