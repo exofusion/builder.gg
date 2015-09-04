@@ -89,8 +89,11 @@ function selectMatchQueueItem(){
                                 riot_api.getMatch(current_mqi._id, addMatchToCache);
                             } else {
                                 console.log('[WARNING] No match queue items found for tier: '+current_tier);
-                                stepTier();
-                                selectMatchQueueItem();
+                                var timeout = 0;
+                                if (current_tier < 6) { // If under Master tier, wait a few seconds before continuing
+                                    timeout = 60000;
+                                }
+                                setTimeout(function(){ stepTier(); selectMatchQueueItem(); }, timeout);
                             }
                         }).limit(1).sort({ timestamp: -1 });
 }

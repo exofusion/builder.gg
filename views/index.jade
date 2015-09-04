@@ -15,8 +15,8 @@ html
         #headerSubText <a href="http://champion.builder.gg">Don't know what to build? Try champion.builder.gg!</a>
     .row
       .col-md-3
-        .genericContainer#saveButtons(popover-title="Item Set Saving"
-                                      popover-html="'<li><strong>Upload Item Set</strong>: Select an item set JSON file from the League of Legends directory or an item set downloaded from builder.gg <li><strong>Share Item Set</strong>: Generate a shareable link for this item set <li><strong>Download Item Set</strong>: Download a copy of this item set. To load in game, save the JSON file to:<br> C:/Riot Games/League of Legends/Config/Global/Recommended'"
+        .genericContainer#saveButtons(popover-title="Item Set Loading"
+                                      popover-html="'<li><strong>Upload Item Set</strong>: Select an item set JSON file from the League of Legends directory or an item set downloaded from builder.gg <li><strong>Load Random Item Set</strong>: Populate all the item slots with completely random items (this will overwrite any items you might have saved)'"
                                       popover-toggle="show_help"
                                       popover-placement="right"
                                       popover-append-to-body="true")
@@ -29,6 +29,25 @@ html
                       id='file-selector'
                       onchange='angular.element(this).scope().uploadItemset(this)'
                       style='display:none')
+        .genericContainer#saveButtons(popover-title="Item Set Saving"
+                                      popover-html="'<li><strong>Map and Mode</strong>: If you plan to load this item set into a game, you can set map and game mode filters here so it only shows up in the store if it matches what you select.<li><strong>Share Item Set</strong>: Generate a shareable link for this item set <li><strong>Download Item Set</strong>: Download a copy of this item set. To load in game, save the JSON file to:<br><li>C:&#92;Riot Games&#92;League of Legends&#92;Config&#92;Global&#92;Recommended<br>or for a specific champion:<br><li>C:&#92;Riot Games&#92;League of Legends&#92;Config&#92;Champions&#92;{<i>champion</i>}&#92;Recommended'"
+                                      popover-toggle="show_help"
+                                      popover-placement="bottom"
+                                      popover-append-to-body="true")
+          div
+            select(class='form-control'
+                   ng-model='selected_map'
+                   ng-init='selected_map = map_array[0].id'
+                   ng-options='map.id as map.name for map in map_array')
+          div
+            select(class='form-control'
+                   ng-model='selected_game_mode'
+                   ng-init='selected_game_mode = game_mode_array[0].id'
+                   ng-options='mode.id as mode.name for mode in game_mode_array')
+          .separator
+          div
+            button(class='btn btn-default'
+                   ng-click='exportItemSet()') Download Item Set
           div
             button(class='btn btn-default'
                    id='shareItemSetButton'
@@ -40,53 +59,6 @@ html
                     ng-model='share_link'
                     class='form-control'
                     ng-show='share_link')
-
-          div
-            button(class='btn btn-default'
-                   ng-click='exportItemSet()') Download Item Set
-
-        #blockSelectionContainer.genericContainer(popover-title="Block Management"
-                                                  popover-html="'Here you can manage each block in your itemset'"
-                                                  popover-placement="bottom"
-                                                  popover-toggle="show_help"
-                                                  popover-append-to-body="true")
-          button(class='btn btn-default btn-xs'
-                 ng-click='createNewBlock()'
-                 ng-disabled='currently_renaming_block') New Block
-          button(class='btn btn-default btn-xs'
-                 ng-click='copyNewBlock()'
-                 ng-disabled='currently_renaming_block') Copy Block
-          button(class='btn btn-default btn-xs'
-                 ng-click='startRenamingBlock()'
-                 ng-disabled='currently_renaming_block') Rename Block
-          button(class='btn btn-default btn-xs'
-                 ng-disabled='currently_renaming_block'
-                 ng-click='deleteBlock(current_block.selected)') Delete Block
-
-          form(ng-submit='renameBlock(build_blocks[current_block],new_block_name)')
-            input(ng-show='currently_renaming_block'
-                  id='rename-input-box'
-                  ng-model='new_block_name'
-                  class='form-control')
-            input(type='submit' class='btn btn-default btn-xs'
-                  style='display: inline-block; width: 25%; margin-right: 20px;'
-                   value='Apply'
-                   ng-show='currently_renaming_block')
-            input(type='button' class='btn btn-default btn-xs'
-                  style='display: inline-block; width: 25%; margin-right: 20px;'
-                   ng-click='currently_renaming_block=false'
-                   ng-show='currently_renaming_block' value='Cancel')
-
-          .btn-group-vertical#blockSelection
-            label(class="btn btn-default"
-                  ng-repeat='block in build_blocks track by $index'
-                  ng-model="$parent.current_block"
-                  ng-click="loadBlock(build_blocks[$index])"
-                  btn-radio="{{$index}}")
-              span {{block.name}}
-              .block_item_img_container
-                span(ng-repeat="item in block.items track by $index")
-                  img(class='block_item_img' ng-show='item != null' ng-src="{{item_img_url+item+'.png'}}")
 
       .col-md-6.genericContainer
         #statDistributionChartContainer(popover-title="Stat Distribution Chart"
@@ -133,6 +105,48 @@ html
 
     #itemSelectionContainer.col-md-12
       .col-md-3
+        #blockSelectionContainer.genericContainer(popover-title="Block Management"
+                                                  popover-html="'Here you can manage each block in your itemset'"
+                                                  popover-placement="right"
+                                                  popover-toggle="show_help"
+                                                  popover-append-to-body="true")
+          button(class='btn btn-default btn-xs'
+                 ng-click='createNewBlock()'
+                 ng-disabled='currently_renaming_block') New Block
+          button(class='btn btn-default btn-xs'
+                 ng-click='copyNewBlock()'
+                 ng-disabled='currently_renaming_block') Copy Block
+          button(class='btn btn-default btn-xs'
+                 ng-click='startRenamingBlock()'
+                 ng-disabled='currently_renaming_block') Rename Block
+          button(class='btn btn-default btn-xs'
+                 ng-disabled='currently_renaming_block'
+                 ng-click='deleteBlock(current_block.selected)') Delete Block
+
+          form(ng-submit='renameBlock(build_blocks[current_block],new_block_name)')
+            input(ng-show='currently_renaming_block'
+                  id='rename-input-box'
+                  ng-model='new_block_name'
+                  class='form-control')
+            input(type='submit' class='btn btn-default btn-xs'
+                  style='display: inline-block; width: 25%; margin-right: 20px;'
+                   value='Apply'
+                   ng-show='currently_renaming_block')
+            input(type='button' class='btn btn-default btn-xs'
+                  style='display: inline-block; width: 25%; margin-right: 20px;'
+                   ng-click='currently_renaming_block=false'
+                   ng-show='currently_renaming_block' value='Cancel')
+
+          .btn-group-vertical#blockSelection
+            label(class="btn btn-default"
+                  ng-repeat='block in build_blocks track by $index'
+                  ng-model="$parent.current_block"
+                  ng-click="loadBlock(build_blocks[$index])"
+                  btn-radio="{{$index}}")
+              span {{block.name}}
+              .block_item_img_container
+                span(ng-repeat="item in block.items track by $index")
+                  img(class='block_item_img' ng-show='item != null' ng-src="{{item_img_url+item+'.png'}}")
 
 
       include ./item_popover_template

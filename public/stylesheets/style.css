@@ -25,6 +25,10 @@ a {
   color: #00B7FF;
 }
 
+.separator {
+  margin: 20px;
+}
+
 .passive {
   font-style: italic;
 }
@@ -387,7 +391,7 @@ a {
 }
 
 #blockSelectionContainer {
-  margin-top: 20px;
+  margin-top: 5px;
   padding: 10px;
   width: 90%;
   margin-left: 20px;
@@ -425,11 +429,20 @@ a {
   width: 90%;
   margin-left: 20px;
   margin-top: 5px;
+  margin-bottom: 15px;
   padding: 5px;
+}
+
+#saveButtons select {
+  margin: 5px auto;
+  width: 50%;
+  min-width: 200px;
 }
 
 #saveButtons .btn {
   margin: 5px;
+  width: 50%;
+  min-width: 200px;
 }
 
 #saveButtons input {

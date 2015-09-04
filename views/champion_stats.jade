@@ -51,7 +51,15 @@ html
                 span(ng-bind-html="position")
 
       .row
-        .col-md-5
+        .col-md-4
+        .col-md-1
+          ui-select(ng-model="search.patch.selected" theme="bootstrap" ng-disabled="disabled" class="patch_select" search-enabled="false" ng-init="search.patch.selected = patches[0]")
+            ui-select-match
+              span Patch {{$select.selected}}
+            ui-select-choices(repeat="patch in patches")
+              .item-selection-choice
+                span Patch 
+                span(ng-bind-html="patch")
         .col-md-2#searchSubmit(popover-title="Stat Search"
                               popover-placement="bottom"
                               popover-html="'Find aggregate KDA stats for the selected search terms.'"

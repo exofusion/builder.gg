@@ -9,8 +9,6 @@ router.get('/', function(req, res, next) {
     var search_options = {};
 
     if (req.query.championId) {
-        search_options.patch = '5.16';
-
         search_options.championId = parseInt(req.query.championId);
 
         if (req.query.tier) {
@@ -35,10 +33,9 @@ router.get('/', function(req, res, next) {
             // switch case
         }
 
-        /*
         if (req.query.patch) {
             search_options.patch = req.query.patch;
-        }*/
+        }
 
         search_options.victory = true;
 
@@ -46,6 +43,7 @@ router.get('/', function(req, res, next) {
         // lose capability of finding the most popular lane and would still need multiple find() queries anyway
 
         // First try to find a victory
+        console.log(search_options);
         StatCollection.findOne(search_options, function(error, victory_stat_collection) {
             if (error) {
                  console.log(error);

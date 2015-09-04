@@ -433,8 +433,8 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
     var item_set = {};
     item_set.title = $scope.item_set_name;
     item_set.type = "custom";
-    item_set.map = "any";
-    item_set.mode = "any";
+    item_set.map = $scope.selected_map;
+    item_set.mode = $scope.selected_game_mode;
     item_set.priority = false;
     item_set.sortrank = 0;
     item_set.blocks = [];
@@ -492,6 +492,17 @@ app.controller('statDistributionCtrl', function($scope, $http, $timeout, $locati
   GetItemlistJson($scope, $http, $scope.loadItemset);
 
   $scope.build_item_image = [];
+
+  $scope.map_array = [ { id: 'any', name: 'Any Map' },
+                       { id: 'SR', name: "Summoner's Rift" },
+                       { id: 'HA', name: 'Howling Abyss' },
+                       { id: 'TT', name: 'Twisted Treeline' },
+                       { id: 'CS', name: 'Crystal Scar' } ];
+
+  $scope.game_mode_array = [ { id: 'any', name: 'Any Game Mode' },
+                             { id: 'CLASSIC', name: 'Classic' },
+                             { id: 'ARAM', name: 'ARAM' },
+                             { id: 'ODIN', name: 'Dominion'} ];
 
   // Stat Distribution Chart Setup
   $scope.stat_distribution_label_values = ["Attack Damage",
@@ -1181,6 +1192,8 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
                        'Bottom',
                        'Most Popular Lane' ];
 
+  $scope.patches = [ '5.17', '5.16' ];
+
   $scope.randomSearch = function() {
     if (!$scope.alert_loading) {
       $scope.search.championId.selected = $scope.champion_array[$scope.random_champ_idx];
@@ -1212,12 +1225,14 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
     var championId = $scope.search.championId.selected.id;
     var tier = $scope.search.tier.selected.id;
     var position = $scope.search.position.selected;
+    var patch = $scope.search.patch.selected;
 
     $scope.alert_loading = true;
 
     $http.get('/stat_collections?championId='+championId+
               '&tier='+tier+
-              '&position='+position)
+              '&position='+position+
+              '&patch='+patch)
       .then(function(res){
         //$scope.previous_stats = $scope.current_stats;
         $scope.current_stats = res.data;
