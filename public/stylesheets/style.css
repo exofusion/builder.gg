@@ -566,18 +566,18 @@ a {
   height: 30px;
 }
 
-.tier_select .ui-select-choices-row img {
+#tier_select .ui-select-choices-row img {
   width: 30px;
   height: 30px;
   margin-left: -15px;
   margin-right: 5px;
 }
 
-.tier_select .ui-select-match-text span {
+#tier_select .ui-select-match-text span {
   margin-left: 30px;
 }
 
-.tier_select .ui-select-match img {
+#tier_select .ui-select-match img {
   width: 30px;
   height: 30px;
   margin-top: -5px;
@@ -585,14 +585,14 @@ a {
   position: absolute;
 }
 
-.champion_select .ui-select-choices-row img {
+#champion_select .ui-select-choices-row img {
   width: 30px;
   height: 30px;
   margin-left: -15px;
   margin-right: 5px;
 }
 
-.champion_select .ui-select-match img {
+#champion_select .ui-select-match img {
   border-radius: 5px;
   width: 30px;
   height: 30px;
@@ -600,8 +600,13 @@ a {
   margin-left: -10px;
   position: absolute;
 }
-.champion_select .ui-select-match-text span {
+#champion_select .ui-select-match-text span {
   margin-left: 30px;
+}
+
+#patch_select {
+  width: 50%;
+  margin: 0 auto;
 }
 
 #item0 .ui-select-container {

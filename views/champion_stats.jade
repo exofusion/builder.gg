@@ -23,7 +23,7 @@ html
       .row
         .col-md-3
         .col-md-2
-          ui-select(ng-model="search.tier.selected" theme="bootstrap" ng-disabled="disabled" class="tier_select" search-enabled="false" ng-init='search.tier.selected = tiers[4]')
+          ui-select(ng-model="search.tier.selected" theme="bootstrap" ng-disabled="disabled" id="tier_select" search-enabled="false" ng-init='search.tier.selected = tiers[4]')
             ui-select-match(placeholder="Select a tier")
               img(ng-src="{{$select.selected.image}}")
               {{$select.selected.name}}
@@ -33,7 +33,7 @@ html
                 span(ng-bind-html="tier.name")
 
         .col-md-2
-          ui-select(ng-model="search.championId.selected" theme="bootstrap" ng-disabled="disabled" class="champion_select" search-enabled="true")
+          ui-select(ng-model="search.championId.selected" theme="bootstrap" ng-disabled="disabled" id="champion_select" search-enabled="true")
             ui-select-match(placeholder="Enter a champion")
               img(ng-src="{{$select.selected.image}}")
               {{$select.selected.name}}
@@ -43,7 +43,7 @@ html
                 span(ng-bind-html="champion.name | highlight: $select.search")
 
         .col-md-2
-          ui-select(ng-model="search.position.selected" theme="bootstrap" ng-disabled="disabled" class="position_select" search-enabled="false" ng-init="search.position.selected = positions[4]")
+          ui-select(ng-model="search.position.selected" theme="bootstrap" ng-disabled="disabled" id="position_select" search-enabled="false" ng-init="search.position.selected = positions[4]")
             ui-select-match(placeholder="Select a position")
               {{$select.selected}}
             ui-select-choices(repeat="position in positions")
@@ -51,9 +51,9 @@ html
                 span(ng-bind-html="position")
 
       .row
-        .col-md-4
-        .col-md-1
-          ui-select(ng-model="search.patch.selected" theme="bootstrap" ng-disabled="disabled" class="patch_select" search-enabled="false" ng-init="search.patch.selected = patches[0]")
+        .col-md-3
+        .col-md-2
+          ui-select(ng-model="search.patch.selected" theme="bootstrap" ng-disabled="disabled" id="patch_select" search-enabled="false" ng-init="search.patch.selected = patches[0]")
             ui-select-match
               span Patch {{$select.selected}}
             ui-select-choices(repeat="patch in patches")
