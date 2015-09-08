@@ -375,7 +375,7 @@ function processStateHistory(json_data, state_history, tier, callback) {
 
                         var aggregate_frame = new AggregateStats();
 
-                        aggregate_frame.gameTime = p_history.timestamp;
+                        aggregate_frame.gameTime = Math.floor(p_history.timestamp/60000);
                         aggregate_frame.samples = 1;
                         //aggregate_frame.totalGold = p_history.pframe.totalGold;
                         //aggregate_frame.currentGold = p_history.pframe.currentGold;

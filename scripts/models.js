@@ -91,6 +91,9 @@ var statCollectionSchema = new Schema({
     matchFrameData: [matchFrameDataSchema]
 });
 
+var aggregateKDASchema = new Schema({
+}, {collection: 'aggregatekda'});
+
 var itemSetEntrySchema = new Schema({
     _id: String,
     date_added: Date,
@@ -105,6 +108,7 @@ exports.MatchCacheItem = mongoose.model('MatchCacheItem', matchCacheItemSchema);
 exports.MatchProcessed = mongoose.model('MatchProcessed', matchProcessedSchema);
 exports.MatchFrameData = mongoose.model('MatchFrameData', matchFrameDataSchema);
 exports.StatCollection = mongoose.model('StatCollection', statCollectionSchema);
+exports.AggregateKDA = mongoose.model('AggregateKDA', aggregateKDASchema);
 exports.ItemSetEntry = mongoose.model('ItemSetEntry', itemSetEntrySchema);
 
 exports.mongoose = mongoose;

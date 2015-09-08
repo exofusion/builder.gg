@@ -3,6 +3,7 @@ var router = express.Router();
 
 var models = require('../scripts/models');
 var StatCollection = models.StatCollection;
+var AggregateKDA = models.AggregateKDA;
 
 router.get('/', function(req, res, next) {
     var combine_games = false;
@@ -43,7 +44,6 @@ router.get('/', function(req, res, next) {
         // lose capability of finding the most popular lane and would still need multiple find() queries anyway
 
         // First try to find a victory
-        console.log(search_options);
         StatCollection.findOne(search_options, function(error, victory_stat_collection) {
             if (error) {
                  console.log(error);
@@ -70,7 +70,29 @@ router.get('/', function(req, res, next) {
                         var response_stat_collection = {};
                         response_stat_collection.victories = victory_stat_collection;
                         response_stat_collection.defeats = defeat_stat_collection;
-                        res.send(response_stat_collection);
+
+                        // Look up KDA aggregate stats
+                        var victory_aggkda_search = {
+                                                        '_id.patch': search_options.patch,
+                                                        '_id.tier': search_options.tier,
+                                                        '_id.lane': search_options.lane,
+                                                        '_id.role': search_options.role,
+                                                        '_id.victory': true
+                                                    };
+                        AggregateKDA.findOne(victory_aggkda_search, function(error, victory_aggregate_kda){
+                            if (error) {
+                                console.log(error);
+                            } else {
+                                response_stat_collection.victories_aggregate_kda = victory_aggregate_kda;
+                                var defeat_aggkda_search = victory_aggkda_search;
+                                defeat_aggkda_search['_id.victory'] = false
+
+                                AggregateKDA.findOne(defeat_aggkda_search, function(error, defeat_aggregate_kda){
+                                    response_stat_collection.defeats_aggregate_kda = defeat_aggregate_kda;
+                                    res.send(response_stat_collection);
+                                }).lean();
+                            }
+                        }).lean();
                     }
                 }).lean();
             }

@@ -717,6 +717,35 @@ function CombineStats(victory_stats, defeat_stats) {
   return combined_stats;
 }
 
+function CombineAggregateStats(victory_agg_stats, defeat_agg_stats) {
+  if (!victory_agg_stats && !defeat_agg_stats) {
+    return null;
+  } else if (!victory_agg_stats) {
+    return defeat_agg_stats;
+  } else if (!defeat_agg_stats) {
+    return victory_agg_stats;
+  }
+
+  // Make a copy of our source stats so we don't end up changing anything
+  victory_agg_stats = JSON.parse(JSON.stringify(victory_agg_stats));
+  defeat_agg_stats = JSON.parse(JSON.stringify(defeat_agg_stats));
+
+  var combined_agg_stats = {};
+  combined_agg_stats.aggregateStats = victory_agg_stats.aggregateStats;
+  for (frame in defeat_agg_stats.aggregateStats) {
+      if (combined_agg_stats.aggregateStats[frame]) {
+          combined_agg_stats.aggregateStats[frame].samples += defeat_agg_stats.aggregateStats[frame].samples;
+          combined_agg_stats.aggregateStats[frame].totalKills += defeat_agg_stats.aggregateStats[frame].totalKills;
+          combined_agg_stats.aggregateStats[frame].totalAssists += defeat_agg_stats.aggregateStats[frame].totalAssists;
+          combined_agg_stats.aggregateStats[frame].totalDeaths += defeat_agg_stats.aggregateStats[frame].totalDeaths;
+      } else {
+          combined_agg_stats.aggregateStats[frame] = defeat_agg_stats.aggregateStats[frame];
+      }
+  }
+
+  return combined_agg_stats;
+}
+
 app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
   $scope.getNumber = function(num) {
     return new Array(num);   
@@ -753,20 +782,21 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
     SetRandoms($scope);
 
     var stat_data = null;
+    var aggregate_data = null;
     delete $scope.item_builder_link;
 
     switch (display_subset) {
       case 'victories':
         stat_data = $scope.current_stats.victories;
-        $scope.current_victory = 'Victories';
+        aggregate_data = $scope.current_stats.victories_aggregate_kda;
         break;
       case 'defeats':
         stat_data = $scope.current_stats.defeats;
-        $scope.current_victory = 'Defeats';
+        aggregate_data = $scope.current_stats.defeats_aggregate_kda;
         break;
       case 'all':
         stat_data = CombineStats($scope.current_stats.victories, $scope.current_stats.defeats);
-        $scope.current_victory = 'All Games';
+        aggregate_data = CombineAggregateStats($scope.current_stats.victories_aggregate_kda, $scope.current_stats.defeats_aggregate_kda);
         break;
     }
 
@@ -805,6 +835,11 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
          $scope.kda_chart.datasets[2].points[i].value = null;
          $scope.kda_chart.datasets[3].points[i].value = null;
          $scope.kda_chart.datasets[4].points[i].value = null;
+
+         $scope.kda_aggregate_chart.datasets[0].points[i].value = null;
+         $scope.kda_aggregate_chart.datasets[1].points[i].value = null;
+         $scope.kda_aggregate_chart.datasets[2].points[i].value = null;
+         $scope.kda_aggregate_chart.datasets[3].points[i].value = null;
       }
 
 
@@ -813,19 +848,34 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
       var assistTally = 0
       var lastKDA = 0;
 
+      var totalKillTally = 0;
+      var totalDeathTally = 0;
+      var totalAssistTally = 0;
+
       for (var i = 0; i<stat_data.aggregateStats.length; i++) {
         killTally += stat_data.aggregateStats[i].kills;
         deathTally += stat_data.aggregateStats[i].deaths;
         assistTally += stat_data.aggregateStats[i].assists;
+
+        totalKillTally += aggregate_data.aggregateStats[i].totalKills;
+        totalDeathTally += aggregate_data.aggregateStats[i].totalDeaths;
+        totalAssistTally += aggregate_data.aggregateStats[i].totalAssists;
+
         if (!(i % kda_interval)) {
           var label_index = i/kda_interval;
           var frame_samples = stat_data.aggregateStats[i].samples;
+          var aggregate_frame_samples = aggregate_data.aggregateStats[i].samples;
 
           if (i <= kda_last_minute) {
             var kills = (killTally/frame_samples);
             var deaths = (deathTally/frame_samples);
             var assists = (assistTally/frame_samples);
             var kda = ((kills+assists)/(deaths < 1 ? 1 : deaths)); // 0 deaths shouldn't skyrocket your KDA
+
+            var totalKills = (totalKillTally/aggregate_frame_samples);
+            var totalDeaths = (totalDeathTally/aggregate_frame_samples);
+            var totalAssists = (totalAssistTally/aggregate_frame_samples);
+            var totalKda = ((totalKills+totalAssists)/(totalDeaths < 1 ? 1 : totalDeaths));
             
             $scope.current_kda_deltas.push(kda.toFixed(2)-lastKDA);
 
@@ -835,10 +885,19 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
             $scope.kda_chart.datasets[3].points[label_index].value = assists.toFixed(2);
             $scope.kda_chart.datasets[4].points[label_index].value = frame_samples;
 
+            $scope.kda_aggregate_chart.datasets[0].points[label_index].value = (kda-totalKda).toFixed(2);
+            $scope.kda_aggregate_chart.datasets[1].points[label_index].value = (kills-totalKills).toFixed(2);
+            $scope.kda_aggregate_chart.datasets[2].points[label_index].value = (deaths-totalDeaths).toFixed(2);
+            $scope.kda_aggregate_chart.datasets[3].points[label_index].value = (assists-totalAssists).toFixed(2);
+
             lastKDA = kda.toFixed(2);
             killTally = 0;
             deathTally = 0;
             assistTally = 0;
+
+            totalKillTally = 0;
+            totalDeathTally = 0;
+            totalAssistTally = 0;
           }
         }
       }
@@ -847,11 +906,20 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
       for (var i = 0; i < $scope.kda_chart.datasets.length; i++) {
         if ($scope.kda_chart.datasets[i].hidden) {
           delete $scope.kda_chart.datasets[i].hidden;
+          $scope.toggleVisibility($scope.kda_chart, i, true);
+        }
+      }
+      /*
+      for (var i = 0; i < $scope.kda_aggregate_chart.datasets.length; i++) {
+        if ($scope.kda_aggregate_chart.datasets[i].hidden) {
+          delete $scope.kda_chart.datasets[i].hidden;
           $scope.toggleVisibility(i, true);
         }
       }
+      */
 
       $scope.kda_chart.update();
+      $scope.kda_aggregate_chart.update();
 
       // *** Item Processing ***
       $scope.item_builds = [];
@@ -1018,48 +1086,48 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
     }
   }
 
-  $scope.removeHiddenPoints = function() {
+  $scope.removeHiddenPoints = function(chart) {
     if ($scope.hiddenPointBuffer.length > 0) {
       var dataset = $scope.hiddenPointBuffer[0];
       $scope.hiddenPointBuffer.shift();
       for (var j=0; j<=kda_timeline_length; j++) {
-        if ($scope.kda_chart.datasets[dataset].points[j].hidden_value != null) {
-          $scope.kda_chart.datasets[dataset].points[j].value = null;
+        if (chart.datasets[dataset].points[j].hidden_value != null) {
+          chart.datasets[dataset].points[j].value = null;
         }
       }
     }
   }
 
-  $scope.toggleVisibility = function(dataset, instant) {
+  $scope.toggleVisibility = function(chart, dataset, instant) {
     var already_hidden;
 
-    if ($scope.kda_chart.datasets[dataset].hidden != undefined) {
+    if (chart.datasets[dataset].hidden != undefined) {
       already_hidden = true;
-      delete $scope.kda_chart.datasets[dataset].hidden;
+      delete chart.datasets[dataset].hidden;
     } else {
       already_hidden = false;
-      $scope.kda_chart.datasets[dataset].hidden = true;
+      chart.datasets[dataset].hidden = true;
       $scope.hiddenPointBuffer.push(dataset);
     }
 
     for (var i=0; i<=kda_timeline_length; i++) {
       if (already_hidden) {
-        $scope.kda_chart.datasets[dataset].points[i].value = $scope.kda_chart.datasets[dataset].points[i].hidden_value;
-        delete $scope.kda_chart.datasets[dataset].points[i].hidden_value;
+        chart.datasets[dataset].points[i].value = chart.datasets[dataset].points[i].hidden_value;
+        delete chart.datasets[dataset].points[i].hidden_value;
       } else {
-        $scope.kda_chart.datasets[dataset].points[i].hidden_value = $scope.kda_chart.datasets[dataset].points[i].value;
-        if ($scope.kda_chart.datasets[dataset].points[i].value != null) {
+        chart.datasets[dataset].points[i].hidden_value = chart.datasets[dataset].points[i].value;
+        if (chart.datasets[dataset].points[i].value != null) {
           // If instant, do not animate
           if (instant) {
-            $scope.kda_chart.datasets[dataset].points[i].value = null;
+            chart.datasets[dataset].points[i].value = null;
           } else {
-            $scope.kda_chart.datasets[dataset].points[i].value = -3.5;
+            chart.datasets[dataset].points[i].value = -3.5;
           }
         }
       }
     }
 
-    $scope.kda_chart.update();
+    chart.update();
   }
 
   $scope.item_img_url = ddragon_item_img_url;
@@ -1152,7 +1220,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
                        {
                           label: "Sample Size",
                           fillColor: "rgba(0,0,0,0)",
-                          strokeColor: "rgba(151,151,151,0.3)",
+                          strokeColor: "rgba(151,151,151,0.8)",
                           pointColor: "rgba(151,151,151,0)",
                           pointStrokeColor: "rgba(255,255,255,0)",
                           pointHighlightFill: "rgba(255,255,255,0)",
@@ -1171,12 +1239,93 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
     scaleFontSize: 18,
     scaleFontColor: "#DDDDDD",
     pointHitDetectionRadius : 30,
-    onAnimationComplete: function(){ $scope.removeHiddenPoints() },
-    legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li class=\"legendItem\" ng-class=\"{grayed: kda_chart.datasets[<%=i%>].hidden}\" ng-click=\"toggleVisibility(<%=i%>)\"><span style=\"background-color:<%=datasets[i].strokeColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
+    onAnimationComplete: function(){ $scope.removeHiddenPoints($scope.kda_chart) },
+    legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li class=\"legendItem\" ng-class=\"{grayed: kda_chart.datasets[<%=i%>].hidden}\" ng-click=\"toggleVisibility(kda_chart, <%=i%>)\"><span style=\"background-color:<%=datasets[i].strokeColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
   };
 
   $scope.kda_chart = new Chart($scope.kda_ctx).Line($scope.kda_data, $scope.kda_options);
   $scope.kda_chart_legend = $sce.trustAsHtml($scope.kda_chart.generateLegend());
+
+  // KDA Aggregate Chart
+  $scope.kda_aggregate_ctx = document.getElementById("kdaAggregateChart").getContext("2d");
+  $scope.kda_aggregate_labels = $scope.kda_labels;
+  var kda_aggregate_datasets =  [{
+                          label: "KDA Ratio",
+                          fillColor: 'rgba(0,0,0,0)',
+                          //fillColor: ratio_gradient,
+                          strokeColor: "rgba(255,255,70,0.5)",
+                          pointColor: "rgba(255,255,70,0.5)",
+                          pointStrokeColor: "rgba(255,255,70,0.5)",
+                          pointHighlightFill: "rgba(255,255,70,1)",
+                          pointHighlightStroke: "rgba(255,255,70,1)",
+                          data: [ 0,0,0,0,0,0,0,0,0,0,0 ]
+                       },
+                       {
+                          label: "Kills",
+                          fillColor: 'rgba(0,0,0,0)',
+                          //fillColor: kills_gradient,
+                          strokeColor: "rgba(70,200,70,1)",
+                          pointColor: "rgba(70,200,70,0.5)",
+                          pointStrokeColor: "rgba(70,200,70,1)",
+                          pointHighlightFill: "rgba(70,200,70,1)",
+                          pointHighlightStroke: "rgba(70,200,70,0.8)",
+                          data: [ 0,0,0,0,0,0,0,0,0,0,0 ]
+                       },
+                       {
+                          label: "Deaths",
+                          fillColor: 'rgba(0,0,0,0)',
+                          //fillColor: deaths_gradient,
+                          strokeColor: "rgba(247,70,74,1)",
+                          pointColor: "rgba(247,70,74,0.5)",
+                          pointStrokeColor: "rgba(247,70,74,1)",
+                          pointHighlightFill: "rgba(247,70,74,1)",
+                          pointHighlightStroke: "rgba(247,70,74,1)",
+                          data: [ 0,0,0,0,0,0,0,0,0,0,0 ]
+                       },
+                       {
+                          label: "Assists",
+                          fillColor: 'rgba(0,0,0,0)',
+                          //fillColor: assists_gradient,
+                          strokeColor: "rgba(151,187,205,1)",
+                          pointColor: "rgba(151,187,205,0.5)",
+                          pointStrokeColor: "rgba(151,187,205,1)",
+                          pointHighlightFill: "rgba(151,187,205,1)",
+                          pointHighlightStroke: "rgba(151,187,205,1)",
+                          data: [ 0,0,0,0,0,0,0,0,0,0,0 ]
+                       },
+                       {
+                          label: "Average Performance",
+                          fillColor: 'rgba(0,0,0,0)',
+                          //fillColor: "rgba(0,0,0,0)",
+                          strokeColor: "rgba(151,151,151,0.5)",
+                          pointColor: "rgba(151,151,151,0)",
+                          pointStrokeColor: "rgba(255,255,255,0)",
+                          pointHighlightFill: "rgba(255,255,255,0)",
+                          pointHighlightStroke: "rgba(151,151,151,0)",
+                          data: [ 0,0,0,0,0,0,0,0,0,0,0 ]
+                       }];
+  $scope.kda_aggregate_data = { labels: $scope.kda_aggregate_labels,
+                                datasets: kda_aggregate_datasets };
+  $scope.kda_aggregate_options = {
+    scaleOverride: true,
+    scaleSteps: 4,
+    scaleStepWidth: 1,
+    scaleStartValue: -2,
+    scaleFontSize: 18,
+    scaleFontColor: "#DDDDDD",
+    scaleShowGridLines : true,
+    scaleGridLineColor : "rgba(255,255,255,.06)",
+    scaleShowHorizontalLines: true,
+    scaleShowVerticalLines: true,
+    pointHitDetectionRadius : 30,
+    bezierCurveTension : 0.314,
+    onAnimationComplete: function(){ $scope.removeHiddenPoints($scope.kda_aggregate_chart) },
+    legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li class=\"legendItem\" ng-class=\"{grayed: kda_aggregate_chart.datasets[<%=i%>].hidden}\" ng-click=\"toggleVisibility(kda_aggregate_chart, <%=i%>)\"><span style=\"background-color:<%=datasets[i].strokeColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
+  };
+
+  $scope.kda_aggregate_chart = new Chart($scope.kda_aggregate_ctx).Line($scope.kda_aggregate_data, $scope.kda_aggregate_options);
+
+  $scope.kda_aggregate_chart_legend = $sce.trustAsHtml($scope.kda_aggregate_chart.generateLegend());
 
   $scope.tiers = [ { id: 1, name: 'Bronze',     image:'./images/tier_icons/bronze.png' },
                    { id: 2, name: 'Silver',     image:'./images/tier_icons/silver.png' },

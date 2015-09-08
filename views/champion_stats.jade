@@ -94,9 +94,16 @@ html
           .chartTitleKeyValueContainer(ng-show="current_stats")
             .chartTitleValue {{current_patch}}
             .chartTitleKey PATCH
-        #kdaChartContainer
+        #kdaChartContainer(ng-show='true')
           canvas(id='kdaChart')
         div(bind-html-compile='kda_chart_legend'
+            popover-title="Toggle Datasets"
+            popover-html="'Click on a dataset here in the legend to hide it from the chart.'"
+            popover-toggle="show_help"
+            popover-append-to-body="true")
+        #kdaAggregateChartContainer
+          canvas(id='kdaAggregateChart')
+        div(bind-html-compile='kda_aggregate_chart_legend'
             popover-title="Toggle Datasets"
             popover-html="'Click on a dataset here in the legend to hide it from the chart.'"
             popover-toggle="show_help"
