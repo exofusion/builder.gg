@@ -67,6 +67,15 @@ router.get('/', function(req, res, next) {
                         // Didn't find victories or defeats for search terms
                         res.status(404).end();
                     } else {
+                        if (defeat_stat_collection) {
+                            search_options = {};
+                            search_options.patch = defeat_stat_collection.patch;
+                            search_options.championId = defeat_stat_collection.championId;
+                            search_options.tier = defeat_stat_collection.tier;
+                            search_options.lane = defeat_stat_collection.lane;
+                            search_options.role = defeat_stat_collection.role;
+                        }
+
                         var response_stat_collection = {};
                         response_stat_collection.victories = victory_stat_collection;
                         response_stat_collection.defeats = defeat_stat_collection;

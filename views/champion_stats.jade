@@ -94,26 +94,32 @@ html
           .chartTitleKeyValueContainer(ng-show="current_stats")
             .chartTitleValue {{current_patch}}
             .chartTitleKey PATCH
-        #kdaChartContainer(ng-show='true')
-          canvas(id='kdaChart')
-        div(bind-html-compile='kda_chart_legend'
-            popover-title="Toggle Datasets"
-            popover-html="'Click on a dataset here in the legend to hide it from the chart.'"
-            popover-toggle="show_help"
-            popover-append-to-body="true")
-        #kdaAggregateChartContainer
-          canvas(id='kdaAggregateChart')
-        div(bind-html-compile='kda_aggregate_chart_legend'
-            popover-title="Toggle Datasets"
-            popover-html="'Click on a dataset here in the legend to hide it from the chart.'"
-            popover-toggle="show_help"
-            popover-append-to-body="true")
+        div(ng-show='!display_comparison_chart')
+          #kdaChartContainer
+            canvas(id='kdaChart')
+          div(bind-html-compile='kda_chart_legend'
+              popover-title="Toggle Datasets"
+              popover-html="'Click on a dataset here in the legend to hide it from the chart.'"
+              popover-toggle="show_help"
+              popover-append-to-body="true")
+        div(ng-show='display_comparison_chart')
+          #kdaAggregateChartContainer
+            canvas(id='kdaAggregateChart')
+          div(bind-html-compile='kda_aggregate_chart_legend'
+              popover-title="Toggle Datasets"
+              popover-html="'Click on a dataset here in the legend to hide it from the chart.'"
+              popover-toggle="show_help"
+              popover-append-to-body="true")
+        #kdaChartSelection
+          .btn-group(style="float:left")
+            label(class="btn btn-default"
+                         ng-model="display_comparison_chart"
+                         btn-radio="false") KDA Chart
+            label(class="btn btn-default"
+                         ng-model="display_comparison_chart"
+                         btn-radio="true") KDA Comparison Chart
 
     #kdaVictoryDefeat
-      //div(class='btn btn-default' ng-show='previous_stats' ng-click='loadPrevious()') Load Previous
-      div(class="btn-group")
-        //label(class='btn btn-default' ng-disabled='!current_stats.victories' btn-radio="'Victories'" ng-click='parseStatCollection("victories")')
-
       .btn-group(popover-title="Game Subset"
                   popover-placement="bottom"
                   popover-html="'Toggle which games to show for the selected search terms: only victories, only defeats, or both.'"

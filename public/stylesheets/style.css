@@ -249,7 +249,8 @@ a {
   margin-bottom: 20px !important;
 }
 
-#kdaVictoryDefeat .active {
+#kdaVictoryDefeat .active,
+#kdaChartSelection .active {
   color: white !important;
   background-color: rgba(255,255,255,0.3) !important;
 }
