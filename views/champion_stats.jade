@@ -111,13 +111,13 @@ html
               popover-toggle="show_help"
               popover-append-to-body="true")
         #kdaChartSelection
-          .btn-group(style="float:left")
-            label(class="btn btn-default"
-                         ng-model="display_comparison_chart"
-                         btn-radio="false") KDA Chart
+          .btn-group
             label(class="btn btn-default"
                          ng-model="display_comparison_chart"
                          btn-radio="true") KDA Comparison Chart
+            label(class="btn btn-default"
+                         ng-model="display_comparison_chart"
+                         btn-radio="false") Standalone KDA Chart
 
     #kdaVictoryDefeat
       .btn-group(popover-title="Game Subset"
