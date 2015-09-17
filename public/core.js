@@ -1217,7 +1217,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
           if (instant) {
             chart.datasets[dataset].points[i].value = null;
           } else {
-            chart.datasets[dataset].points[i].value = -chart.scale.max*2;
+            chart.datasets[dataset].points[i].value = -chart.scale.max;
           }
         }
       }
@@ -1425,7 +1425,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
     bezierCurveTension : 0.314,
     onAnimationComplete: function(){ $scope.removeHiddenPoints($scope.kda_aggregate_chart) },
     multiTooltipTemplate: "<%=datasetLabel%>: <% if(value>0){ %>+<% } %><%= value %>%",
-    legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li class=\"legendItem\" ng-class=\"{grayed: kda_aggregate_chart.datasets[<%=i%>].hidden}\" ng-click=\"toggleVisibility(kda_aggregate_chart, <%=i%>)\"><span style=\"background-color:<%=datasets[i].strokeColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
+    legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li class=\"legendItem\" ng-class=\"{grayed: kda_aggregate_chart.datasets[<%=i%>].hidden}\" ng-click=\"toggleVisibility(kda_aggregate_chart, <%=i%>, true)\"><span style=\"background-color:<%=datasets[i].strokeColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
   };
 
   $scope.kda_aggregate_chart = new Chart($scope.kda_aggregate_ctx).Line($scope.kda_aggregate_data, $scope.kda_aggregate_options);
