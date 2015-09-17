@@ -1210,7 +1210,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
   $scope.search.position = {};
 
   $scope.display_subset = 'all';
-  $scope.display_comparison_chart = true;
+  $scope.display_comparison_chart = false;
   $scope.percentile_chart_available = true;
 
   $scope.alert_loading = false;
