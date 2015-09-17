@@ -911,6 +911,11 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
           percentileDeathTally.push(GetPercentile(currentDeaths, aggregate_data.aggregateStats[i].totalDeaths));
           percentileAssistTally.push(GetPercentile(currentAssists, aggregate_data.aggregateStats[i].totalAssists));
           percentileKDATally.push(GetPercentile(currentKDA, aggregate_data.aggregateStats[i].totalKDA));
+        } else {
+          percentileKillTally.push(50);
+          percentileDeathTally.push(50);
+          percentileAssistTally.push(50);
+          percentileKDATally.push(50);
         }
 
         if (!(i % kda_interval)) {
