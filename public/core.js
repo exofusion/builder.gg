@@ -949,6 +949,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
             var deaths = deathTally;
             var assists = assistTally;
             var kda = GetKDA(kills, deaths, assists);
+            var aggregateKDA = GetKDA(killAggregateTally, deathAggregateTally, assistAggregateTally);
 
             // Sort so we can easily find the median
             /*
@@ -966,6 +967,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
             $scope.kda_chart.datasets[3].points[label_index].value = assists.toFixed(2);
             $scope.kda_chart.datasets[4].points[label_index].value = frame_samples;
 
+            $scope.kda_aggregate_chart.datasets[0].points[label_index].value = aggregateKDA == 0 ? 0 : Math.round(((kda-aggregateKDA)/aggregateKDA)*100);
             $scope.kda_aggregate_chart.datasets[1].points[label_index].value = killAggregateTally == 0 ? 0 : Math.round(((kills-killAggregateTally)/killAggregateTally)*100);
             $scope.kda_aggregate_chart.datasets[2].points[label_index].value = deathAggregateTally == 0 ? 0 : Math.round(((deaths-deathAggregateTally)/deathAggregateTally)*100);
             $scope.kda_aggregate_chart.datasets[3].points[label_index].value = assistAggregateTally == 0 ? 0 : Math.round(((assists-assistAggregateTally)/assistAggregateTally)*100);
@@ -1215,7 +1217,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
           if (instant) {
             chart.datasets[dataset].points[i].value = null;
           } else {
-            chart.datasets[dataset].points[i].value = -chart.scale.max;
+            chart.datasets[dataset].points[i].value = -chart.scale.max*2;
           }
         }
       }
@@ -1417,7 +1419,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
   $scope.kda_aggregate_data = { labels: $scope.kda_aggregate_labels,
                                 datasets: kda_aggregate_datasets };
   $scope.kda_aggregate_options = {
-    scaleOverride: true,
+    //scaleOverride: true,
     scaleSteps: 4,
     scaleStepWidth: 50,
     scaleStartValue: -100,
