@@ -1,0 +1,86 @@
+db.statcollections.aggregate(
+  [
+    {
+      $unwind: "$aggregateStats"
+    },
+    {
+      $match: { "aggregateStats.samples": { $gt: 5 }}
+    },
+    {
+      $group:
+        {
+          _id: 
+            {
+              patch: "$patch",
+              tier: "$tier",
+              role: "$role",
+              lane: "$lane",
+              victory: "$victory",
+              gameTime: "$aggregateStats.gameTime"
+            },
+          totalKills:
+            {
+              $push: {
+      $divide: ["$aggregateStats.kills","$aggregateStats.samples"]
+         }
+            },
+          totalDeaths:
+            {
+              $push: {
+      $divide: ["$aggregateStats.deaths","$aggregateStats.samples"]
+         }
+            },
+          totalAssists:
+            {
+              $push: {
+      $divide: ["$aggregateStats.assists","$aggregateStats.samples"]
+         }
+            },
+          totalKDA:
+            {
+              $push: {
+      $divide: [{ $add: ["$aggregateStats.kills","$aggregateStats.assists"] },
+                { $cond: { if: { $lt: [{$divide: ["$aggregateStats.deaths","$aggregateStats.samples"]}, 1] },
+                           then: "$aggregateStats.samples", else: "$aggregateStats.deaths" }}]
+              }
+            }
+        }
+    },
+    {
+      $sort:
+        {
+          "_id.gameTime": 1
+        }
+    },
+    {
+      $group:
+        {
+          _id: 
+            {
+              patch: "$_id.patch",
+              tier: "$_id.tier",
+              role: "$_id.role",
+              lane: "$_id.lane",
+              victory: "$_id.victory"
+            },
+          aggregateStats:
+            {
+              $push:
+                {
+                  gameTime: "$_id.gameTime",
+                  totalKills: "$totalKills",
+                  totalDeaths: "$totalDeaths",
+                  totalAssists: "$totalAssists",
+                  totalKDA: "$totalKDA"
+                }
+            }
+        }
+    },
+    {
+      $out: "kdapercentile"
+    }
+  ],
+  {
+    allowDiskUse: true
+  }
+)

@@ -1,0 +1,68 @@
+db.statcollections.aggregate(
+  [
+    {
+      $unwind: "$aggregateStats"
+    },
+    {
+      $group:
+        {
+          _id: 
+            {
+              patch: "$patch",
+              tier: "$tier",
+              role: "$role",
+              lane: "$lane",
+              victory: "$victory",
+              gameTime: "$aggregateStats.gameTime"
+            },
+          totalKills:
+            {
+              $sum: { $divide: ["$aggregateStats.kills","$aggregateStats.samples"] }
+            },
+          totalDeaths:
+            {
+              $sum: { $divide: ["$aggregateStats.deaths","$aggregateStats.samples"] }
+            },
+          totalAssists:
+            {
+              $sum: { $divide: ["$aggregateStats.assists","$aggregateStats.samples"] }
+            }
+        }
+    },
+    {
+      $sort:
+        {
+          "_id.gameTime": 1
+        }
+    },
+    {
+      $group:
+        {
+          _id: 
+            {
+              patch: "$_id.patch",
+              tier: "$_id.tier",
+              role: "$_id.role",
+              lane: "$_id.lane",
+              victory: "$_id.victory"
+            },
+          aggregateStats:
+            {
+              $push:
+                {
+                  gameTime: "$_id.gameTime",
+                  totalKills: "$totalKills",
+                  totalDeaths: "$totalDeaths",
+                  totalAssists: "$totalAssists"
+                }
+            }
+        }
+    },
+    {
+      $out: "aggregatekda"
+    }
+  ],
+  {
+    allowDiskUse: true
+  }
+)

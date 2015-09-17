@@ -21,7 +21,7 @@ function addMatchQueueItem(json_data) {
         var num_inserted = 0;
         var current_time = new Date();
         //var cutoff_date = current_time.setDate(current_time.getDate()-31);
-        var cutoff_date = 1441190383000; // First game of 5.17 patch
+        var cutoff_date = 1442401445000; // First game of 5.18 patch
         json_data.matches.forEach( function(match){
             if (match.timestamp > cutoff_date) {
                 MatchQueueItem.update({ _id: match.matchId },

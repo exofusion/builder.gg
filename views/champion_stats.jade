@@ -110,14 +110,20 @@ html
               popover-html="'Click on a dataset here in the legend to hide it from the chart.'"
               popover-toggle="show_help"
               popover-append-to-body="true")
-        #kdaChartSelection
+        #kdaChartSelection(
+            popover-title="Chart Selection"
+            popover-placement="right"
+            popover-html="'Toggle between the percentile chart (which compares this champion against all others in the same role) and the standalone chart (which simply looks at KDA statistics apart from other champions).'"
+            popover-toggle="show_help"
+            popover-append-to-body="true")
           .btn-group
             label(class="btn btn-default"
                          ng-model="display_comparison_chart"
-                         btn-radio="true") KDA Comparison Chart
+                         btn-radio="true"
+                         ng-disabled="!percentile_chart_available") Role Percentile Chart
             label(class="btn btn-default"
                          ng-model="display_comparison_chart"
-                         btn-radio="false") Standalone KDA Chart
+                         btn-radio="false") Standalone Chart
 
     #kdaVictoryDefeat
       .btn-group(popover-title="Game Subset"

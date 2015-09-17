@@ -737,19 +737,28 @@ function CombineAggregateStats(victory_agg_stats, defeat_agg_stats) {
           combined_agg_stats.aggregateStats[frame].totalKills = combined_agg_stats.aggregateStats[frame].totalKills.concat(defeat_agg_stats.aggregateStats[frame].totalKills);
           combined_agg_stats.aggregateStats[frame].totalAssists = combined_agg_stats.aggregateStats[frame].totalAssists.concat(defeat_agg_stats.aggregateStats[frame].totalAssists);
           combined_agg_stats.aggregateStats[frame].totalDeaths = combined_agg_stats.aggregateStats[frame].totalDeaths.concat(defeat_agg_stats.aggregateStats[frame].totalDeaths);
+          combined_agg_stats.aggregateStats[frame].totalKDA = combined_agg_stats.aggregateStats[frame].totalKills.concat(defeat_agg_stats.aggregateStats[frame].totalKDA);
       } else {
           combined_agg_stats.aggregateStats[frame] = defeat_agg_stats.aggregateStats[frame];
       }
-
-      combined_agg_stats.aggregateStats[frame].totalKills.sort();
-      combined_agg_stats.aggregateStats[frame].totalAssists.sort();
-      combined_agg_stats.aggregateStats[frame].totalDeaths.sort();
   }
 
   return combined_agg_stats;
 }
 
-function GetPercentile(value, dataset) {
+function GetPercentile(value, dataset, remove_zeros) {
+  // In the case where we have 0, figure out how many zero values start out
+  // the data set, and take the middle index of those
+  var last_zero_index = dataset.lastIndexOf(0);
+  if (value == 0) {
+    var middle_zero_index = Math.floor(last_zero_index/2);
+    return Math.round((middle_zero_index / dataset.length)*100);
+  }
+
+  if (remove_zeros != undefined && remove_zeros) {
+    dataset = dataset.slice(last_zero_index+1,dataset.length); // If we only want to consider non-zero datasets
+  }
+
   for (var i=0; i<dataset.length; i++) {
     if (value <= dataset[i]) {
       return Math.round((i / dataset.length)*100);
@@ -757,6 +766,10 @@ function GetPercentile(value, dataset) {
   }
 
   return 50;
+}
+
+function GetKDA(kills, deaths, assists) {
+  return (kills+assists)/(deaths < 1 ? 1 : deaths); // <1 deaths shouldn't skyrocket your KDA
 }
 
 app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
@@ -813,6 +826,22 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
         break;
     }
 
+    if (aggregate_data != null) {
+      for (var i=0; i<aggregate_data.aggregateStats.length; i++) {
+        aggregate_data.aggregateStats[i].totalKills.sort();
+        aggregate_data.aggregateStats[i].totalAssists.sort();
+        aggregate_data.aggregateStats[i].totalDeaths.sort();
+        aggregate_data.aggregateStats[i].totalKDA.sort();
+      }
+
+      $scope.percentile_chart_available = true;
+    } else {
+      $scope.display_comparison_chart = false;
+      $scope.percentile_chart_available = false;
+    }
+
+    // Swap to other chart display?
+
     if (stat_data) {
       var victories = 0;
       var defeats = 0;
@@ -860,13 +889,10 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
       var assistTally = 0
       var lastKDA = 0;
 
-      var percentileKillTally = 0;
-      var percentileDeathTally = 0;
-      var percentileAssistTally = 0;
-
-      //var totalKillTally = 0;
-      //var totalDeathTally = 0;
-      //var totalAssistTally = 0;
+      var percentileKillTally = [];
+      var percentileDeathTally = [];
+      var percentileAssistTally = [];
+      var percentileKDATally = [];
 
       for (var i = 0; i<stat_data.aggregateStats.length; i++) {
         var frame_samples = stat_data.aggregateStats[i].samples;
@@ -874,46 +900,36 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
         var currentKills = stat_data.aggregateStats[i].kills/frame_samples;
         var currentDeaths = stat_data.aggregateStats[i].deaths/frame_samples;
         var currentAssists = stat_data.aggregateStats[i].assists/frame_samples;
+        var currentKDA = GetKDA(currentKills, currentDeaths, currentAssists);
 
         killTally += currentKills;
         deathTally += currentDeaths;
         assistTally += currentAssists;
 
-        percentileKillTally += GetPercentile(currentKills, aggregate_data.aggregateStats[i].totalKills);
-        percentileDeathTally += GetPercentile(currentDeaths, aggregate_data.aggregateStats[i].totalDeaths);
-        percentileAssistTally += GetPercentile(currentAssists, aggregate_data.aggregateStats[i].totalAssists);
-
-        //totalKillTally += aggregate_data.aggregateStats[i].totalKills;
-        //totalDeathTally += aggregate_data.aggregateStats[i].totalDeaths;
-        //totalAssistTally += aggregate_data.aggregateStats[i].totalAssists;
+        if (i > 0 && aggregate_data != null && aggregate_data.aggregateStats[i] != undefined) {
+          percentileKillTally.push(GetPercentile(currentKills, aggregate_data.aggregateStats[i].totalKills));
+          percentileDeathTally.push(GetPercentile(currentDeaths, aggregate_data.aggregateStats[i].totalDeaths));
+          percentileAssistTally.push(GetPercentile(currentAssists, aggregate_data.aggregateStats[i].totalAssists));
+          percentileKDATally.push(GetPercentile(currentKDA, aggregate_data.aggregateStats[i].totalKDA));
+        }
 
         if (!(i % kda_interval)) {
           var label_index = i/kda_interval;
-          //var frame_samples = stat_data.aggregateStats[i].samples;
-          var aggregate_frame_samples = aggregate_data.aggregateStats[i].samples;
-
-          if (i > 0) {
-            // Possibly take average between beginning and end of frame interval samples?
-            frame_samples = stat_data.aggregateStats[i-kda_interval+1].samples;
-          } else {
-            percentileKillTally = kda_interval * 50;
-            percentileDeathTally = kda_interval * 50;
-            percentileAssistTally = kda_interval * 50;
-          }
 
           if (i <= kda_last_minute) {
+            var middle_index = Math.floor(percentileKillTally.length / 2);
+
             var kills = killTally;
             var deaths = deathTally;
             var assists = assistTally;
-            var kda = ((kills+assists)/(deaths < 1 ? 1 : deaths)); // 0 deaths shouldn't skyrocket your KDA
+            var kda = GetKDA(kills, deaths, assists);
 
-/*
-            var totalKills = (totalKillTally/aggregate_frame_samples);
-            var totalDeaths = (totalDeathTally/aggregate_frame_samples);
-            var totalAssists = (totalAssistTally/aggregate_frame_samples);
-            var totalKda = ((totalKills+totalAssists)/(totalDeaths < 1 ? 1 : totalDeaths));
-            */
-            
+            // Sort so we can easily find the median
+            percentileKillTally.sort();
+            percentileDeathTally.sort();
+            percentileAssistTally.sort();
+            percentileKDATally.sort();
+
             $scope.current_kda_deltas.push(kda.toFixed(2)-lastKDA);
 
             $scope.kda_chart.datasets[0].points[label_index].value = kda.toFixed(2);
@@ -922,10 +938,10 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
             $scope.kda_chart.datasets[3].points[label_index].value = assists.toFixed(2);
             $scope.kda_chart.datasets[4].points[label_index].value = frame_samples;
 
-            //$scope.kda_aggregate_chart.datasets[0].points[label_index].value = Math.round(percentileKillTally / kda_interval);
-            $scope.kda_aggregate_chart.datasets[1].points[label_index].value = Math.round(percentileKillTally / kda_interval);
-            $scope.kda_aggregate_chart.datasets[2].points[label_index].value = 100-Math.round(percentileDeathTally / kda_interval); // Invert deaths since we want lower deaths
-            $scope.kda_aggregate_chart.datasets[3].points[label_index].value = Math.round(percentileAssistTally / kda_interval);
+            $scope.kda_aggregate_chart.datasets[0].points[label_index].value = Math.round(percentileKDATally[middle_index]);
+            $scope.kda_aggregate_chart.datasets[1].points[label_index].value = Math.round(percentileKillTally[middle_index]);
+            $scope.kda_aggregate_chart.datasets[2].points[label_index].value = 100-Math.round(percentileDeathTally[middle_index]); // Invert deaths since we want lower deaths
+            $scope.kda_aggregate_chart.datasets[3].points[label_index].value = Math.round(percentileAssistTally[middle_index]);
 
             lastKDA = kda.toFixed(2);
 
@@ -933,9 +949,10 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
             deathTally = 0;
             assistTally = 0;
 
-            percentileKillTally = 0;
-            percentileDeathTally = 0;
-            percentileAssistTally = 0;
+            percentileKDATally = [];
+            percentileKillTally = [];
+            percentileDeathTally = [];
+            percentileAssistTally = [];
           }
         }
       }
@@ -1159,7 +1176,8 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
           if (instant) {
             chart.datasets[dataset].points[i].value = null;
           } else {
-            chart.datasets[dataset].points[i].value = -3.5;
+            console.log(chart);
+            chart.datasets[dataset].points[i].value = -chart.scale.max;
           }
         }
       }
@@ -1188,6 +1206,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
 
   $scope.display_subset = 'all';
   $scope.display_comparison_chart = true;
+  $scope.percentile_chart_available = true;
 
   $scope.alert_loading = false;
   $scope.alert_error = false;
@@ -1277,6 +1296,10 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
     scaleStartValue: 0,
     scaleFontSize: 18,
     scaleFontColor: "#DDDDDD",
+    scaleShowGridLines : true,
+    scaleGridLineColor : "rgba(255,255,255,.06)",
+    scaleShowHorizontalLines: true,
+    scaleShowVerticalLines: true,
     pointHitDetectionRadius : 30,
     onAnimationComplete: function(){ $scope.removeHiddenPoints($scope.kda_chart) },
     legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li class=\"legendItem\" ng-class=\"{grayed: kda_chart.datasets[<%=i%>].hidden}\" ng-click=\"toggleVisibility(kda_chart, <%=i%>)\"><span style=\"background-color:<%=datasets[i].strokeColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
@@ -1333,7 +1356,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
                           data: [ 50,50,50,50,50,50,50,50,50,50,50 ]
                        },
                        {
-                          label: "Average Performance",
+                          label: "50th Percentile",
                           fillColor: 'rgba(0,0,0,0)',
                           //fillColor: "rgba(0,0,0,0)",
                           strokeColor: "rgba(151,151,151,0.5)",

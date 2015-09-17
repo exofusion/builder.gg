@@ -535,7 +535,7 @@ function selectMatch() {
                         console.log(error);
                     } else {
                         if (!mp) {
-                            MatchCacheItem.findOne({ _id: mqi_entry._id, 'data.matchVersion': /^5.17/ }, function(error, mci) {
+                            MatchCacheItem.findOne({ _id: mqi_entry._id, 'data.matchVersion': /^5.18/ }, function(error, mci) {
                                 if (error) {
                                     console.log(error);
                                 } else if (mci) {
