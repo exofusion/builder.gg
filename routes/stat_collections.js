@@ -3,7 +3,7 @@ var router = express.Router();
 
 var models = require('../scripts/models');
 var StatCollection = models.StatCollection;
-var KDAPercentile = models.KDAPercentile;
+var AggregateKDA = models.AggregateKDA;
 
 router.get('/', function(req, res, next) {
     var combine_games = false;
@@ -88,7 +88,7 @@ router.get('/', function(req, res, next) {
                                                         '_id.role': search_options.role,
                                                         '_id.victory': true
                                                     };
-                        KDAPercentile.findOne(victory_aggkda_search, function(error, victory_aggregate_kda){
+                        AggregateKDA.findOne(victory_aggkda_search, function(error, victory_aggregate_kda){
                             if (error) {
                                 console.log(error);
                             } else {
@@ -96,7 +96,7 @@ router.get('/', function(req, res, next) {
                                 var defeat_aggkda_search = victory_aggkda_search;
                                 defeat_aggkda_search['_id.victory'] = false
 
-                                KDAPercentile.findOne(defeat_aggkda_search, function(error, defeat_aggregate_kda){
+                                AggregateKDA.findOne(defeat_aggkda_search, function(error, defeat_aggregate_kda){
                                     response_stat_collection.defeats_aggregate_kda = defeat_aggregate_kda;
                                     res.send(response_stat_collection);
                                 }).lean();

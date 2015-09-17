@@ -17,15 +17,19 @@ db.statcollections.aggregate(
             },
           totalKills:
             {
-              $sum: { $divide: ["$aggregateStats.kills","$aggregateStats.samples"] }
+              $sum: "$aggregateStats.kills"
             },
           totalDeaths:
             {
-              $sum: { $divide: ["$aggregateStats.deaths","$aggregateStats.samples"] }
+              $sum: "$aggregateStats.deaths"
             },
           totalAssists:
             {
-              $sum: { $divide: ["$aggregateStats.assists","$aggregateStats.samples"] }
+              $sum: "$aggregateStats.assists"
+            },
+          totalSamples:
+            {
+              $sum: "$aggregateStats.samples"
             }
         }
     },
@@ -53,7 +57,8 @@ db.statcollections.aggregate(
                   gameTime: "$_id.gameTime",
                   totalKills: "$totalKills",
                   totalDeaths: "$totalDeaths",
-                  totalAssists: "$totalAssists"
+                  totalAssists: "$totalAssists",
+                  totalSamples: "$totalSamples"
                 }
             }
         }

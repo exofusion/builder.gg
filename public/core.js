@@ -734,10 +734,16 @@ function CombineAggregateStats(victory_agg_stats, defeat_agg_stats) {
   combined_agg_stats.aggregateStats = victory_agg_stats.aggregateStats;
   for (frame in defeat_agg_stats.aggregateStats) {
       if (combined_agg_stats.aggregateStats[frame]) {
+          combined_agg_stats.aggregateStats[frame].totalKills += defeat_agg_stats.aggregateStats[frame].totalKills;
+          combined_agg_stats.aggregateStats[frame].totalAssists += defeat_agg_stats.aggregateStats[frame].totalAssists;
+          combined_agg_stats.aggregateStats[frame].totalDeaths += defeat_agg_stats.aggregateStats[frame].totalDeaths;
+          combined_agg_stats.aggregateStats[frame].totalSamples += defeat_agg_stats.aggregateStats[frame].totalSamples;
+        /*
           combined_agg_stats.aggregateStats[frame].totalKills = combined_agg_stats.aggregateStats[frame].totalKills.concat(defeat_agg_stats.aggregateStats[frame].totalKills);
           combined_agg_stats.aggregateStats[frame].totalAssists = combined_agg_stats.aggregateStats[frame].totalAssists.concat(defeat_agg_stats.aggregateStats[frame].totalAssists);
           combined_agg_stats.aggregateStats[frame].totalDeaths = combined_agg_stats.aggregateStats[frame].totalDeaths.concat(defeat_agg_stats.aggregateStats[frame].totalDeaths);
           combined_agg_stats.aggregateStats[frame].totalKDA = combined_agg_stats.aggregateStats[frame].totalKills.concat(defeat_agg_stats.aggregateStats[frame].totalKDA);
+      */
       } else {
           combined_agg_stats.aggregateStats[frame] = defeat_agg_stats.aggregateStats[frame];
       }
@@ -826,6 +832,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
         break;
     }
 
+/*
     if (aggregate_data != null) {
       for (var i=0; i<aggregate_data.aggregateStats.length; i++) {
         aggregate_data.aggregateStats[i].totalKills.sort();
@@ -839,8 +846,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
       $scope.display_comparison_chart = false;
       $scope.percentile_chart_available = false;
     }
-
-    // Swap to other chart display?
+*/
 
     if (stat_data) {
       var victories = 0;
@@ -882,6 +888,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
          $scope.kda_aggregate_chart.datasets[1].points[i].value = null;
          $scope.kda_aggregate_chart.datasets[2].points[i].value = null;
          $scope.kda_aggregate_chart.datasets[3].points[i].value = null;
+         $scope.kda_aggregate_chart.datasets[4].points[i].value = null;
       }
 
       var killTally = 0;
@@ -889,10 +896,18 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
       var assistTally = 0
       var lastKDA = 0;
 
+      var killAggregateTally = 0;
+      var deathAggregateTally = 0;
+      var assistAggregateTally = 0;
+
+      var lastAggregateKDA = 0;
+
+/*
       var percentileKillTally = [];
       var percentileDeathTally = [];
       var percentileAssistTally = [];
       var percentileKDATally = [];
+*/
 
       for (var i = 0; i<stat_data.aggregateStats.length; i++) {
         var frame_samples = stat_data.aggregateStats[i].samples;
@@ -906,6 +921,11 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
         deathTally += currentDeaths;
         assistTally += currentAssists;
 
+        killAggregateTally += aggregate_data.aggregateStats[i].totalKills / aggregate_data.aggregateStats[i].totalSamples;
+        deathAggregateTally += aggregate_data.aggregateStats[i].totalDeaths / aggregate_data.aggregateStats[i].totalSamples;
+        assistAggregateTally += aggregate_data.aggregateStats[i].totalAssists / aggregate_data.aggregateStats[i].totalSamples;
+
+/*
         if (i > 0 && aggregate_data != null && aggregate_data.aggregateStats[i] != undefined) {
           percentileKillTally.push(GetPercentile(currentKills, aggregate_data.aggregateStats[i].totalKills));
           percentileDeathTally.push(GetPercentile(currentDeaths, aggregate_data.aggregateStats[i].totalDeaths));
@@ -917,12 +937,13 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
           percentileAssistTally.push(50);
           percentileKDATally.push(50);
         }
+        */
 
         if (!(i % kda_interval)) {
           var label_index = i/kda_interval;
 
           if (i <= kda_last_minute) {
-            var middle_index = Math.floor(percentileKillTally.length / 2);
+            //var middle_index = Math.floor(percentileKillTally.length / 2);
 
             var kills = killTally;
             var deaths = deathTally;
@@ -930,10 +951,12 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
             var kda = GetKDA(kills, deaths, assists);
 
             // Sort so we can easily find the median
+            /*
             percentileKillTally.sort();
             percentileDeathTally.sort();
             percentileAssistTally.sort();
             percentileKDATally.sort();
+            */
 
             $scope.current_kda_deltas.push(kda.toFixed(2)-lastKDA);
 
@@ -943,21 +966,32 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
             $scope.kda_chart.datasets[3].points[label_index].value = assists.toFixed(2);
             $scope.kda_chart.datasets[4].points[label_index].value = frame_samples;
 
+            $scope.kda_aggregate_chart.datasets[1].points[label_index].value = killAggregateTally == 0 ? 0 : Math.round(((kills-killAggregateTally)/killAggregateTally)*100);
+            $scope.kda_aggregate_chart.datasets[2].points[label_index].value = deathAggregateTally == 0 ? 0 : Math.round(((deaths-deathAggregateTally)/deathAggregateTally)*100);
+            $scope.kda_aggregate_chart.datasets[3].points[label_index].value = assistAggregateTally == 0 ? 0 : Math.round(((assists-assistAggregateTally)/assistAggregateTally)*100);
+            $scope.kda_aggregate_chart.datasets[4].points[label_index].value = frame_samples;
+/*
             $scope.kda_aggregate_chart.datasets[0].points[label_index].value = Math.round(percentileKDATally[middle_index]);
             $scope.kda_aggregate_chart.datasets[1].points[label_index].value = Math.round(percentileKillTally[middle_index]);
             $scope.kda_aggregate_chart.datasets[2].points[label_index].value = 100-Math.round(percentileDeathTally[middle_index]); // Invert deaths since we want lower deaths
             $scope.kda_aggregate_chart.datasets[3].points[label_index].value = Math.round(percentileAssistTally[middle_index]);
-
+*/
             lastKDA = kda.toFixed(2);
 
             killTally = 0;
             deathTally = 0;
             assistTally = 0;
 
+            killAggregateTally = 0;
+            deathAggregateTally = 0;
+            assistAggregateTally = 0;
+
+/*
             percentileKDATally = [];
             percentileKillTally = [];
             percentileDeathTally = [];
             percentileAssistTally = [];
+            */
           }
         }
       }
@@ -1181,7 +1215,6 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
           if (instant) {
             chart.datasets[dataset].points[i].value = null;
           } else {
-            console.log(chart);
             chart.datasets[dataset].points[i].value = -chart.scale.max;
           }
         }
@@ -1283,7 +1316,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
                        {
                           label: "Sample Size",
                           fillColor: "rgba(0,0,0,0)",
-                          strokeColor: "rgba(151,151,151,0.8)",
+                          strokeColor: "rgba(151,151,151,0.3)",
                           pointColor: "rgba(151,151,151,0)",
                           pointStrokeColor: "rgba(255,255,255,0)",
                           pointHighlightFill: "rgba(255,255,255,0)",
@@ -1311,6 +1344,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
   };
 
   $scope.kda_chart = new Chart($scope.kda_ctx).Line($scope.kda_data, $scope.kda_options);
+  console.log($scope.kda_chart);
   $scope.kda_chart_legend = $sce.trustAsHtml($scope.kda_chart.generateLegend());
 
   // KDA Aggregate Chart
@@ -1325,7 +1359,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
                           pointStrokeColor: "rgba(255,255,70,0.5)",
                           pointHighlightFill: "rgba(255,255,70,1)",
                           pointHighlightStroke: "rgba(255,255,70,1)",
-                          data: [ 50,50,50,50,50,50,50,50,50,50,50 ]
+                          data: [ 0,0,0,0,0,0,0,0,0,0,0 ]
                        },
                        {
                           label: "Kills",
@@ -1336,7 +1370,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
                           pointStrokeColor: "rgba(70,200,70,1)",
                           pointHighlightFill: "rgba(70,200,70,1)",
                           pointHighlightStroke: "rgba(70,200,70,0.8)",
-                          data: [ 50,50,50,50,50,50,50,50,50,50,50 ]
+                          data: [ 0,0,0,0,0,0,0,0,0,0,0 ]
                        },
                        {
                           label: "Deaths",
@@ -1347,7 +1381,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
                           pointStrokeColor: "rgba(247,70,74,1)",
                           pointHighlightFill: "rgba(247,70,74,1)",
                           pointHighlightStroke: "rgba(247,70,74,1)",
-                          data: [ 50,50,50,50,50,50,50,50,50,50,50 ]
+                          data: [ 0,0,0,0,0,0,0,0,0,0,0 ]
                        },
                        {
                           label: "Assists",
@@ -1358,38 +1392,47 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
                           pointStrokeColor: "rgba(151,187,205,1)",
                           pointHighlightFill: "rgba(151,187,205,1)",
                           pointHighlightStroke: "rgba(151,187,205,1)",
-                          data: [ 50,50,50,50,50,50,50,50,50,50,50 ]
+                          data: [ 0,0,0,0,0,0,0,0,0,0,0 ]
                        },
                        {
-                          label: "50th Percentile",
-                          fillColor: 'rgba(0,0,0,0)',
-                          //fillColor: "rgba(0,0,0,0)",
+                          label: "Sample Size",
+                          fillColor: "rgba(0,0,0,0)",
+                          strokeColor: "rgba(151,151,151,0)",
+                          pointColor: "rgba(151,151,151,0)",
+                          pointStrokeColor: "rgba(255,255,255,0)",
+                          pointHighlightFill: "rgba(255,255,255,0)",
+                          pointHighlightStroke: "rgba(151,151,151,0)",
+                          data: [ 0,0,0,0,0,0,0,0,0,0,0 ]
+                       },
+                       {
+                          label: "Mean Performance",
+                          fillColor: "rgba(0,0,0,0)",
                           strokeColor: "rgba(151,151,151,0.5)",
                           pointColor: "rgba(151,151,151,0)",
                           pointStrokeColor: "rgba(255,255,255,0)",
                           pointHighlightFill: "rgba(255,255,255,0)",
                           pointHighlightStroke: "rgba(151,151,151,0)",
-                          data: [ 50,50,50,50,50,50,50,50,50,50,50 ]
+                          data: [ 0,0,0,0,0,0,0,0,0,0,0 ]
                        }];
   $scope.kda_aggregate_data = { labels: $scope.kda_aggregate_labels,
                                 datasets: kda_aggregate_datasets };
   $scope.kda_aggregate_options = {
     scaleOverride: true,
     scaleSteps: 4,
-    scaleStepWidth: 25,
-    scaleStartValue: 0,
+    scaleStepWidth: 50,
+    scaleStartValue: -100,
     scaleFontSize: 18,
     scaleFontColor: "#DDDDDD",
     scaleShowGridLines : true,
     scaleGridLineColor : "rgba(255,255,255,.06)",
     scaleShowHorizontalLines: true,
     scaleShowVerticalLines: true,
-    scaleLabel: "<%=value%>%",
+    scaleLabel: "<%if(value>0){%>+<%}%><%=value%>%",
     pointHitDetectionRadius : 30,
     bezierCurveTension : 0.314,
     onAnimationComplete: function(){ $scope.removeHiddenPoints($scope.kda_aggregate_chart) },
-    multiTooltipTemplate: "<%=datasetLabel%>: <%= value %>%",
-    legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li class=\"legendItem\" ng-class=\"{grayed: kda_aggregate_chart.datasets[<%=i%>].hidden}\" ng-click=\"toggleVisibility(kda_aggregate_chart, <%=i%>)\"><span style=\"background-color:<%=datasets[i].strokeColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
+    multiTooltipTemplate: "<%=datasetLabel%>: <%if(datasetLabel == 'Sample Size'){%><%= value %><% }else{ %><% if(value>0){ %>+<% } %><%= value %>%<% } %>",
+    legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><%if(datasets[i].label != 'Sample Size'){%><li class=\"legendItem\" ng-class=\"{grayed: kda_aggregate_chart.datasets[<%=i%>].hidden}\" ng-click=\"toggleVisibility(kda_aggregate_chart, <%=i%>)\"><span style=\"background-color:<%=datasets[i].strokeColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%><%}%></ul>"
   };
 
   $scope.kda_aggregate_chart = new Chart($scope.kda_aggregate_ctx).Line($scope.kda_aggregate_data, $scope.kda_aggregate_options);

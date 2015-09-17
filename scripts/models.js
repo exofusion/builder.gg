@@ -91,8 +91,8 @@ var statCollectionSchema = new Schema({
     matchFrameData: [matchFrameDataSchema]
 });
 
-var KDAPercentileSchema = new Schema({
-}, {collection: 'kdapercentile'});
+var AggregateKDASchema = new Schema({
+}, {collection: 'aggregatekda'});
 
 var itemSetEntrySchema = new Schema({
     _id: String,
@@ -108,7 +108,7 @@ exports.MatchCacheItem = mongoose.model('MatchCacheItem', matchCacheItemSchema);
 exports.MatchProcessed = mongoose.model('MatchProcessed', matchProcessedSchema);
 exports.MatchFrameData = mongoose.model('MatchFrameData', matchFrameDataSchema);
 exports.StatCollection = mongoose.model('StatCollection', statCollectionSchema);
-exports.KDAPercentile = mongoose.model('KDAPercentile', KDAPercentileSchema);
+exports.AggregateKDA = mongoose.model('AggregateKDA', AggregateKDASchema);
 exports.ItemSetEntry = mongoose.model('ItemSetEntry', itemSetEntrySchema);
 
 exports.mongoose = mongoose;
