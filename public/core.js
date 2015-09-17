@@ -1420,6 +1420,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
                                 datasets: kda_aggregate_datasets };
   $scope.kda_aggregate_options = {
     //scaleOverride: true,
+    scaleIntegersOnly: true,
     scaleSteps: 4,
     scaleStepWidth: 50,
     scaleStartValue: -100,
