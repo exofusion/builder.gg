@@ -1005,14 +1005,12 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
           $scope.toggleVisibility($scope.kda_chart, i, true);
         }
       }
-      /*
       for (var i = 0; i < $scope.kda_aggregate_chart.datasets.length; i++) {
         if ($scope.kda_aggregate_chart.datasets[i].hidden) {
-          delete $scope.kda_chart.datasets[i].hidden;
-          $scope.toggleVisibility(i, true);
+          delete $scope.kda_aggregate_chart.datasets[i].hidden;
+          $scope.toggleVisibility($scope.kda_aggregate_chart, i, true);
         }
       }
-      */
 
       $scope.kda_chart.update();
       $scope.kda_aggregate_chart.update();
