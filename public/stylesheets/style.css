@@ -71,6 +71,11 @@ a {
   user-select: none;
 }
 
+.item_image {
+  border-radius: 50%;
+  border: 2px solid rgba(155,155,155,0.3);
+}
+
 #navigation {
   margin-top: 20px;
   font-family: 'Sofia';
