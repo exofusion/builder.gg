@@ -1344,7 +1344,6 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
   };
 
   $scope.kda_chart = new Chart($scope.kda_ctx).Line($scope.kda_data, $scope.kda_options);
-  console.log($scope.kda_chart);
   $scope.kda_chart_legend = $sce.trustAsHtml($scope.kda_chart.generateLegend());
 
   // KDA Aggregate Chart
