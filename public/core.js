@@ -951,6 +951,8 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
             var kda = GetKDA(kills, deaths, assists);
             var aggregateKDA = GetKDA(killAggregateTally, deathAggregateTally, assistAggregateTally);
 
+            var aggregateKDAchange = aggregateKDA == 0 ? 0 : Math.round(((kda-aggregateKDA)/aggregateKDA)*100);
+
             // Sort so we can easily find the median
             /*
             percentileKillTally.sort();
@@ -959,7 +961,8 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
             percentileKDATally.sort();
             */
 
-            $scope.current_kda_deltas.push(kda.toFixed(2)-lastKDA);
+            //$scope.current_kda_deltas.push(kda.toFixed(2)-lastKDA);
+            $scope.current_kda_deltas.push(aggregateKDAchange-lastKDA);
 
             $scope.kda_chart.datasets[0].points[label_index].value = kda.toFixed(2);
             $scope.kda_chart.datasets[1].points[label_index].value = kills.toFixed(2);
@@ -967,7 +970,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
             $scope.kda_chart.datasets[3].points[label_index].value = assists.toFixed(2);
             $scope.kda_chart.datasets[4].points[label_index].value = frame_samples;
 
-            $scope.kda_aggregate_chart.datasets[0].points[label_index].value = aggregateKDA == 0 ? 0 : Math.round(((kda-aggregateKDA)/aggregateKDA)*100);
+            $scope.kda_aggregate_chart.datasets[0].points[label_index].value = aggregateKDAchange;
             $scope.kda_aggregate_chart.datasets[1].points[label_index].value = killAggregateTally == 0 ? 0 : Math.round(((kills-killAggregateTally)/killAggregateTally)*100);
             $scope.kda_aggregate_chart.datasets[2].points[label_index].value = deathAggregateTally == 0 ? 0 : Math.round(((deaths-deathAggregateTally)/deathAggregateTally)*100);
             $scope.kda_aggregate_chart.datasets[3].points[label_index].value = assistAggregateTally == 0 ? 0 : Math.round(((assists-assistAggregateTally)/assistAggregateTally)*100);
@@ -978,7 +981,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
             $scope.kda_aggregate_chart.datasets[2].points[label_index].value = 100-Math.round(percentileDeathTally[middle_index]); // Invert deaths since we want lower deaths
             $scope.kda_aggregate_chart.datasets[3].points[label_index].value = Math.round(percentileAssistTally[middle_index]);
 */
-            lastKDA = kda.toFixed(2);
+            lastKDA = aggregateKDAchange;
 
             killTally = 0;
             deathTally = 0;

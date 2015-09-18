@@ -219,7 +219,7 @@ html
             td(class='minuteBuildsSubtext') Δ KDA
             td(class='minuteBuildsSubtext' ng-repeat="n in getNumber(10) track by $index")
               span
-                strong {{item_builds[$index+1].samples ? current_kda_deltas[$index+1].toFixed(2) : ''}}
+                strong {{item_builds[$index+1].samples && current_kda_deltas[$index+1] > 0 ? '+' : ''}}{{item_builds[$index+1].samples ? current_kda_deltas[$index+1] : ''}}%
           tr
             td(class='minuteBuildsSubtext') # Samples
             td(class='minuteBuildsSubtext' ng-repeat="n in getNumber(10) track by $index")
