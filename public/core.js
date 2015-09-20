@@ -1446,7 +1446,7 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
                        'Bottom',
                        'Most Popular Lane' ];
 
-  $scope.patches = [ '5.17', '5.16' ];
+  $scope.patches = [ '5.18', '5.17' ];
 
   $scope.randomSearch = function() {
     if (!$scope.alert_loading) {
