@@ -535,7 +535,7 @@ function selectMatch() {
                         console.log(error);
                     } else {
                         if (!mp) {
-                            MatchCacheItem.findOne({ _id: mqi_entry._id, 'data.matchVersion': /^5.18/ }, function(error, mci) {
+                            MatchCacheItem.findOne({ _id: mqi_entry._id, 'data.matchVersion': /^5.19/ }, function(error, mci) {
                                 if (error) {
                                     console.log(error);
                                 } else if (mci) {
@@ -555,7 +555,7 @@ function selectMatch() {
                         }
                     }
                 });
-            }, function(){ console.log('[FINISHED]'); });
+            }, function(){ console.log('[FINISHED]'); setTimeout( function(){ selectMatch(); }, 60000 ) });
         } else {
             console.log('[ERROR] No MatchQueueItems ready to be processed');
         }

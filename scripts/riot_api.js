@@ -26,21 +26,31 @@ var url_match_timeline = '?includeTimeline=true';
 function handleResponse(error, response, body, url, callback, retries_left) {
     if (retries_left >= 0)
     {
+        var retry = false;
         if (!error && response.statusCode == 200) {
             var league_json = JSON.parse(body);
             setTimeout( function(){ callback(league_json); }, TIMEOUT );
+        } else if (error && error.code == 'ETIMEDOUT')
+        {
+            console.log('[ERROR] Request timed out ('+retries_left+' retries left)');
+            retry = true;
         } else if (error) {
             console.log(error);
         } else if (response.statusCode == 429) {
             console.log('[429] API Rate Limit Reached ('+retries_left+' retries left)');
-            setTimeout( function(){
-                request(url, function(error, response, body){
-                                      handleResponse(error, response, body, url, callback, retries_left-1); });}, RATE_LIMIT_TIMOUT);
+            retry = true;
         } else if (response.statusCode = 404) {
             console.log('[404] Not Found');
             callback(null);
         } else {
             console.log('Status Code: '+response.statusCode);
+        }
+
+        if (retry)
+        {
+            setTimeout( function(){
+                request(url, function(error, response, body){
+                                      handleResponse(error, response, body, url, callback, retries_left-1); });}, RATE_LIMIT_TIMOUT);
         }
     } else {
         console.log('No retries left');
@@ -49,7 +59,7 @@ function handleResponse(error, response, body, url, callback, retries_left) {
 
 exports.getLeagueBySummonerId = function(summoner_id, callback) {
     var url = url_base+url_league_by_summoner+summoner_id+'?'+api_key;
-    request(url, function(error, response, body){
+    request(url, {timeout: REQUEST_TIMEOUT}, function(error, response, body){
                           handleResponse(error, response, body, url, callback, RETRY)});
 }
 

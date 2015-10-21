@@ -21,7 +21,7 @@ function addMatchQueueItem(json_data) {
         var num_inserted = 0;
         var current_time = new Date();
         //var cutoff_date = current_time.setDate(current_time.getDate()-31);
-        var cutoff_date = 1442401445000; // First game of 5.18 patch
+        var cutoff_date = 1443657600000; // First game of 5.19 patch
         json_data.matches.forEach( function(match){
             if (match.timestamp > cutoff_date) {
                 MatchQueueItem.update({ _id: match.matchId },
@@ -60,7 +60,9 @@ function addMatchQueueItem(json_data) {
 function selectSummoner() {
     SeedSummoner.find({tier: current_tier},
                         function(error, summoner){
-                            if (error) console.log(error);
+                            if (error) {
+                                console.log(error);
+                            }
                             else if (summoner) {
                                 current_summoner = summoner[0];
                                 riot_api.getMatchList(current_summoner._id, addMatchQueueItem);
