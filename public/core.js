@@ -921,10 +921,11 @@ app.controller('buildStatsCtrl', function($scope, $http, $timeout, $sce) {
         deathTally += currentDeaths;
         assistTally += currentAssists;
 
-        killAggregateTally += aggregate_data.aggregateStats[i].totalKills / aggregate_data.aggregateStats[i].totalSamples;
-        deathAggregateTally += aggregate_data.aggregateStats[i].totalDeaths / aggregate_data.aggregateStats[i].totalSamples;
-        assistAggregateTally += aggregate_data.aggregateStats[i].totalAssists / aggregate_data.aggregateStats[i].totalSamples;
-
+        if (aggregate_data.aggregateStats[i]) {
+          killAggregateTally += aggregate_data.aggregateStats[i].totalKills / aggregate_data.aggregateStats[i].totalSamples;
+          deathAggregateTally += aggregate_data.aggregateStats[i].totalDeaths / aggregate_data.aggregateStats[i].totalSamples;
+          assistAggregateTally += aggregate_data.aggregateStats[i].totalAssists / aggregate_data.aggregateStats[i].totalSamples;
+        }
 /*
         if (i > 0 && aggregate_data != null && aggregate_data.aggregateStats[i] != undefined) {
           percentileKillTally.push(GetPercentile(currentKills, aggregate_data.aggregateStats[i].totalKills));
